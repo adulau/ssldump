@@ -306,7 +306,7 @@ int r_assoc_copy(newp,old)
       ABORT(R_NO_MEMORY);
     for(i=0;i<new->size;i++){
       if(r=copy_assoc_chain(new->chains+i,old->chains[i]))
-	ABORT(r);
+	ABORT(R_NO_MEMORY);
     }
     *newp=new;
     

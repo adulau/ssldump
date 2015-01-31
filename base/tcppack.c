@@ -95,11 +95,11 @@ int process_tcp_packet(handler,ctx,p)
 	proper order. This shouldn't be a problem, though,
         except for simultaneous connects*/
       if((p->tcp->th_flags & (TH_SYN|TH_ACK))!=TH_SYN){
-	DBG((0,"TCP: rejecting packet from unknown connection\n"));
+	DBG((0,"TCP: rejecting packet from unknown connection, seq: %u\n",ntohl(p->tcp->th_seq)));
 	return(0);
       }
       
-      DBG((0,"SYN1\n"));
+      DBG((0,"SYN1 seq: %u",ntohl(p->tcp->th_seq)));
       if(r=new_connection(handler,ctx,p,&conn))
 	ABORT(r);
       conn->i2r.seq=ntohl(p->tcp->th_seq)+1;
@@ -117,14 +117,14 @@ int process_tcp_packet(handler,ctx,p)
 	conn->r2i.seq=ntohl(p->tcp->th_seq)+1;
 	conn->r2i.ack=ntohl(p->tcp->th_ack)+1;
 	conn->state=TCP_STATE_SYN2;
-	DBG((0,"SYN2\n"));	
+	DBG((0,"SYN2 seq: %u",ntohl(p->tcp->th_seq)));
 	break;
       case TCP_STATE_SYN2:
         {
           char *sn=0,*dn=0;
 	if(direction != DIR_I2R)
 	  break;
-	DBG((0,"ACK\n"));
+	DBG((0,"ACK seq: %u",ntohl(p->tcp->th_seq)));
 	conn->i2r.ack=ntohl(p->tcp->th_ack)+1;
         lookuphostname(&conn->i_addr,&sn);
         lookuphostname(&conn->r_addr,&dn);
@@ -228,7 +228,8 @@ static int process_data_segment(conn,handler,p,stream,direction)
     l=p->len - p->tcp->th_off * 4;
     
     if(stream->close){
-      DBG((0,"Rejecting packet received after FIN"));
+      DBG((0,"Rejecting packet received after FIN: %u:%u(%u)",
+             ntohl(p->tcp->th_seq),ntohl(p->tcp->th_seq+l),l));
       return(0);
     }
 
@@ -341,20 +342,26 @@ static int process_data_segment(conn,handler,p,stream,direction)
           if(conn->state == TCP_STATE_ESTABLISHED)
             conn->state=TCP_STATE_FIN1;
           else
-	  conn->state=TCP_STATE_CLOSED;
+	    conn->state=TCP_STATE_CLOSED;
         }
         
         stream->oo_queue=seg->next;
         seg->next=0;
         stream->seq=seg->s_seq + seg->len;
 
-        if(r=conn->analyzer->vtbl->data(conn->analyzer->obj,&_seg,direction))
+        DBG((0,"Analyzing segment: %u:%u(%u)", seg->s_seq, seg->s_seq+seg->len, seg->len));
+        if(r=conn->analyzer->vtbl->data(conn->analyzer->obj,&_seg,direction)) {
+          DBG((0,"ABORT due to segment: %u:%u(%u)", seg->s_seq, seg->s_seq+seg->len, seg->len));
           ABORT(r);
+        }
       }
 
       if(stream->close){
-	if(r=conn->analyzer->vtbl->close(conn->analyzer->obj,p,direction))
-	  ABORT(r);
+        DBG((0,"Closing with segment: %u:%u(%u)", seg->s_seq, stream->seq, seg->len));
+        if(r=conn->analyzer->vtbl->close(conn->analyzer->obj,p,direction)) {
+          DBG((0,"ABORT due to segment: %u:%u(%u)", seg->s_seq, stream->seq, seg->len));
+          ABORT(r);
+        }
       }
       
       free_tcp_segment_queue(_seg.next);

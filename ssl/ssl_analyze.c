@@ -359,11 +359,15 @@ static int read_ssl_record(obj,q,seg,offset,lastp,offsetp)
           case 23:
             break;
           default:
-            printf("Unknown SSL content type %d\n",q->data[0] & 255);
-            ABORT(R_INTERNAL);
+            DBG((0,"Unknown SSL content type %d for segment %u:%u(%u)",
+                   q->data[0] & 255,seg->s_seq,seg->s_seq+seg->len,seg->len));
         }
         
 	rec_len=COMBINE(q->data[3],q->data[4]);
+
+	/* SSL v3.0 spec says a record may not exceed 2**14 + 2048 == 18432 */
+	if(rec_len > 18432)
+	  ABORT(R_INTERNAL);
 
 	/*Expand the buffer*/
 	if(q->_allocated<(rec_len+SSL_HEADER_SIZE)){

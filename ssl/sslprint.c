@@ -248,12 +248,12 @@ int ssl_expand_record(ssl,q,direction,data,len)
     SSL_DECODE_UINT16(ssl,0,0,&d,&length);
 
     if(d.len!=length){
-      explain(ssl,"Short record\n");
+      explain(ssl,"  Short record: %u bytes available (expecting: %u)\n",length,d.len);
       return(0);
     }
    
     P_(P_RH){
-      explain(ssl,"V%d.%d(%d)",vermaj,vermin,length);
+       explain(ssl," V%d.%d(%d)",vermaj,vermin,length);
     }
 
       
@@ -262,19 +262,22 @@ int ssl_expand_record(ssl,q,direction,data,len)
     r=ssl_decode_record(ssl,ssl->decoder,direction,ct,version,&d);
 
     if(r==SSL_BAD_MAC){
-      explain(ssl," bad MAC\n");
+      explain(ssl,"  bad MAC\n");
       return(0);
     }
 
     if(r){
-      if(r=ssl_print_enum(ssl,0,ContentType_decoder,ct))
+      if(r=ssl_print_enum(ssl,0,ContentType_decoder,ct)) {
+        printf("  unknown record type: %d\n", ct);
         ERETURN(r);
+      }
       printf("\n");
     }
     else{
-     if(r=ssl_decode_switch(ssl,ContentType_decoder,data[0],direction,q,
-        &d))
+      if(r=ssl_decode_switch(ssl,ContentType_decoder,data[0],direction,q, &d)) {
+        printf("  unknown record type: %d\n", ct);
         ERETURN(r);
+      }
     }
  
     return(0);
@@ -369,7 +372,7 @@ int ssl_lookup_enum(ssl,dtable,val,ptr)
       dtable++;
     }
 
-    return(-1);
+    return(R_NOT_FOUND);
   }
   
 int ssl_decode_enum(ssl,name,size,dtable,p,data,x)
@@ -416,8 +419,7 @@ int ssl_print_enum(ssl,name,dtable,value)
       dtable++;
     }
 
-    explain(ssl,"%s","unknown value");
-    return(0);
+    return(R_NOT_FOUND);
   }
 
 int explain(ssl_obj *ssl,char *format,...)
@@ -535,7 +537,7 @@ int print_data(ssl,d)
 
     printf("\n");    
     for(i=0;i<d->len;i++){
-      if(!isprint(d->data[i]) && !strchr("\r\n\t",d->data[i])){
+      if(d->data[i] == 0 || (!isprint(d->data[i]) && !strchr("\r\n\t",d->data[i]))){
 	bit8=1;
 	break;
       }
@@ -557,7 +559,8 @@ int print_data(ssl,d)
     else{
       int nl=1;
       INDENT;
-      printf("---------------------------------------------------------------\n");      if(SSL_print_flags & SSL_PRINT_NROFF){
+      printf("---------------------------------------------------------------\n");
+      if(SSL_print_flags & SSL_PRINT_NROFF){
         if(ssl->process_ciphertext & ssl->direction)
           printf("\\f[CI]");
         else
