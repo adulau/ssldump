@@ -206,7 +206,7 @@ int main(argc,argv)
 
     signal(SIGINT,sig_handler);
     
-    while((c=getopt(argc,argv,"vr:f:S:Ttai:k:p:nsAxXhHVNdqem:P"))!=EOF){
+    while((c=getopt(argc,argv,"vr:f:S:yTtai:k:p:nsAxXhHVNdqem:P"))!=EOF){
       switch(c){
         case 'v':
           print_version();
@@ -226,6 +226,9 @@ int main(argc,argv)
           break;
 	case 'a':
 	  NET_print_flags |= NET_PRINT_ACKS;
+	  break;
+	case 'A':
+	  SSL_print_flags |= SSL_PRINT_ALL_FIELDS;
 	  break;
         case 'T':
           NET_print_flags |= NET_PRINT_TCP_HDR;

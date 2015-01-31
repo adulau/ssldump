@@ -133,7 +133,7 @@ flag_struct flags[]={
           SSL_PRINT_DECODE
      },
      {
-          0,
+          'y',
           "nroff",
           SSL_PRINT_NROFF
      },
