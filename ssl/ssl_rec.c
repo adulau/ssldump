@@ -68,19 +68,28 @@ struct ssl_rec_decoder_ {
 };
 
 
-static char *digests[]={
+char *digests[]={
      "MD5",
      "SHA1"
+     "SHA224",
+     "SHA256",
+     "SHA384",
+     "SHA512",
+     NULL
 };
 
-static char *ciphers[]={
+char *ciphers[]={
      "DES",
-     "DES3",
+     "3DES",
      "RC4",
      "RC2",
      "IDEA",
      "AES128",
-     "AES256"
+     "AES256",
+     "CAMELLIA128",
+     "CAMELLIA256",
+     "SEED",
+     NULL
 };
 
 
@@ -192,6 +201,19 @@ int ssl_decode_rec_data(ssl,d,ct,version,in,inl,out,outl)
         ERETURN(r);
     }
     else{
+      /* TLS 1.1 and beyond: remove explicit IV, only used with
+       * non-stream ciphers. */
+      if (ssl->version>=0x0302 && ssl->cs->block > 1) {
+          UINT4 blk = ssl->cs->block;
+          if (blk <= *outl) {
+              *outl-=blk;
+              memmove(out, out+blk, *outl);
+          }
+          else {
+              DBG((0,"Block size greater than Plaintext!"));
+              ERETURN(SSL_BAD_MAC);
+          }
+      }
       if(r=tls_check_mac(d,ct,version,out,*outl,mac))
         ERETURN(r);
     }
@@ -231,7 +253,7 @@ static int tls_check_mac(d,ct,ver,data,datalen,mac)
     HMAC_CTX hm;
     const EVP_MD *md;
     UINT4 l;
-    UCHAR buf[20];
+    UCHAR buf[128];
     
     md=EVP_get_digestbyname(digests[d->cs->dig-0x40]);
     HMAC_Init(&hm,d->mac_key->data,d->mac_key->len,md);

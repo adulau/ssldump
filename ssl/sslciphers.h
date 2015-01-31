@@ -73,10 +73,17 @@ typedef struct SSL_CipherSuite_ {
 #define ENC_IDEA	0x34
 #define ENC_AES128	0x35
 #define ENC_AES256	0x36
-#define ENC_NULL	0x37
+#define ENC_CAMELLIA128	0x37
+#define ENC_CAMELLIA256	0x38
+#define ENC_SEED	0x39
+#define ENC_NULL	0x3a
 
 #define DIG_MD5		0x40
 #define DIG_SHA		0x41
+#define DIG_SHA224	0x42  /* Not sure why EKR didn't follow RFC for */
+#define DIG_SHA256	0x43  /* these values, but whatever, just adding on */
+#define DIG_SHA384	0x44
+#define DIG_SHA512	0x45
 
 int ssl_find_cipher PROTO_LIST((int num,SSL_CipherSuite **cs));
 

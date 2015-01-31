@@ -61,11 +61,14 @@ static char *RCSSTRING="$Id: ssldecode.c,v 1.9 2002/08/17 01:33:17 ekr Exp $";
 
 #define PRF(ssl,secret,usage,rnd1,rnd2,out) (ssl->version==SSLV3_VERSION)? \
         ssl3_prf(ssl,secret,usage,rnd1,rnd2,out): \
-        tls_prf(ssl,secret,usage,rnd1,rnd2,out)
+        ((ssl->version == TLSV12_VERSION) ? \
+            tls12_prf(ssl,secret,usage,rnd1,rnd2,out): \
+            tls_prf(ssl,secret,usage,rnd1,rnd2,out))
 
 
 static char *ssl_password;
 
+extern char *digests;
 extern UINT4 SSL_print_flags;
 
 struct ssl_decode_ctx_ {
@@ -98,6 +101,8 @@ struct ssl_decoder_ {
 #ifdef OPENSSL
 static int tls_P_hash PROTO_LIST((ssl_obj *ssl,Data *secret,Data *seed,
   const EVP_MD *md,Data *out));
+static int tls12_prf PROTO_LIST((ssl_obj *ssl,Data *secret,char *usage,
+  Data *rnd1,Data *rnd2,Data *out));
 static int tls_prf PROTO_LIST((ssl_obj *ssl,Data *secret,char *usage,
   Data *rnd1,Data *rnd2,Data *out));
 static int ssl3_prf PROTO_LIST((ssl_obj *ssl,Data *secret,char *usage,
@@ -432,10 +437,9 @@ int ssl_restore_session(ssl,d)
 
     switch(ssl->version){
       case SSLV3_VERSION:
-	if(r=ssl_generate_keying_material(ssl,d))
-          ABORT(r);
-	break;
       case TLSV1_VERSION:
+      case TLSV11_VERSION:
+      case TLSV12_VERSION:
 	if(r=ssl_generate_keying_material(ssl,d))
 	  ABORT(r);
 	break;
@@ -535,10 +539,9 @@ int ssl_process_client_key_exchange(ssl,d,msg,len)
     
     switch(ssl->version){
       case SSLV3_VERSION:
-	if(r=ssl_generate_keying_material(ssl,d))
-          ABORT(r);
-	break;
       case TLSV1_VERSION:
+      case TLSV11_VERSION:
+      case TLSV12_VERSION:
 	if(r=ssl_generate_keying_material(ssl,d))
 	  ABORT(r);
 	break;
@@ -572,7 +575,7 @@ static int tls_P_hash(ssl,secret,seed,md,out)
     int left=out->len;
     int tocpy;
     UCHAR *A;
-    UCHAR _A[20],tmp[20];
+    UCHAR _A[128],tmp[128];
     unsigned int A_l,tmp_l;
     HMAC_CTX hm;
 
@@ -661,6 +664,53 @@ static int tls_prf(ssl,secret,usage,rnd1,rnd2,out)
     r_data_destroy(&seed);
     r_data_destroy(&S1);
     r_data_destroy(&S2);
+    return(_status);
+
+  }
+
+static int tls12_prf(ssl,secret,usage,rnd1,rnd2,out)
+  ssl_obj *ssl;
+  Data *secret;
+  char *usage;
+  Data *rnd1;
+  Data *rnd2;
+  Data *out;
+
+  {
+    const EVP_MD *md;
+    int r,_status;
+    Data *sha_out=0;
+    Data *seed;
+    UCHAR *ptr;
+    int i, dgi;
+
+    if(r=r_data_alloc(&sha_out,MAX(out->len,64))) /* assume max SHA512 */
+      ABORT(r);
+    if(r=r_data_alloc(&seed,strlen(usage)+rnd1->len+rnd2->len))
+      ABORT(r);
+    ptr=seed->data;
+    memcpy(ptr,usage,strlen(usage)); ptr+=strlen(usage);
+    memcpy(ptr,rnd1->data,rnd1->len); ptr+=rnd1->len;
+    memcpy(ptr,rnd2->data,rnd2->len); ptr+=rnd2->len;    
+
+    /* Earlier versions of openssl didn't have SHA256 of course... */
+    dgi = MAX(DIG_SHA256, ssl->cs->dig)-0x40;
+    if ((md=EVP_get_digestbyname(digests[dgi])) == NULL) {
+        DBG((0,"Cannot get EVP for digest %s, openssl library current?",
+                    digests[dgi]));
+        ERETURN(SSL_BAD_MAC);
+    }
+    if(r=tls_P_hash(ssl,secret,seed,md,sha_out))
+      ABORT(r);
+
+    for(i=0;i<out->len;i++)
+      out->data[i]=sha_out->data[i];
+
+    CRDUMPD("PRF out",out);
+    _status=0;
+  abort:
+    r_data_destroy(&sha_out);
+    r_data_destroy(&seed);
     return(_status);
 
   }

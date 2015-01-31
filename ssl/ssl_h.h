@@ -121,6 +121,8 @@ typedef struct decoder_ {
 
 #define SSLV3_VERSION	       0x300
 #define TLSV1_VERSION	       0x301
+#define TLSV11_VERSION	       0x302
+#define TLSV12_VERSION	       0x303
 
 /*State defines*/
 #define SSL_ST_SENT_NOTHING             0
