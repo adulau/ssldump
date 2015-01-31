@@ -1,0 +1,114 @@
+				Notes
+
+
+First, make sure you've read the README file.
+
+Build Environment
+-----------------
+
+The build environment is assumed to be Microsoft Visual C++ 6.0 SP4
+(VC6), although earlier or later versions may work. In particular, the
+make-like utility used to build this port of ssldump is NMAKE version
+6.00.x from Microsoft.
+
+The basis for this port is ssldump version 0.9b3. The win32 directory
+contains the win32-specific stuff, including the NMAKE makefile
+vcwin32.mak.
+
+You need to have your environment variables and PATH correctly setup
+to properly use the command-line VC6 tools. In the VC6\bin directory
+is a batch file, VCVARS32.bat, which should set things up
+correctly. You should run this batch file prior to attempting a build.
+
+
+
+What you need (besides the ssldump source)
+------------------------------------------
+ 
+You must have downloaded and installed the following from the
+WinPcap/Windump project:
+
+1. The Winpcap developer's pack, version 2.3, from
+http://winpcap.polito.it/install/bin/WPdpack_2_3.zip contains the
+pcap.h and net/bpf.h files, and the pcap import library. Place these
+in the win32 directory.
+
+2. The Winpcap source code distribution, version 2.3, from
+http://winpcap.polito.it/install/bin/WPcapSrc_2_3.zip. It contains
+some .h files commonly found on UNIX systems that ssldump
+expects. Place these in the win32 directory.
+
+3. The Winpcap auto-installer, version 2.3, from
+http://winpcap.polito.it/install/bin/WinPcap_2_3_nogui.exe. This is
+only needed to run ssldump, not needed to build it. It is needed on
+*any* windows system on which ssldump is run. It installs a device
+driver and the pcap library DLL.
+
+4. Possibly the Windump utility from
+http://windump.polito.it/install/bin/WinDump.exe. This is essentially
+a Windows port of tcpdump, with an extra -D option. This option
+enumerates the interface names so that you at least have a clue to
+what to supply the -i option (see below).
+
+The win32 directory should look like the following after these files
+are downloaded and extracted:
+
+winpcap	       <directory>
+WPdpack	       <directory>
+Ssldump.html
+vcwin32.mak
+
+
+
+OpenSSL Support
+---------------
+
+By default, the OpenSSL libraries are not linked into ssldump. If you
+want to link in the OpenSSL libraries, you'll need to customize the
+makefile. First, look for the macro OPENSSL and change its value to
+"yes". Next, look for the macro OPENSSL_DIR and make sure it points to
+the openssl distribution on your machine. You must build a version(s)
+of SSL that links to the static C run-time library; these are
+distinguished by the use of the compiler flag /MT for release
+versions, and /MTd for debug versions. Then you must set the
+OPENSSL_RELEASE and OPENSSL_DEBUG macros to point to the directories
+that contain the libraries for these versions. If you only intend to
+build one of either the debug or release versions, you only need to
+define the corresponding OPENSSL_ macro.
+
+
+
+Building ssldump
+----------------
+
+To build, run (from the ssldump root directory):
+
+nmake /f win32\vcwin32.mak all
+
+this creates a directory, out32, which contains the object files and
+the ssldump.exe executable. The build produces a simple command-line
+ssldump.exe which must be run from a console window (i.e. a DOS
+box). It builds the release version by default. Set the macro
+CFG="debug" to build a debug version, e.g. nmake /f vcwin32.mak all
+CFG="debug".
+
+win32\ssldump.html contains an HTML version of the ssldump.1
+manpage. You should read this to learn the options.
+
+
+
+What are the names of the Interfaces?
+-------------------------------------
+
+One tricky aspect is choosing the correct interface name for the -i
+option of ssldump. AFAIK, there is no standard windows utility that
+will give you the correct names for the interfaces. For example, on my
+system they are named PPPMAC (for the PPP adapter) and CBEN5 (for my
+Ethernet Adapter). I did find these names in the registry under
+HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\Class\Net\nnnn\NDIS\LogDriverName,
+but this may be different on other Windows OSes. The Windump utility
+from the WinPcap folks has an option, -D, to enumerate these interface
+names.  Use the Windump utility or hunt through the registry to find
+the names of your interfaces. If you don't specify the interface
+explicitly with the -i option, ssldump will select the 'first'
+interface and this may be exactly what you want.

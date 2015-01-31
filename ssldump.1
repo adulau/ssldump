@@ -1,0 +1,516 @@
+.\" This file contains sections of the tcpdump man page, to which the
+.\" following copyright applies --EKR
+.\" Copyright (c) 1987, 1988, 1989, 1990, 1991, 1992, 1994, 1995, 1996, 1997
+.\"	The Regents of the University of California.  All rights reserved.
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that: (1) source code distributions
+.\" retain the above copyright notice and this paragraph in its entirety, (2)
+.\" distributions including binary code include the above copyright notice and
+.\" this paragraph in its entirety in the documentation or other materials
+.\" provided with the distribution, and (3) all advertising materials mentioning
+.\" features or use of this software display the following acknowledgement:
+.\" ``This product includes software developed by the University of California,
+.\" Lawrence Berkeley Laboratory and its contributors.'' Neither the name of
+.\" the University nor the names of its contributors may be used to endorse
+.\" or promote products derived from this software without specific prior
+.\" written permission.
+.\" THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
+.\" WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+.\"
+.\" Copyright (C) 1999-2000 RTFM, Inc.
+.\" All Rights Reserved
+.\"
+.\" This package is a SSLv3/TLS protocol analyzer written by Eric Rescorla
+.\" <ekr\@rtfm.com> and licensed by RTFM, Inc.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\" 
+.\"    This product includes software developed by Eric Rescorla for
+.\"    RTFM, Inc.
+.\"
+.\" 4. Neither the name of RTFM, Inc. nor the name of Eric Rescorla may be
+.\"    used to endorse or promote products derived from this
+.\"    software without specific prior written permission.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY ERIC RESCORLA AND RTFM, INC. ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+.TH SSLDUMP 1 "28 September 2001"
+.SH NAME
+ssldump \- dump SSL traffic on a network
+.SH SYNOPSIS
+.na
+.B ssldump
+[
+.B \-vtaTnsAxXhHVNdq
+] [
+.B \-r
+.I dumpfile
+]
+[
+.B \-i
+.I interface
+]
+.br
+.ti +8
+[
+.B \-k
+.I keyfile
+]
+[
+.B \-p
+.I password
+]
+[
+.I expression
+]
+.br
+.ad
+.SH DESCRIPTION
+.LP
+\fIssldump\fP is an SSL/TLS network protocol analyzer. It identifies
+TCP connections on the chosen network interface and attempts to
+interpret them as SSL/TLS traffic. When it identifies SSL/TLS
+traffic, it decodes the records and displays them in a textual
+form to stdout. If provided with the appropriate keying material,
+it will also decrypt the connections and display the application
+data traffic. 
+.LP
+ssldump has been tested on FreeBSD, Linux, Solaris, and HP/UX.  Since
+it's based on PCAP, it should work on most platforms. However, unlike
+tcpdump, ssldump needs to be able to see both sides of the data
+transmission so you may have trouble using it with network taps such
+as SunOS nit that don't permit you to see transmitted data.
+.B Under SunOS with nit or bpf:
+To run
+.I tcpdump
+you must have read access to
+.I /dev/nit
+or
+.IR /dev/bpf* .
+.B Under Solaris with dlpi:
+You must have read access to the network pseudo device, e.g.
+.IR /dev/le .
+.B Under HP-UX with dlpi:
+You must be root or it must be installed setuid to root.
+.B Under IRIX with snoop:
+You must be root or it must be installed setuid to root.
+.B Under Linux:
+You must be root or it must be installed setuid to root.
+.B Under Ultrix and Digital UNIX:
+Once the super-user has enabled promiscuous-mode operation using
+.IR pfconfig (8),
+any user may run
+.BR ssldump
+.B Under BSD:
+You must have read access to
+.IR /dev/bpf* .
+.SH OPTIONS
+.B \-a
+Print bare TCP ACKs (useful for observing Nagle behavior)
+.TP
+.B \-A
+Print all record fields (by default ssldump chooses
+the most interesting fields)
+.TP
+.B \-d
+Display the application data traffic. This usually means
+decrypting it, but when -d is used ssldump will also decode
+application data traffic _before_ the SSL session initiates.
+This allows you to see HTTPS CONNECT behavior as well as
+SMTP STARTTLS. As a side effect, since ssldump can't tell
+whether plaintext is traffic before the initiation of an
+SSL connection or just a regular TCP connection, this allows
+you to use ssldump to sniff any TCP connection. 
+ssldump will automatically detect ASCII data and display it
+directly to the screen. non-ASCII data is displayed as hex
+dumps. See also -X.
+.TP
+.B \-e
+Print absolute timestamps instead of relative timestamps
+.TP
+.B \-r
+Read data from \fIfile\fP instead of from the network.
+The old -f option still works but is deprecated and will 
+probably be removed with the next version.
+.B \-H
+Print the full SSL packet header.
+.TP
+.B \-k
+Use \fIkeyfile\fP as the location of the SSL keyfile (OpenSSL format)
+Previous versions of ssldump automatically looked in ./server.pem.
+Now you must specify your keyfile every time.
+.TP
+.B \-n 
+Don't try to resolve host names from IP addresses
+.TP
+.B \-N
+Attempt to parse ASN.1 when it appears, such as in 
+certificates and DNs.
+.TP
+.B \-p
+Use \fIpassword\fP as the SSL keyfile password.
+.TP
+.B \-P
+Don't put the interface into promiscuous mode.
+.TP
+.B \-q
+Don't decode any record fields beyond a single summary line. (quiet mode).
+.TP
+.B \-x
+Print each record in hex, as well as decoding it.
+.TP
+.B \-X
+When the -d option is used, binary data is automatically printed
+in two columns with a hex dump on the left and the printable characters
+on the right. -X suppresses the display of the printable characters,
+thus making it easier to cut and paste the hext data into some other
+program.
+.B \-y
+Decorate the output for processing with troff. Not very
+useful for the average user.
+.TP
+.IP "\fI expression\fP"
+.RS
+Selects what packets ssldump will examine. Technically speaking,
+ssldump supports the full expression syntax from PCAP and tcpdump.
+In fact, the description here is cribbed from the tcpdump man
+page. However, since ssldump needs to examine full TCP streams,
+most of the tcpdump expressions will select traffic mixes
+that ssldump will simply ignore. Only the expressions which
+don't result in incomplete TCP streams are listed here. 
+.LP
+The \fIexpression\fP consists of one or more
+.I primitives.
+Primitives usually consist of an
+.I id
+(name or number) preceded by one or more qualifiers.  There are three
+different kinds of qualifier:
+.IP \fItype\fP
+qualifiers say what kind of thing the id name or number refers to.
+Possible types are
+.BR host ,
+.B net
+and
+.BR port .
+E.g., `host foo', `net 128.3', `port 20'.  If there is no type
+qualifier,
+.B host
+is assumed.
+.IP \fIdir\fP
+qualifiers specify a particular transfer direction to and/or from
+.I id.
+Possible directions are
+.BR src ,
+.BR dst ,
+.B "src or dst"
+and
+.B "src and"
+.BR dst .
+E.g., `src foo', `dst net 128.3', `src or dst port ftp-data'.  If
+there is no dir qualifier,
+.B "src or dst"
+is assumed.
+For `null' link layers (i.e. point to point protocols such as slip) the
+.B inbound
+and
+.B outbound
+qualifiers can be used to specify a desired direction.
+.LP
+More complex filter expressions are built up by using the words
+.BR and ,
+.B or
+and
+.B not
+to combine primitives.  E.g., `host foo and not port ftp and not port ftp-data'.
+To save typing, identical qualifier lists can be omitted.  E.g.,
+`tcp dst port ftp or ftp-data or domain' is exactly the same as
+`tcp dst port ftp or tcp dst port ftp-data or tcp dst port domain'.
+.LP
+Allowable primitives are:
+.IP "\fBdst host \fIhost\fR"
+True if the IPv4/v6 destination field of the packet is \fIhost\fP,
+which may be either an address or a name.
+.IP "\fBsrc host \fIhost\fR"
+True if the IPv4/v6 source field of the packet is \fIhost\fP.
+.IP "\fBhost \fIhost\fP
+True if either the IPv4/v6 source or destination of the packet is \fIhost\fP.
+Any of the above host expressions can be prepended with the keywords,
+\fBip\fP, \fBarp\fP, \fBrarp\fP, or \fBip6\fP as in:
+.in +.5i
+.nf
+\fBip host \fIhost\fR
+.fi
+.in -.5i
+which is equivalent to:
+.in +.5i
+.nf
+\fBether proto \fI\\ip\fB and host \fIhost\fR
+.fi
+.in -.5i
+If \fIhost\fR is a name with multiple IP addresses, each address will
+be checked for a match.
+.IP "\fBether dst \fIehost\fP
+True if the ethernet destination address is \fIehost\fP.  \fIEhost\fP
+may be either a name from /etc/ethers or a number (see
+.IR ethers (3N)
+for numeric format).
+.IP "\fBether src \fIehost\fP
+True if the ethernet source address is \fIehost\fP.
+.IP "\fBether host \fIehost\fP
+True if either the ethernet source or destination address is \fIehost\fP.
+.IP "\fBgateway\fP \fIhost\fP
+True if the packet used \fIhost\fP as a gateway.  I.e., the ethernet
+source or destination address was \fIhost\fP but neither the IP source
+nor the IP destination was \fIhost\fP.  \fIHost\fP must be a name and
+must be found in both /etc/hosts and /etc/ethers.  (An equivalent
+expression is
+.in +.5i
+.nf
+\fBether host \fIehost \fBand not host \fIhost\fR
+.fi
+.in -.5i
+which can be used with either names or numbers for \fIhost / ehost\fP.)
+This syntax does not work in IPv6-enabled configuration at this moment.
+.IP "\fBdst net \fInet\fR"
+True if the IPv4/v6 destination address of the packet has a network
+number of \fInet\fP. \fINet\fP may be either a name from /etc/networks
+or a network number (see \fInetworks(4)\fP for details).
+.IP "\fBsrc net \fInet\fR"
+True if the IPv4/v6 source address of the packet has a network
+number of \fInet\fP.
+.IP "\fBnet \fInet\fR"
+True if either the IPv4/v6 source or destination address of the packet has a network
+number of \fInet\fP.
+.IP "\fBnet \fInet\fR \fBmask \fImask\fR"
+True if the IP address matches \fInet\fR with the specific netmask.
+May be qualified with \fBsrc\fR or \fBdst\fR.
+Note that this syntax is not valid for IPv6 \fInet\fR.
+.IP "\fBnet \fInet\fR/\fIlen\fR"
+True if the IPv4/v6 address matches \fInet\fR a netmask \fIlen\fR bits wide.
+May be qualified with \fBsrc\fR or \fBdst\fR.
+.IP "\fBdst port \fIport\fR"
+True if the packet is ip/tcp, ip/udp, ip6/tcp or ip6/udp and has a
+destination port value of \fIport\fP.
+The \fIport\fP can be a number or a name used in /etc/services (see
+.IR tcp (4P)
+and
+.IR udp (4P)).
+If a name is used, both the port
+number and protocol are checked.  If a number or ambiguous name is used,
+only the port number is checked (e.g., \fBdst port 513\fR will print both
+tcp/login traffic and udp/who traffic, and \fBport domain\fR will print
+both tcp/domain and udp/domain traffic).
+.IP "\fBsrc port \fIport\fR"
+True if the packet has a source port value of \fIport\fP.
+.IP "\fBport \fIport\fR"
+True if either the source or destination port of the packet is \fIport\fP.
+Any of the above port expressions can be prepended with the keywords,
+\fBtcp\fP or \fBudp\fP, as in:
+.in +.5i
+.nf
+\fBtcp src port \fIport\fR
+.fi
+.in -.5i
+which matches only tcp packets whose source port is \fIport\fP.
+.LP
+Primitives may be combined using:
+.IP
+A parenthesized group of primitives and operators
+(parentheses are special to the Shell and must be escaped).
+.IP
+Negation (`\fB!\fP' or `\fBnot\fP').
+.IP
+Concatenation (`\fB&&\fP' or `\fBand\fP').
+.IP
+Alternation (`\fB||\fP' or `\fBor\fP').
+.LP
+Negation has highest precedence.
+Alternation and concatenation have equal precedence and associate
+left to right.  Note that explicit \fBand\fR tokens, not juxtaposition,
+are now required for concatenation.
+.LP
+If an identifier is given without a keyword, the most recent keyword
+is assumed.
+For example,
+.in +.5i
+.nf
+\fBnot host vs and ace\fR
+.fi
+.in -.5i
+is short for
+.in +.5i
+.nf
+\fBnot host vs and host ace\fR
+.fi
+.in -.5i
+which should not be confused with
+.in +.5i
+.nf
+\fBnot ( host vs or ace )\fR
+.fi
+.in -.5i
+.LP
+Expression arguments can be passed to ssldump as either a single argument
+or as multiple arguments, whichever is more convenient.
+Generally, if the expression contains Shell metacharacters, it is
+easier to pass it as a single, quoted argument.
+Multiple arguments are concatenated with spaces before being parsed.
+.SH EXAMPLES
+.LP
+To listen to traffic on interface \fIle0\fP port \fI443\fP
+.RS
+.nf
+\fBssldump -i le0 port 443\fP
+.fi
+.RE
+.LP
+To listen to traffic to the server \fIromeo\fP on port \fI443\fP.
+.RS
+.nf
+\fBssldump -i le0 port 443 and host romeo\fP
+.fi
+.RE
+.LP
+To decrypt traffic to to host \fIromeo\fR 
+\fIserver.pem\fR and the password \fIfoobar\fR
+.RS
+.nf
+\fBssldump -Ad -k ~/server.pem -p foobar -i le0 host romeo
+.fi
+.RE
+.SH OUTPUT FORMAT
+.LP
+All output is printed to standard out.
+.LP
+ssldump prints an indication of every new TCP connection using a line
+like the following
+.nf
+.LP
+\fBNew TCP connection #2: iromeo.rtfm.com(2302) <-> sr1.rtfm.com(4433)\fP
+.LP
+.fi
+The host which send the first SYN is printed on the left and the host
+which responded is printed on the right. Ordinarily, this means that
+the SSL client will be printed on the left with the SSL server on the
+right. In this case we have a connection from \fIiromeo.rtfm.com\fR (port \fI2303\fR)
+to \fIsr1.rtfm.com\fR (port \fI4433\fR). To allow the user to disentangle
+traffic from different connections, each connection is numbered. This is
+connection \fI2\fR.
+.LP
+The printout of each SSL record begins with a record line. This
+line contains the connection and record number, a timestamp, and the
+record type, as in the following:
+.LP
+.nf
+\fB2 3  0.2001 (0.0749)  S>C  Handshake      Certificate\fR
+.fi
+.LP
+This is record \fI3\fR on connection \fI2\fR. The first timestamp
+is the time since the beginning of the connection. The second is
+the time since the previous record. Both are in seconds.
+.LP
+The next field in the record line is the direction that the record
+was going. \fIC>S\fR indicates records transmitted from client to
+server and \fIS>C\fR indicates records transmitted from server to client.
+ssldump assumes that the host to transmit the first SYN
+is the SSL client (this is nearly always correct).
+.LP
+The next field is the record type, one of \fIHandshake\fR, \fIIAlert\fR,
+\fIChangeCipherSpec\fR, or \fIapplication_data\fR. Finally, ssldump
+may print record-specific data on the rest of the line. For \fIHandshake\fR
+records, it prints the handshake message. Thus, this record is
+a \fICertificate\fR message.
+.LP
+ssldump chooses certain record types for further decoding. These
+are the ones that have proven to be most useful for debugging:
+.LP
+.nf
+\fIClientHello\fR \- version, offered cipher suites, session id
+                     if provided)
+\fIServerHello\fR \- version, session_id, chosen cipher suite,
+		     compression method
+\fIAlert\fR \- type and level (if obtainable)
+.fi
+.LP
+Fuller decoding of the various records can be obtained by using the
+.B \-A
+,
+.B \-d
+,
+.B \-k
+and 
+.B \-p
+flags.
+.LP
+.SH DECRYPTION
+.LP
+ssldump can decrypt traffic between two hosts if the following two
+conditions are met:
+.RS
+.nf
+1. ssldump has the keys.
+2. Static RSA was used.
+.fi
+.RE
+In any other case, once encryption starts,
+ssldump will only be able to determine the
+record type. Consider the following section of a trace.
+.LP
+.nf
+\fB1 5  0.4129 (0.1983)  C>S  Handshake      ClientKeyExchange
+1 6  0.4129 (0.0000)  C>S  ChangeCipherSpec
+1 7  0.4129 (0.0000)  C>S  Handshake
+1 8  0.5585 (0.1456)  S>C  ChangeCipherSpec
+1 9  0.6135 (0.0550)  S>C  Handshake
+1 10 2.3121 (1.6986)  C>S  application_data
+1 11 2.5336 (0.2214)  C>S  application_data
+1 12 2.5545 (0.0209)  S>C  application_data
+1 13 2.5592 (0.0046)  S>C  application_data
+1 14 2.5592 (0.0000)  S>C  Alert\fP
+.fi
+.LP
+Note that the \fIClientKeyExchange\fR message type is printed
+but the rest of the \fIHandshake\fR messages do not have
+types. These are the \fIFinished\fR messages, but because they
+are encrypted ssldump only knows that they are of type \fIHandshake\fR.
+Similarly, had the \fIAlert\fR in record 14 happened during the handshake,
+it's type and level would have been printed. However, since it
+is encrypted we can only tell that it is an alert.
+.LP
+.SH BUGS
+.LP
+Please send bug reports to ssldump@rtfm.com.
+.LP
+The TCP reassembler is not perfect. No attempt is made to reassemble IP 
+fragments and the 3-way handshake and close handshake are imperfectly
+implemented. In practice, this turns out not to be much of a problem.
+.LP
+Support is provided for only for Ethernet and loopback interfaces
+because that's all that I have. If you have another kind of network
+you will need to modify pcap_cb in base/pcap-snoop.c. If you have
+direct experience with ssldump on other networks, please send me patches.
+.LP
+ssldump doesn't implement session caching and therefore can't decrypt
+resumed sessions.
+
+

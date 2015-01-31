@@ -1,0 +1,394 @@
+<HTML>
+<BODY>
+<PRE>
+<!-- Manpage converted by man2html 3.0.1 --><!-- Tiny bit of hand editing by GHS -->
+       ssldump - dump SSL traffic on a network
+
+
+</PRE>
+<H2>SYNOPSIS</H2><PRE>
+       <B>ssldump</B> [ <B>-vtaTnsAxXhHVNdq</B> ] [ <B>-r</B> <I>dumpfile</I> ]        [ <B>-i</B> <I>interface</I> ] [ <B>-k</B> <I>keyfile</I> ] [ <B>-p</B> <I>password</I> ] [ <I>expression</I> ]
+
+
+</PRE>
+<H2>DESCRIPTION</H2><PRE>
+       <I>ssldump</I> is an SSL/TLS network protocol analyzer. It  iden-
+       tifies TCP connections on the chosen network interface and
+       attempts to interpret them as  SSL/TLS  traffic.  When  it
+       identifies  SSL/TLS  traffic,  it  decodes the records and
+       displays them in a textual form  to  stdout.  If  provided
+       with the appropriate keying material, it will also decrypt
+       the connections and display the application data  traffic.
+
+       ssldump  has  been  tested on FreeBSD, Linux, Solaris, and
+       HP/UX.  Since it's based on PCAP, it should work  on  most
+       platforms.  However,  unlike  tcpdump, ssldump needs to be
+       able to see both sides of the data transmission so you may
+       have  trouble using it with network taps such as SunOS nit
+       that don't permit you  to  see  transmitted  data.   <B>Under</B>
+       <B>SunOS</B>  <B>with</B>  <B>nit</B> <B>or</B> <B>bpf:</B> To run <I>tcpdump</I> you must have read
+       access to <I>/dev/nit</I> or <I>/dev/bpf*</I>.  <B>Under</B> <B>Solaris</B> <B>with</B> <B>dlpi:</B>
+       You  must  have  read access to the network pseudo device,
+       e.g.  <I>/dev/le</I>.  <B>Under</B> <B>HP-UX</B> <B>with</B> <B>dlpi:</B> You must be root or
+       it  must  be  installed  setuid  to root.  <B>Under</B> <B>IRIX</B> <B>with</B>
+       <B>snoop:</B> You must be root or it must be installed setuid  to
+       root.   <B>Under</B>  <B>Linux:</B>  You  must  be  root  or  it must be
+       installed setuid to root.  <B>Under</B> <B>Ultrix</B> <B>and</B> <B>Digital</B>  <B>UNIX:</B>
+       Once the super-user has enabled promiscuous-mode operation
+       using <B>pfconfig(8)</B>, any user may run <B>ssldump</B> <B>Under</B> <B>BSD:</B> You
+       must have read access to <I>/dev/bpf*</I>.
+
+
+</PRE>
+<H2>OPTIONS</H2><PRE>
+       <B>-a</B>     Print bare TCP ACKs (useful for observing Nagle behav-
+              ior)
+
+       <B>-A</B>     Print all record fields (by default ssldump chooses
+              the most interesting fields)
+
+       <B>-d</B>     Display  the application data traffic. This usually
+              means decrypting it, but when -d  is  used  ssldump
+              will  also decode application data traffic _before_
+              the SSL session initiates.  This allows you to  see
+              HTTPS CONNECT behavior as well as SMTP STARTTLS. As
+              a side effect, since  ssldump  can't  tell  whether
+              plaintext  is  traffic  before the initiation of an
+              SSL connection or just a  regular  TCP  connection,
+              this  allows  you  to  use ssldump to sniff any TCP
+              connection.   ssldump  will  automatically   detect
+              ASCII  data  and display it directly to the screen.
+
+       <B>-e</B>     Print   absolute  timestamps  instead  of  relative
+              timestamps
+
+       <B>-r</B>     Read data from <I>file</I> instead of  from  the  network.
+              The old -f option still works but is deprecated and
+              will probably be removed with the next version.                     <B>-H</B>
+              Print the full SSL packet header.
+
+       <B>-k</B>     Use  <I>keyfile</I>  as  the  location  of the SSL keyfile
+              (OpenSSL format)  ssldump  automatically  looks  in
+              ./server.pem.
+
+       <B>-n</B>     Don't try to resolve host names from IP addresses
+
+       <B>-N</B>     Attempt  to parse ASN.1 when it appears, such as in
+              certificates and DNs.
+
+       <B>-p</B>     Use <I>password</I> as the SSL keyfile password default is
+              "password".
+
+       <B>-q</B>     Don't decode any record fields beyond a single sum-
+              mary line. (quiet mode).
+
+       <B>-x</B>     Print each record in hex, as well as decoding it.
+
+       <B>-X</B>     When the -d option is used, binary data is automat-
+              ically  printed  in  two columns with a hex dump on
+              the left and the printable characters on the right.
+              -X  suppresses the display of the printable charac-
+              ters, thus making it easier to cut  and  paste  the
+              hext data into some other program.  <B>-y</B> Decorate the
+              output for processing with troff. Not  very  useful
+              for the average user.
+
+
+        <I>expression</I>
+              Selects  what packets ssldump will examine. Techni-
+              cally speaking, ssldump supports the  full  expres-
+              sion  syntax  from  PCAP and tcpdump.  In fact, the
+              description here is cribbed from  the  tcpdump  man
+              page.  However, since ssldump needs to examine full
+              TCP streams, most of the tcpdump  expressions  will
+              select  traffic  mixes  that  ssldump  will  simply
+              ignore. Only the expressions which don't result  in
+              incomplete TCP streams are listed here.
+
+              The  <I>expression</I> consists of one or more <I>primitives.</I>
+              Primitives usually consist of an <I>id</I> (name  or  num-
+              ber) preceded by one or more qualifiers.  There are
+              three different kinds of qualifier:
+
+                     are <B>host</B>, <B>net</B> and <B>port</B>.  E.g.,  `host  foo',
+                     `net 128.3', `port 20'.  If there is no type
+                     qualifier, <B>host</B> is assumed.
+
+              <I>dir</I>    qualifiers  specify  a  particular  transfer
+                     direction   to  and/or  from  <I>id.</I>   Possible
+                     directions are <B>src</B>, <B>dst</B>, <B>src</B> <B>or</B> <B>dst</B> and  <B>src</B>
+                     <B>and</B>  <B>dst</B>.  E.g., `src foo', `dst net 128.3',
+                     `src or dst port ftp-data'.  If there is  no
+                     dir  qualifier,  <B>src</B> <B>or</B> <B>dst</B> is assumed.  For
+                     `null' link layers (i.e. point to point pro-
+                     tocols  such  as  slip) the <B>inbound</B> and <B>out-</B>
+                     <B>bound</B> qualifiers can be used  to  specify  a
+                     desired direction.
+
+              More  complex  filter  expressions  are built up by
+              using the words <B>and</B>, <B>or</B> and <B>not</B> to  combine  primi-
+              tives.   E.g.,  `host  foo and not port ftp and not
+              port ftp-data'.  To save typing,  identical  quali-
+              fier lists can be omitted.  E.g., `tcp dst port ftp
+              or ftp-data or domain' is exactly the same as  `tcp
+              dst  port  ftp  or tcp dst port ftp-data or tcp dst
+              port domain'.
+
+              Allowable primitives are:
+
+              <B>dst</B> <B>host</B> <I>host</I>
+                     True if the IPv4/v6 destination field of the
+                     packet  is  <I>host</I>,  which  may  be  either an
+                     address or a name.
+
+              <B>src</B> <B>host</B> <I>host</I>
+                     True if the  IPv4/v6  source  field  of  the
+                     packet is <I>host</I>.
+
+              <B>host</B> <I>host</I>
+                     True  if either the IPv4/v6 source or desti-
+                     nation of the packet is <I>host</I>.   Any  of  the
+                     above host expressions can be prepended with
+                     the keywords, <B>ip</B>, <B>arp</B>, <B>rarp</B>, or <B>ip6</B> as in:
+                          <B>ip</B> <B>host</B> <I>host</I>
+                     which is equivalent to:
+                          <B>ether</B> <B>proto</B> <I>\ip</I> <B>and</B> <B>host</B> <I>host</I>
+                     If  <I>host</I>  is  a  name   with   multiple   IP
+                     addresses,  each address will be checked for
+                     a match.
+
+              <B>ether</B> <B>dst</B> <I>ehost</I>
+                     True if the ethernet destination address  is
+                     <I>ehost</I>.   <I>Ehost</I>  may  be  either  a name from
+                     /etc/ethers or a number (see <B>ethers(3N)</B>  for
+                     numeric format).
+                     True  if  the  ethernet  source  address  is
+                     <I>ehost</I>.
+
+              <B>ether</B> <B>host</B> <I>ehost</I>
+                     True if either the ethernet source or desti-
+                     nation address is <I>ehost</I>.
+
+              <B>gateway</B> <I>host</I>
+                     True  if  the packet used <I>host</I> as a gateway.
+                     I.e., the  ethernet  source  or  destination
+                     address  was  <I>host</I> but neither the IP source
+                     nor the IP destination was <I>host</I>.  <I>Host</I>  must
+                     be   a  name  and  must  be  found  in  both
+                     /etc/hosts and /etc/ethers.  (An  equivalent
+                     expression is
+                          <B>ether</B> <B>host</B> <I>ehost</I> <B>and</B> <B>not</B> <B>host</B> <I>host</I>
+                     which  can be used with either names or num-
+                     bers for <I>host</I> <I>/</I> <I>ehost</I>.)   This  syntax  does
+                     not  work  in  IPv6-enabled configuration at
+                     this moment.
+
+              <B>dst</B> <B>net</B> <I>net</I>
+                     True if the IPv4/v6 destination  address  of
+                     the  packet has a network number of <I>net</I>. <I>Net</I>
+                     may be either a name from /etc/networks or a
+                     network    number   (see   <I>networks(4)</I>   for
+                     details).
+
+              <B>src</B> <B>net</B> <I>net</I>
+                     True if the IPv4/v6 source  address  of  the
+                     packet has a network number of <I>net</I>.
+
+              <B>net</B> <I>net</I>
+                     True  if either the IPv4/v6 source or desti-
+                     nation address of the packet has  a  network
+                     number of <I>net</I>.
+
+              <B>net</B> <I>net</I> <B>mask</B> <I>mask</I>
+                     True  if the IP address matches <I>net</I> with the
+                     specific netmask.  May be qualified with <B>src</B>
+                     or  <B>dst</B>.  Note that this syntax is not valid
+                     for IPv6 <I>net</I>.
+
+              <B>net</B> <I>net</I>/<I>len</I>
+                     True if the IPv4/v6 address  matches  <I>net</I>  a
+                     netmask  <I>len</I>  bits  wide.   May be qualified
+                     with <B>src</B> or <B>dst</B>.
+
+              <B>dst</B> <B>port</B> <I>port</I>
+                     True  if  the  packet  is  ip/tcp,   ip/udp,
+                     ip6/tcp  or  ip6/udp  and  has a destination
+                     port value of <I>port</I>.  The <I>port</I> can be a  num-
+                     both   the  port  number  and  protocol  are
+                     checked.  If a number or ambiguous  name  is
+                     used, only the port number is checked (e.g.,
+                     <B>dst</B> <B>port</B> <B>513</B> will print both tcp/login traf-
+                     fic  and  udp/who  traffic,  and <B>port</B> <B>domain</B>
+                     will print both  tcp/domain  and  udp/domain
+                     traffic).
+
+              <B>src</B> <B>port</B> <I>port</I>
+                     True  if  the packet has a source port value
+                     of <I>port</I>.
+
+              <B>port</B> <I>port</I>
+                     True if either  the  source  or  destination
+                     port  of  the  packet  is  <I>port</I>.  Any of the
+                     above port expressions can be prepended with
+                     the keywords, <B>tcp</B> or <B>udp</B>, as in:
+                          <B>tcp</B> <B>src</B> <B>port</B> <I>port</I>
+                     which  matches only tcp packets whose source
+                     port is <I>port</I>.
+
+              Primitives may be combined using:
+
+                     A  parenthesized  group  of  primitives  and
+                     operators  (parentheses  are  special to the
+                     Shell and must be escaped).
+
+                     Negation (`<B>!</B>' or `<B>not</B>').
+
+                     Concatenation (`<B>&amp;&amp;</B>' or `<B>and</B>').
+
+                     Alternation (`<B>||</B>' or `<B>or</B>').
+
+              Negation has highest precedence.   Alternation  and
+              concatenation  have  equal precedence and associate
+              left to right.  Note that explicit <B>and</B> tokens,  not
+              juxtaposition,  are now required for concatenation.
+
+              If an identifier is given without  a  keyword,  the
+              most recent keyword is assumed.  For example,
+                   <B>not</B> <B>host</B> <B>vs</B> <B>and</B> <B>ace</B>
+              is short for
+                   <B>not</B> <B>host</B> <B>vs</B> <B>and</B> <B>host</B> <B>ace</B>
+              which should not be confused with
+                   <B>not</B> <B>(</B> <B>host</B> <B>vs</B> <B>or</B> <B>ace</B> <B>)</B>
+
+              Expression  arguments  can  be passed to ssldump as
+              either a single argument or as multiple  arguments,
+              whichever  is  more  convenient.  Generally, if the
+              expression contains  Shell  metacharacters,  it  is
+              easier  to  pass  it  as a single, quoted argument.
+              Multiple arguments  are  concatenated  with  spaces
+
+       To listen to traffic on interface <I>le0</I> port <I>443</I>
+              <B>ssldump</B> <B>-i</B> <B>le0</B> <B>port</B> <B>443</B>
+
+       To listen to traffic to the server <I>romeo</I> on port <I>443</I>.
+              <B>ssldump</B> <B>-i</B> <B>le0</B> <B>port</B> <B>443</B> <B>and</B> <B>host</B> <B>romeo</B>
+
+       To  decrypt  traffic  to  to host <I>romeo</I> <I>server.pem</I> and the
+       password <I>foobar</I>
+              <B>ssldump</B> <B>-Ad</B> <B>-k</B> <B>~/server.pem</B> <B>-p</B> <B>foobar</B> <B>-i</B> <B>le0</B> <B>host</B> <B>romeo</B>
+
+
+</PRE>
+<H2>OUTPUT FORMAT</H2><PRE>
+       All output is printed to standard out.
+
+       ssldump prints an indication of every new  TCP  connection
+       using a line like the following
+
+       <B>New</B> <B>TCP</B> <B>connection</B> <B>#2:</B> <B>iromeo.rtfm.com(2302)</B> <B>&lt;-&gt;</B> <B>sr1.rtfm.com(4433)</B>
+
+       The  host  which send the first SYN is printed on the left
+       and the host which responded  is  printed  on  the  right.
+       Ordinarily, this means that the SSL client will be printed
+       on the left with the SSL server on the right. In this case
+       we  have  a connection from <I>iromeo.rtfm.com</I> (port <I>2303</I>) to
+       <I>sr1.rtfm.com</I> (port <I>4433</I>). To allow the user to disentangle
+       traffic  from  different  connections,  each connection is
+       numbered. This is connection <I>2</I>.
+
+       The printout of each SSL record begins with a record line.
+       This  line  contains  the  connection and record number, a
+       timestamp, and the record type, as in the following:
+
+       <B>2</B> <B>3</B>  <B>0.2001</B> <B>(0.0749)</B>  <B>S&gt;C</B>  <B>Handshake</B>      <B>Certificate</B>
+
+       This is record <I>3</I> on connection <I>2</I>. The first  timestamp  is
+       the time since the beginning of the connection. The second
+       is the time since the previous record. Both  are  in  sec-
+       onds.
+
+       The  next  field  in the record line is the direction that
+       the record was going. <I>C&gt;S</I>  indicates  records  transmitted
+       from  client to server and <I>S&gt;C</I> indicates records transmit-
+       ted from server to client.  ssldump assumes that the  host
+       to  transmit  the  first  SYN  is  the SSL client (this is
+       nearly always correct).
+
+       The next field is  the  record  type,  one  of  <I>Handshake</I>,
+       <I>IAlert</I>,  <I>ChangeCipherSpec</I>,  or  <I>application</I><B>_</B><I>data</I>. Finally,
+       ssldump may print record-specific data on the rest of  the
+       line.  For <I>Handshake</I> records, it prints the handshake mes-
+       sage. Thus, this record is a <I>Certificate</I> message.
+
+       ssldump chooses certain record types for further decoding.
+
+       <I>ClientHello</I> - version, offered cipher suites, session id
+                            if provided)
+       <I>ServerHello</I> - version, session_id, chosen cipher suite,
+                      compression method
+       <I>Alert</I> - type and level (if obtainable)
+
+       Fuller decoding of the various records can be obtained  by
+       using the <B>-A</B> , <B>-d</B> , <B>-k</B> and <B>-p</B> flags.
+
+
+
+</PRE>
+<H2>DECRYPTION</H2><PRE>
+       ssldump  can decrypt traffic between two hosts if the fol-
+       lowing two conditions are met:
+              1. ssldump has the keys.
+              2. Static RSA was used.
+       In any other case, once encryption  starts,  ssldump  will
+       only  be  able  to determine the record type. Consider the
+       following section of a trace.
+
+       <B>1</B> <B>5</B>  <B>0.4129</B> <B>(0.1983)</B>  <B>C&gt;S</B>  <B>Handshake</B>      <B>ClientKeyExchange</B>
+       <B>1</B> <B>6</B>  <B>0.4129</B> <B>(0.0000)</B>  <B>C&gt;S</B>  <B>ChangeCipherSpec</B>
+       <B>1</B> <B>7</B>  <B>0.4129</B> <B>(0.0000)</B>  <B>C&gt;S</B>  <B>Handshake</B>
+       <B>1</B> <B>8</B>  <B>0.5585</B> <B>(0.1456)</B>  <B>S&gt;C</B>  <B>ChangeCipherSpec</B>
+       <B>1</B> <B>9</B>  <B>0.6135</B> <B>(0.0550)</B>  <B>S&gt;C</B>  <B>Handshake</B>
+       <B>1</B> <B>10</B> <B>2.3121</B> <B>(1.6986)</B>  <B>C&gt;S</B>  <B>application_data</B>
+       <B>1</B> <B>11</B> <B>2.5336</B> <B>(0.2214)</B>  <B>C&gt;S</B>  <B>application_data</B>
+       <B>1</B> <B>12</B> <B>2.5545</B> <B>(0.0209)</B>  <B>S&gt;C</B>  <B>application_data</B>
+       <B>1</B> <B>13</B> <B>2.5592</B> <B>(0.0046)</B>  <B>S&gt;C</B>  <B>application_data</B>
+       <B>1</B> <B>14</B> <B>2.5592</B> <B>(0.0000)</B>  <B>S&gt;C</B>  <B>Alert</B>
+
+       Note that the <I>ClientKeyExchange</I> message  type  is  printed
+       but  the rest of the <I>Handshake</I> messages do not have types.
+       These are the <I>Finished</I>  messages,  but  because  they  are
+       encrypted  ssldump  only knows that they are of type <I>Hand-</I>
+       <I>shake</I>.  Similarly, had the <I>Alert</I>  in  record  14  happened
+       during  the handshake, it's type and level would have been
+       printed. However, since it is encrypted we can  only  tell
+       that it is an alert.
+
+
+
+</PRE>
+<H2>BUGS</H2><PRE>
+       Please send bug reports to ssldump@rtfm.com.
+
+       The  TCP reassembler is not perfect. No attempt is made to
+       reassemble IP fragments and the 3-way handshake and  close
+       handshake  are  imperfectly implemented. In practice, this
+       turns out not to be much of a problem.
+
+       Support is provided for only  for  Ethernet  and  loopback
+       interfaces  because  that's  all  that I have. If you have
+       another kind of network you will need to modify pcap_cb in
+       base/pcap-snoop.c. If you have direct experience with ssldump
+       on other networks, please send me patches.
+
+       ssldump doesn't implement session  caching  and  therefore
+       can't decrypt resumed sessions.
+
+
+</PRE>
+<HR>
+<ADDRESS>
+Man(1) output converted with
+<a href="http://www.oac.uci.edu/indiv/ehood/man2html.html">man2html</a>
+</ADDRESS>
+</BODY>
+</HTML>

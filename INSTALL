@@ -1,0 +1,46 @@
+$Id: INSTALL,v 1.5 2001/09/14 22:29:13 ekr Exp $
+
+If you don't have libpcap, you'll need to get it and install it. You
+can obtain it from:
+	http://www.tcpdump.org/
+
+If you want to be able to decrypt SSL traffic or view certificates,
+get OpenSSL if you don't have it:
+	http://www.openssl.org/
+
+Once you've built and installed libpcap and OpenSSL, you're ready to
+build ssldump.
+
+ssldump uses a GNU autoconf-based configuration to automatically
+configure the build. 
+
+In the simplest form you can simply do:
+	./configure
+
+If the configure script can't find libpcap, it will abort. If you've
+installed it in unobvious place, you may need to give configure a hint 
+using the '--with-pcap' or '--with-pcap-{lib,inc}' switches.
+
+If the configure script can't find OpenSSL, it will continue without
+it. If your OpenSSL is in a nonstandard location, you may need to give 
+configure a hint with the '--with-openssl' or
+'--with-openssl-{lib,include}' switches.
+
+Once you've done the configure, you can simply run 'make'. Note that
+on some platforms (HP/UX) you will have to use GNU make (gmake).
+
+If the make succeeds, run a 'make install' (you will probably need to
+be root to do this.)
+
+TESTED PLATFORMS
+FreeBSD 2.2.8, 3.4
+HP/UX 10.20         
+Linux (Red Hat, Debian)
+Solaris 2.x
+
+If you get ssldump to work on a platform not listed above, please send mail
+to ssldump@rtfm.com with the platform and any fixes you had to make.
+
+INSTALLING ON WINDOWS
+Read the file INSTALL.W32 in this directory for instructions on
+installing on Windows.

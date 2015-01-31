@@ -1,0 +1,5 @@
+OBJECTS=r_assoc.o r_data.o r_errors.o r_list.c r_time.o
+INCLUDES += ../includes
+OBJECTS:
+	$(CC) $(CFLAGS) $(@:%.c
+

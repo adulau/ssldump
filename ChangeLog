@@ -1,0 +1,158 @@
+Wed Aug 21 10:48:45 2002 EKR <ekr@rtfm.com>
+        * Installed Greg Stark's new Win32 patches.
+
+	* Added updated VLAN support (Jeffrey Hafey)  
+	
+Fri Aug 16 16:56:23 2002 EKR <ekr@rtfm.com>
+	* Cleaned up 56-bit ciphersuites in ciphersuites.c
+	
+	* Fixed memory errors in packet copying.
+
+	* Fixed bugs in processing of bogus SSLv2 messages.
+
+	* Fixed bugs in TCP packet reassembly code.
+		
+Tue Aug 13 13:03:41 2002 EKR <ekr@rtfm.com>
+	* Fixed EXPORT1024 DES cipher suites
+	
+Mon Aug 12 16:49:51 2002 EKR <ekr@rtfm.com>
+        * Added support for VLAN networks (Jeffrey Hafey)
+
+	* Fixed printing of data with embedded tabs (Pavel Curtis)
+
+	* Added support for non-promiscuous mode (-P flag)
+	  (Bruce M Simpson)
+
+	* Fixed potential small overrun in RSA decryption.
+	
+Fri Sep 28 15:54:47 2001 EKR <ekr@rtfm.com>
+	* Fixed install so that we install in /usr/local/sbin
+	  with mode 755. Bug report ssldump/22.
+	  (Dave Jagoda)
+
+	* Fixed compilation warning about create_null_analyzer
+	  Bug report ssldump/23.
+
+Wed Sep 26 14:49:06 2001 EKR <ekr@rtfm.com>
+	* Fixed SYN & SYN/ACK detection to that it works with ECN.
+	(Henrik Nordstrom)
+	 
+	* Added /usr/include/pcap to the PCAP search path
+	(Henrik Nordstrom)
+
+Sat Sep 15 13:41:10 2001 EKR <ekr@rtfm.com>
+	* Fix to ssldecode.c to remove error with empty
+	  struct when compiling with VC++ and no OpenSSL
+	  (Greg Stark)
+
+	* Change to vcwin32.mak to print out that you're not
+	  using OpenSSL (Greg Stark)
+
+	* Automatic version changing courtesy of version-change.pl
+	
+Fri Sep 14 15:22:29 2001 EKR <ekr@rtfm.com>
+	* Fixed bug 4. Delete the MS after decrypting a PMS
+	  to force new MS generation in the key generation phase.
+	  This makes decryption of renegotiated connections work
+	  correctly. This got broken when session resumption 
+	  was added.
+	
+2001-09-14  Eric Rescorla  <ekr@rtfm.com>
+
+	* Imported Greg Stark's Win32 port
+
+Sun Sep  2 15:53:06 2001 EKR <ekr@rtfm.com>
+        * Fixed the reassembler so it doesn't crash when
+	   FIN/RST segments have data.
+
+	* closure/connection freeing now works, thus meaning less
+	  memory leakage and less crashing.
+
+	* A bunch of trivial makefile/configure fixes.
+	  
+Fri Jul 20 16:40:51 2001 EKR <ekr@rtfm.com>
+	* Removed loading of certificate file. This served
+	  no real purpose. Fix for bug 5.
+
+Fri Jul 20 11:02:09 2001 EKR <ekr@rtfm.com>
+	* Fixed initialization so that the key file is loaded
+	  only once. 
+
+	  Removed default keyfile and password. You now must
+	  specify them. You also get an error if you specify
+	  a bad password or keyfile.
+
+Fri Jul 20 10:17:36 2001 EKR <ekr@rtfm.com>
+	* Added support for session resumption.
+	
+Fri Jul 20 10:17:16 2001 EKR <ekr@rtfm.com>
+	* Fixed SEQ_LT problems on Linux and other compilation
+	  problems.
+
+Tue Mar 6 2001 EKR <ekr@rtfm.com>
+	* Removed statically allocated conn array. We can now
+	  have an arbitrary number of 
+	
+Thu Nov  9 12:14:15 2000 EKR <ekr@rtfm.com>
+	* Cleanups to the man page and cleaned up some cases
+	  where printing didn't work quite right. 
+	
+Mon Nov  6 10:22:25 2000 EKR <ekr@rtfm.com>
+	* Added the -X flag to force hex-only printing when
+	  binary data is displayed as hex dumps.
+	
+Fri Nov  3 09:23:35 2000 EKR <ekr@rtfm.com>
+	* cleaned up the case where multiple handshake messages
+	  are in the same SSL record.
+
+Fri Nov  3 09:14:39 2000 EKR <ekr@rtfm.com>
+	* Modified printing so that when we're printing hex dumps
+	  of application data traffic we also print the printable
+	  sections of the data itself in a column on the side.
+
+Thu Nov  2 14:14:21 2000 EKR <ekr@rtfm.com>
+        * Modified cipher suite printing so that the names have
+	  SSL_ if we're doing SSLv3 and TLS_ if we're doing TLS.
+	  Suggestion by Eric Murray.
+	
+Thu Nov  2 13:07:09 2000 EKR <ekr@rtfm.com>
+	* Fixed an ABW in ssldecode.c that caused crashes
+	  on Solaris. Also, fixed a bunch of memory leaks
+	  using Purify.
+	
+Thu Nov  2 08:45:42 2000 EKR <ekr@rtfm.com>
+	* Various Portability fixes
+	  CC=gcc -> CC=@CC@ in Makefile
+	  Removed FLAGS in Makefile (it was a noop)
+	  in base/tcpconn.c, changed {} to {0} to appease HPUX's compiler
+	  made create_null_analyzer.c static as it should be.
+	  Removed the final (bogus) entry in null_vtbl.
+	  made sslx__print_serial() static to match its prototype
+	  Rearranged library order for better linkage
+	  Thanks to Lutze Jainecke for these fixes.
+	
+Thu Nov  2 08:41:10 2000 EKR <ekr@rtfm.com>
+	* Added -r as a synonym for -f. -f will eventually
+	  be removed and reused for some other option.
+	  This was done for option compatibility with tcpdump
+	  and on the theory that someday I might add a -w.
+
+	* Renamed -h to -H and added it to the documentation.
+	  -h now triggers usage info.
+	
+Thu Nov  2 08:38:06 2000 EKR <ekr@rtfm.com>
+	* Removed blank lines in the man page. This confuses some
+	  man page formatters. (Thanks to Hugh Mandeville for pointing
+	  this one out)
+	
+Thu Nov  2 08:37:59 2000 EKR <ekr@rtfm.com>
+	* Wired up -N (it was unwired)
+	
+Thu Nov  2 08:37:47 2000 EKR <ekr@rtfm.com>
+	* Added -D_BSD_SOURCE=1 when you're compiling on Linux.
+	  (Allowing it to compile)
+
+	
+	 
+	
+

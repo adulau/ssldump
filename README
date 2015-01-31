@@ -1,0 +1,85 @@
+$Id: README,v 1.9 2002/08/17 01:33:15 ekr Exp $
+
+SSLDUMP 0.9b3
+
+ssldump is an SSLv3/TLS network protocol analyzer. It identifies TCP
+connections on the chosen network interface and attempts to interpret
+them as SSLv3/TLS traffic. When it identifies SSLv3/TLS traffic, it
+decodes the records and displays them in a textual form to stdout. If
+provided with the appropriate keying material, it will also decrypt
+the connections and display the application data traffic.
+
+ssldump depends on the libpcap packet capture library. Some systems
+(e.g. FreeBSD) now have libpcap as part of their standard install. On
+other systems, you will need to install it.  You can obtain the
+distribution from:
+	http://www.tcpdump.org/
+
+If linked with OpenSSL, ssldump can display certificates in decoded
+form and decrypt traffic (provided that it has the appropriate keying
+material). Again, OpenSSL may be installed on your system. Otherwise
+you can obtain it from:
+	http://www.openssl.org/
+
+See the file INSTALL for instructions on building and installing
+ssldump.
+
+STABILITY
+This is a beta release of ssldump. The UNIX portions have received
+extensive testing and are believed to be quite solid. The Windows
+port is substantially less stable. 
+
+CHANGES SINCE 0.9b2
+	Security fix: some potential over and underflows
+	Added support for VLANs.
+	Added -P flag to disable promiscuous mode.
+	Fixed bugs in the TCP reassembly code.
+	A lot of bug fixes.
+
+See the ChangeLog for a more complete list of changes.
+
+MAILING LIST
+For support questions and general discussion on ssldump, please
+subscribe to the ssldump-users mailing list. Subscription is by
+majordomo. To subscribe, send a message with no subject and a body
+consisting of the single line:
+
+subscribe ssldump-users
+
+to majordomo@rtfm.com. Note, you cannot send messages to the list
+unless you are subscribed.
+
+BUG REPORTS
+Please send bug reports either to the ssldump-users mailing list
+or to ssldump@rtfm.com.
+
+INTEROPERABILITY NOTE
+Previous versions of ssldump automatically looked for the keyfile
+in 'server.pem' and used the password 'password'. This version
+removes those defaults. For decryption to work you MUST specify
+the keyfile (and password if the keyfile is encrypted.)
+
+NEW VERSIONS
+Newer versions of ssldump can be found at:
+	http://www.rtfm.com/ssldump/
+
+
+SSL REFERENCES
+The SSLv3 specification can be found at:
+	http://home.netscape.com/eng/ssl3/draft302.txt
+
+The TLS specification is in RFC 2246 and can be found at:
+	http://www.ietf.org/rfc/rfc2246.txt
+
+SHAMELESS PLUG
+Extremely detailed coverage of SSL/TLS can be found in 
+
+	_SSL_and_TLS:_Designing_and_Building_Secure_Systems_
+	Eric Rescorla
+	Addison-Wesley, 2001
+	ISBN 0-201-61598-3
+
+_SSL_and_TLS_ makes extensive use of ssldump to demonstrate real-life
+SSL behavior. If you like ssldump and want to learn about SSL, you
+might consider buying my book.
+

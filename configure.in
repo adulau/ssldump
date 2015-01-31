@@ -1,0 +1,250 @@
+dnl Copyright (C) 1999-2000 RTFM, Inc.
+dnl All Rights Reserved
+
+dnl This package is a SSLv3/TLS protocol analyzer written by Eric Rescorla
+dnl <ekr\@rtfm.com> and licensed by RTFM, Inc.
+
+dnl Redistribution and use in source and binary forms, with or without
+dnl modification, are permitted provided that the following conditions
+dnl are met:
+dnl 1. Redistributions of source code must retain the above copyright
+dnl    notice, this list of conditions and the following disclaimer.
+dnl 2. Redistributions in binary form must reproduce the above copyright
+dnl    notice, this list of conditions and the following disclaimer in the
+dnl    documentation and/or other materials provided with the distribution.
+dnl 3. All advertising materials mentioning features or use of this software
+dnl    must display the following acknowledgement:
+dnl 
+dnl    This product includes software developed by Eric Rescorla for
+dnl    RTFM, Inc.
+dnl
+dnl 4. Neither the name of RTFM, Inc. nor the name of Eric Rescorla may be
+dnl    used to endorse or promote products derived from this
+dnl    software without specific prior written permission.
+dnl
+dnl THIS SOFTWARE IS PROVIDED BY ERIC RESCORLA AND RTFM, INC. ``AS IS'' AND
+dnl ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+dnl IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+dnl ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+dnl FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+dnl DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+dnl OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+dnl HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+dnl LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+dnl OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(base/pcap-snoop.c)
+AC_CANONICAL_SYSTEM
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_MAKE_SET
+AC_PROG_RANLIB
+AC_PROG_INSTALL
+
+AC_MSG_RESULT(configuring for $target_os)
+
+dnl Replace `main' with a function in -lm:
+AC_CHECK_LIB(m, pow)
+
+dnl System-specific stuff
+case "$target_os" in 
+linux*)
+	DEFINES="$DEFINES -D_BSD_SOURCE=1 -DLINUX"
+	;;
+solaris*)
+	LIBS="$LIBS -lsocket -lnsl"
+	;;
+esac
+
+RECORD_MOD="dummy"
+
+dnl Look for PCAP
+dnl We absolutely need pcap
+ac_pcap_inc_dir="/usr/include /usr/include/pcap /usr/local/include"
+ac_pcap_lib_dir="/usr/lib /usr/local/lib"
+
+AC_ARG_WITH(pcap,[--with-pcap		  root location for pcap library],
+	if test "$withval" = "no"; then
+	   AC_MSG_ERROR(PCAP required for ssldump)
+	else
+		ac_pcap_inc_dir=$withval/include
+		ac_pcap_lib_dir=$withval/lib
+	fi
+)
+
+AC_ARG_WITH(pcap-inc,[--with-pcap-inc           PCAP include files],
+	ac_pcap_inc_dir=$withval
+)
+AC_ARG_WITH(pcap-lib,[--with-pcap-lib        PCAP library files],
+	ac_pcap_lib_dir=$withval
+)
+
+dnl Now look for it
+AC_MSG_CHECKING(for PCAP include files)
+ac_found_pcap_inc_dir="no"
+for dir in $ac_pcap_inc_dir; do 
+	if test -f $dir/pcap.h; then
+		if test "$dir" != "/usr/include"; then
+			INCLUDES="-I$dir $INCLUDES"
+		fi
+		ac_found_pcap_inc_dir=$dir
+		echo "found in $dir"
+		break;
+	fi
+done
+
+if test "$ac_found_pcap_inc_dir" = "no"; then
+	echo
+	AC_MSG_ERROR(Couldn't find PCAP includes: needed for ssldump)
+fi
+
+AC_MSG_CHECKING(for PCAP library)
+ac_found_pcap_lib_dir="no"
+for dir in $ac_pcap_lib_dir; do
+	if test -f $dir/libpcap.a; then
+	dnl Ok, we think we've found them, but check that they
+	dnl actually ontain the right functions
+		save_LIBS=$LIBS
+		save_LDFLAGS=$LDFLAGS
+		LIBS="-lpcap $LIBS"
+		if test "$dir" != "/usr/lib"; then
+			LDFLAGS="-L$dir $LDFLAGS"
+		fi
+		AC_TRY_LINK_FUNC(pcap_open_live,ac_linked_libpcap="true",
+			ac_linked_libpcap="false");
+		if test "$ac_linked_libpcap" != "false"; then
+			ac_found_pcap_lib_dir=$dir
+			break
+		fi
+		LIBS=$save_LIBS
+		LDFLAGS=$save_LDFLAGS
+	fi
+done
+
+if test "$ac_found_pcap_lib_dir" = "no"; then
+	echo
+	AC_MSG_ERROR(Couldn't find PCAP library: needed for ssldump)
+else
+	echo "found in $ac_found_pcap_lib_dir"
+fi
+				
+dnl See if we can find OpenSSL
+dnl We can compile without OpenSSL if we have to
+ac_use_openssl="true"
+ac_openssl_lib_dir="/usr/lib /usr/local /usr/local/ssl /usr/local/ssl/lib /usr/pkg"
+ac_openssl_inc_dir="/usr/include /usr/local /usr/local/ssl /usr/pkg /usr/local/ssl/include"
+
+AC_ARG_WITH(openssl,[--with-openssl            root location for OpenSSL],
+	if test "$withval" = "no"; then
+	   ac_use_openssl="false"
+	else
+		ac_openssl_lib_dir="$withval/lib $withval"
+		ac_openssl_inc_dir=$withval/include
+	fi
+)
+
+AC_ARG_WITH(openssl-inc,[--with-openssl-inc        OpenSSL include files],
+	ac_openssl_inc_dir=$withval
+)
+AC_ARG_WITH(openssl-lib,[--with-openssl-lib        OpenSSL library files],
+	ac_openssl_lib_dir=$withval
+)
+
+dnl Now look for OpenSSL
+if test "$ac_use_openssl" != "false"; then
+	ac_found_openssl_inc_dir="no"
+	AC_MSG_CHECKING(for OpenSSL include files)
+	for dir in $ac_openssl_inc_dir; do
+		if test -f $dir/openssl/ssl.h; then
+		   ac_found_openssl_inc_dir=$dir
+		   break
+		fi
+        done
+	if test "$ac_found_openssl_inc_dir" != "no"; then
+	   	echo "found in $ac_found_openssl_inc_dir"
+	else
+		echo "not found."
+		ac_use_openssl="false"
+	fi
+fi
+
+if test "$ac_use_openssl" != "false"; then
+	ac_found_openssl_lib_dir="no"
+	AC_MSG_CHECKING(for OpenSSL libraries)
+	for dir in $ac_openssl_lib_dir; do
+		found_ssl="false"
+		if test -f $dir/libssl.a -a -f $dir/libcrypto.a; then
+		  found_ssl="true"
+		fi
+		if test -f $dir/libssl.so -a -f $dir/libcrypto.so; then
+		  found_ssl="true"
+		fi
+		if $found_ssl != "false"; then
+		dnl Ok, we think we've found them, but check that they
+		dnl actually ontain the right functions
+		save_LIBS=$LIBS
+		save_LDFLAGS=$LDFLAGS
+		LIBS="-lssl -lcrypto $LIBS"
+		LDFLAGS="-L$dir $LDFLAGS"
+		AC_TRY_LINK_FUNC(SSL_load_error_strings,ac_linked_libssl="true",
+			ac_linked_libssl="false");
+		AC_TRY_LINK_FUNC(RC4_set_key,ac_linked_libcrypto="true",
+			ac_linked_libcrypto="false");
+		if test "$ac_linked_libssl" != "false" -a \
+			"$ac_linked_libcrypto" != "false"; then
+				ac_found_openssl_lib_dir=$dir
+				break
+		fi
+		LIBS=$save_LIBS
+		LDFLAGS=$save_LDFLAGS
+		fi
+	done
+	if test "$ac_found_openssl_lib_dir" != "no"; then
+	   	echo "found in $ac_found_openssl_lib_dir"
+		INCLUDES="-I$ac_found_openssl_inc_dir $INCLUDES"
+		DEFINES="-DOPENSSL $DEFINES"
+	else
+		echo "not found."
+		ac_use_openssl="false"
+	fi
+fi
+
+if test "$ac_use_openssl" = "false"; then
+	AC_MSG_WARN(compiling without OpenSSL)
+fi	
+
+AC_ARG_WITH(record,[--with-record	Compile with record module (EKR Use Only)],
+	DEFINES="-DENABLE_RECORD $DEFINES"
+	RECORD_MOD="record"
+)
+
+dnl Replace `main' with a function in -lpcap:
+AC_CHECK_LIB(pcap, pcap_open)
+
+
+dnl Checks for header files.
+AC_CHECK_HEADERS(sys/time.h)
+AC_HEADER_STDC
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_HEADER_TIME
+
+dnl Find a 4-byte integer size
+AC_CHECK_SIZEOF(unsigned short)
+AC_CHECK_SIZEOF(unsigned int)
+AC_CHECK_SIZEOF(unsigned long)
+AC_CHECK_SIZEOF(unsigned long long)
+
+dnl Checks for library functions.
+AC_FUNC_MEMCMP
+AC_TYPE_SIGNAL
+AC_FUNC_VPRINTF
+AC_CHECK_FUNCS(strdup)
+
+
+AC_SUBST(RECORD_MOD)
+AC_SUBST(INCLUDES)
+AC_SUBST(DEFINES)
+AC_OUTPUT(Makefile)

@@ -1,0 +1,526 @@
+
+
+Terminals which are not used:
+
+   DOT_DOT_
+   STRUCT_
+   OPAQUE_
+   ENUM_
+   DIGITALLY_SIGNED_
+   COMMENT_START_
+   COMMENT_END_
+   CASE_
+
+
+
+Grammar
+rule 1    module -> typelist
+rule 2    typelist ->		/* empty */
+rule 3    typelist -> definition typelist
+rule 4    definition -> selecttype
+rule 5    definition -> constant_type
+rule 6    selecttype -> SELECT_ '{' selecterateds ',' selectmax '}' NAME_ ';'
+rule 7    selecterateds -> selecterateds ',' selecterated
+rule 8    selecterateds -> selecterated
+rule 9    selectmax -> '(' NUM_ ')'
+rule 10   selecterated -> selecterated_no_code
+rule 11   selecterated -> selecterated_code
+rule 12   selecterated_code -> NAME_ '(' NUM_ ')' CODE_
+rule 13   selecterated_no_code -> NAME_ '(' NUM_ ')'
+rule 14   constant_type -> CONSTANT_ '{' constants '}' NAME_ ';'
+rule 15   constants -> constants constant
+rule 16   constants -> constant
+rule 17   constant -> NAME_ NAME_ '=' '{' constval '}' ';'
+rule 18   constval -> NUM_ ',' NUM_ ',' NUM_
+rule 19   constval -> NUM_ ',' NUM_
+rule 20   constval -> NUM_
+
+Terminals, with rules where they appear
+
+$ (-1)
+'(' (40) 9 12 13
+')' (41) 9 12 13
+',' (44) 6 7 18 19
+';' (59) 6 14 17
+'=' (61) 17
+'{' (123) 6 14 17
+'}' (125) 6 14 17
+error (256)
+NAME_ (257) 6 12 13 14 17
+NUM_ (258) 9 12 13 18 19 20
+DOT_DOT_ (259)
+STRUCT_ (260)
+SELECT_ (261) 6
+OPAQUE_ (262)
+ENUM_ (263)
+DIGITALLY_SIGNED_ (264)
+COMMENT_START_ (265)
+CODE_ (266) 12
+COMMENT_END_ (267)
+CASE_ (268)
+CONSTANT_ (269) 14
+
+Nonterminals, with rules where they appear
+
+module (23)
+    on left: 1
+typelist (24)
+    on left: 2 3, on right: 1 3
+definition (25)
+    on left: 4 5, on right: 3
+selecttype (26)
+    on left: 6, on right: 4
+selecterateds (27)
+    on left: 7 8, on right: 6 7
+selectmax (28)
+    on left: 9, on right: 6
+selecterated (29)
+    on left: 10 11, on right: 7 8
+selecterated_code (30)
+    on left: 12, on right: 11
+selecterated_no_code (31)
+    on left: 13, on right: 10
+constant_type (32)
+    on left: 14, on right: 5
+constants (33)
+    on left: 15 16, on right: 14 15
+constant (34)
+    on left: 17, on right: 15 16
+constval (35)
+    on left: 18 19 20, on right: 17
+
+
+state 0
+
+    SELECT_	shift, and go to state 1
+    CONSTANT_	shift, and go to state 2
+
+    $default	reduce using rule 2 (typelist)
+
+    module	go to state 46
+    typelist	go to state 3
+    definition	go to state 4
+    selecttype	go to state 5
+    constant_type	go to state 6
+
+
+
+state 1
+
+    selecttype  ->  SELECT_ . '{' selecterateds ',' selectmax '}' NAME_ ';'   (rule 6)
+
+    '{' 	shift, and go to state 7
+
+
+
+state 2
+
+    constant_type  ->  CONSTANT_ . '{' constants '}' NAME_ ';'   (rule 14)
+
+    '{' 	shift, and go to state 8
+
+
+
+state 3
+
+    module  ->  typelist .   (rule 1)
+
+    $default	reduce using rule 1 (module)
+
+
+
+state 4
+
+    typelist  ->  definition . typelist   (rule 3)
+
+    SELECT_	shift, and go to state 1
+    CONSTANT_	shift, and go to state 2
+
+    $default	reduce using rule 2 (typelist)
+
+    typelist	go to state 9
+    definition	go to state 4
+    selecttype	go to state 5
+    constant_type	go to state 6
+
+
+
+state 5
+
+    definition  ->  selecttype .   (rule 4)
+
+    $default	reduce using rule 4 (definition)
+
+
+
+state 6
+
+    definition  ->  constant_type .   (rule 5)
+
+    $default	reduce using rule 5 (definition)
+
+
+
+state 7
+
+    selecttype  ->  SELECT_ '{' . selecterateds ',' selectmax '}' NAME_ ';'   (rule 6)
+
+    NAME_	shift, and go to state 10
+
+    selecterateds	go to state 11
+    selecterated	go to state 12
+    selecterated_code	go to state 13
+    selecterated_no_code	go to state 14
+
+
+
+state 8
+
+    constant_type  ->  CONSTANT_ '{' . constants '}' NAME_ ';'   (rule 14)
+
+    NAME_	shift, and go to state 15
+
+    constants	go to state 16
+    constant	go to state 17
+
+
+
+state 9
+
+    typelist  ->  definition typelist .   (rule 3)
+
+    $default	reduce using rule 3 (typelist)
+
+
+
+state 10
+
+    selecterated_code  ->  NAME_ . '(' NUM_ ')' CODE_   (rule 12)
+    selecterated_no_code  ->  NAME_ . '(' NUM_ ')'   (rule 13)
+
+    '(' 	shift, and go to state 18
+
+
+
+state 11
+
+    selecttype  ->  SELECT_ '{' selecterateds . ',' selectmax '}' NAME_ ';'   (rule 6)
+    selecterateds  ->  selecterateds . ',' selecterated   (rule 7)
+
+    ',' 	shift, and go to state 19
+
+
+
+state 12
+
+    selecterateds  ->  selecterated .   (rule 8)
+
+    $default	reduce using rule 8 (selecterateds)
+
+
+
+state 13
+
+    selecterated  ->  selecterated_code .   (rule 11)
+
+    $default	reduce using rule 11 (selecterated)
+
+
+
+state 14
+
+    selecterated  ->  selecterated_no_code .   (rule 10)
+
+    $default	reduce using rule 10 (selecterated)
+
+
+
+state 15
+
+    constant  ->  NAME_ . NAME_ '=' '{' constval '}' ';'   (rule 17)
+
+    NAME_	shift, and go to state 20
+
+
+
+state 16
+
+    constant_type  ->  CONSTANT_ '{' constants . '}' NAME_ ';'   (rule 14)
+    constants  ->  constants . constant   (rule 15)
+
+    NAME_	shift, and go to state 15
+    '}' 	shift, and go to state 21
+
+    constant	go to state 22
+
+
+
+state 17
+
+    constants  ->  constant .   (rule 16)
+
+    $default	reduce using rule 16 (constants)
+
+
+
+state 18
+
+    selecterated_code  ->  NAME_ '(' . NUM_ ')' CODE_   (rule 12)
+    selecterated_no_code  ->  NAME_ '(' . NUM_ ')'   (rule 13)
+
+    NUM_	shift, and go to state 23
+
+
+
+state 19
+
+    selecttype  ->  SELECT_ '{' selecterateds ',' . selectmax '}' NAME_ ';'   (rule 6)
+    selecterateds  ->  selecterateds ',' . selecterated   (rule 7)
+
+    NAME_	shift, and go to state 10
+    '(' 	shift, and go to state 24
+
+    selectmax	go to state 25
+    selecterated	go to state 26
+    selecterated_code	go to state 13
+    selecterated_no_code	go to state 14
+
+
+
+state 20
+
+    constant  ->  NAME_ NAME_ . '=' '{' constval '}' ';'   (rule 17)
+
+    '=' 	shift, and go to state 27
+
+
+
+state 21
+
+    constant_type  ->  CONSTANT_ '{' constants '}' . NAME_ ';'   (rule 14)
+
+    NAME_	shift, and go to state 28
+
+
+
+state 22
+
+    constants  ->  constants constant .   (rule 15)
+
+    $default	reduce using rule 15 (constants)
+
+
+
+state 23
+
+    selecterated_code  ->  NAME_ '(' NUM_ . ')' CODE_   (rule 12)
+    selecterated_no_code  ->  NAME_ '(' NUM_ . ')'   (rule 13)
+
+    ')' 	shift, and go to state 29
+
+
+
+state 24
+
+    selectmax  ->  '(' . NUM_ ')'   (rule 9)
+
+    NUM_	shift, and go to state 30
+
+
+
+state 25
+
+    selecttype  ->  SELECT_ '{' selecterateds ',' selectmax . '}' NAME_ ';'   (rule 6)
+
+    '}' 	shift, and go to state 31
+
+
+
+state 26
+
+    selecterateds  ->  selecterateds ',' selecterated .   (rule 7)
+
+    $default	reduce using rule 7 (selecterateds)
+
+
+
+state 27
+
+    constant  ->  NAME_ NAME_ '=' . '{' constval '}' ';'   (rule 17)
+
+    '{' 	shift, and go to state 32
+
+
+
+state 28
+
+    constant_type  ->  CONSTANT_ '{' constants '}' NAME_ . ';'   (rule 14)
+
+    ';' 	shift, and go to state 33
+
+
+
+state 29
+
+    selecterated_code  ->  NAME_ '(' NUM_ ')' . CODE_   (rule 12)
+    selecterated_no_code  ->  NAME_ '(' NUM_ ')' .   (rule 13)
+
+    CODE_	shift, and go to state 34
+
+    $default	reduce using rule 13 (selecterated_no_code)
+
+
+
+state 30
+
+    selectmax  ->  '(' NUM_ . ')'   (rule 9)
+
+    ')' 	shift, and go to state 35
+
+
+
+state 31
+
+    selecttype  ->  SELECT_ '{' selecterateds ',' selectmax '}' . NAME_ ';'   (rule 6)
+
+    NAME_	shift, and go to state 36
+
+
+
+state 32
+
+    constant  ->  NAME_ NAME_ '=' '{' . constval '}' ';'   (rule 17)
+
+    NUM_	shift, and go to state 37
+
+    constval	go to state 38
+
+
+
+state 33
+
+    constant_type  ->  CONSTANT_ '{' constants '}' NAME_ ';' .   (rule 14)
+
+    $default	reduce using rule 14 (constant_type)
+
+
+
+state 34
+
+    selecterated_code  ->  NAME_ '(' NUM_ ')' CODE_ .   (rule 12)
+
+    $default	reduce using rule 12 (selecterated_code)
+
+
+
+state 35
+
+    selectmax  ->  '(' NUM_ ')' .   (rule 9)
+
+    $default	reduce using rule 9 (selectmax)
+
+
+
+state 36
+
+    selecttype  ->  SELECT_ '{' selecterateds ',' selectmax '}' NAME_ . ';'   (rule 6)
+
+    ';' 	shift, and go to state 39
+
+
+
+state 37
+
+    constval  ->  NUM_ . ',' NUM_ ',' NUM_   (rule 18)
+    constval  ->  NUM_ . ',' NUM_   (rule 19)
+    constval  ->  NUM_ .   (rule 20)
+
+    ',' 	shift, and go to state 40
+
+    $default	reduce using rule 20 (constval)
+
+
+
+state 38
+
+    constant  ->  NAME_ NAME_ '=' '{' constval . '}' ';'   (rule 17)
+
+    '}' 	shift, and go to state 41
+
+
+
+state 39
+
+    selecttype  ->  SELECT_ '{' selecterateds ',' selectmax '}' NAME_ ';' .   (rule 6)
+
+    $default	reduce using rule 6 (selecttype)
+
+
+
+state 40
+
+    constval  ->  NUM_ ',' . NUM_ ',' NUM_   (rule 18)
+    constval  ->  NUM_ ',' . NUM_   (rule 19)
+
+    NUM_	shift, and go to state 42
+
+
+
+state 41
+
+    constant  ->  NAME_ NAME_ '=' '{' constval '}' . ';'   (rule 17)
+
+    ';' 	shift, and go to state 43
+
+
+
+state 42
+
+    constval  ->  NUM_ ',' NUM_ . ',' NUM_   (rule 18)
+    constval  ->  NUM_ ',' NUM_ .   (rule 19)
+
+    ',' 	shift, and go to state 44
+
+    $default	reduce using rule 19 (constval)
+
+
+
+state 43
+
+    constant  ->  NAME_ NAME_ '=' '{' constval '}' ';' .   (rule 17)
+
+    $default	reduce using rule 17 (constant)
+
+
+
+state 44
+
+    constval  ->  NUM_ ',' NUM_ ',' . NUM_   (rule 18)
+
+    NUM_	shift, and go to state 45
+
+
+
+state 45
+
+    constval  ->  NUM_ ',' NUM_ ',' NUM_ .   (rule 18)
+
+    $default	reduce using rule 18 (constval)
+
+
+
+state 46
+
+    $   	go to state 47
+
+
+
+state 47
+
+    $   	go to state 48
+
+
+
+state 48
+
+    $default	accept

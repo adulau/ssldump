@@ -1,0 +1,20 @@
+ssldump was written by Eric Rescorla <ekr@rtfm.com>
+
+The Windows port of ssldump was provided by Greg Stark.
+
+The following people have provided bug fixes, bug reports, or suggestions.
+Adam Cain
+Pavel Curtis
+Chris Jepeway
+Alexander Fetke
+Jeffrey Hafey
+Lutz Jaenicke
+Dave Jagoda
+Norbert Klasen
+Richard Levitte
+Hugh Mandeville
+Eric Murray
+Henrik Nordstrom
+
+If you think you should be on this list, send me mail at <ekr@rtfm.com>.
+
