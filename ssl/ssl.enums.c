@@ -500,7 +500,7 @@ decoder HandshakeType_decoder[]={
 		"Finished",
 		decode_HandshakeType_Finished
 	},
-{0}
+{-1}
 };
 
 decoder cipher_suite_decoder[]={
@@ -778,7 +778,7 @@ decoder AlertLevel_decoder[]={
 		"fatal",
 		decode_AlertLevel_fatal
 	},
-{0}
+{-1}
 };
 
 static int decode_AlertDescription_close_notify(ssl,dir,seg,data)
@@ -1081,7 +1081,7 @@ decoder AlertDescription_decoder[]={
 		"no_renegotiation",
 		decode_AlertDescription_no_renegotiation
 	},
-{0}
+{-1}
 };
 
 decoder compression_method_decoder[]={
@@ -1145,6 +1145,6 @@ decoder client_certificate_type_decoder[]={
 		"dss_fixed_dh",
 		decode_client_certificate_type_dss_fixed_dh
 	},
-{0}
+{-1}
 };
 

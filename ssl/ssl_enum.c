@@ -260,7 +260,7 @@ decoder HandshakeType_decoder[]={
 		"finished",
 		decode_HandshakeType_finished
 	},
-{0}
+{-1}
 };
 
 decoder cipher_suite_decoder[]={
