@@ -385,6 +385,30 @@ int main(argc,argv)
     if(filter){
       struct bpf_program fp;
 
+      /* (F5 patch)
+       * reformat filter to include traffic with or without the 802.1q
+       * vlan header. for example, "port 80" becomes:
+       * "( port 80 ) or ( vlan and port 80 )".
+       * note that if the filter includes the literals vlan, tagged, or
+       * untagged, then it is assumed that the user knows what she is
+       * doing, and the filter is not reformatted.
+       */
+      if ((pcap_datalink(p) == DLT_EN10MB) &&
+          (filter != NULL) &&
+          (strstr(filter,"vlan") == NULL)) {
+          char *tmp_filter;
+          char *fmt = "( (not ether proto 0x8100) and (%s) ) or ( vlan and (%s) )";
+            
+          tmp_filter = (char *)malloc((strlen(filter) * 2) + strlen(fmt) + 1);
+          if (tmp_filter == NULL) {
+              fprintf(stderr,"PCAP: malloc failed\n");
+              err_exit("Aborting",-1);
+          }
+            
+          sprintf(tmp_filter,fmt,filter,filter);
+          filter = tmp_filter;
+      }
+
       if(pcap_compile(p,&fp,filter,0,netmask)<0)
         verr_exit("PCAP: %s\n",pcap_geterr(p));
 
