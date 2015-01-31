@@ -49,7 +49,7 @@ static char *RCSSTRING="$Id: pcap-snoop.c,v 1.14 2002/09/09 21:02:58 ekr Exp $";
 
 #include <pcap.h>
 #include <unistd.h>
-#include <net/bpf.h>
+#include <pcap-bpf.h>
 #ifndef _WIN32
 #include <sys/param.h>
 #endif
