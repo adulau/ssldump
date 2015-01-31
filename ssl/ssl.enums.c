@@ -151,7 +151,7 @@ decoder ContentType_decoder[]={
 		"application_data",
 		decode_ContentType_application_data
 	},
-{0}
+{-1}
 };
 
 static int decode_HandshakeType_HelloRequest(ssl,dir,seg,data)
@@ -163,6 +163,7 @@ static int decode_HandshakeType_HelloRequest(ssl,dir,seg,data)
 
 
   printf("\n");
+  return(0);
 
   }
 static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
@@ -368,6 +369,7 @@ static int decode_HandshakeType_ServerHelloDone(ssl,dir,seg,data)
 
 
   printf("\n");
+  return(0);
 
   }
 static int decode_HandshakeType_CertificateVerify(ssl,dir,seg,data)
@@ -609,6 +611,54 @@ decoder cipher_suite_decoder[]={
 	{
 		27,
 		"TLS_DH_anon_WITH_3DES_EDE_CBC_SHA",
+		0	},
+	{
+		47,
+		"TLS_RSA_WITH_AES_128_CBC_SHA",
+		0	},
+	{
+		48,
+		"TLS_DH_DSS_WITH_AES_128_CBC_SHA",
+		0	},
+	{
+		49,
+		"TLS_DH_RSA_WITH_AES_128_CBC_SHA",
+		0	},
+	{
+		50,
+		"TLS_DHE_DSS_WITH_AES_128_CBC_SHA",
+		0	},
+	{
+		51,
+		"TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
+		0	},
+	{
+		52,
+		"TLS_DH_anon_WITH_AES_128_CBC_SHA",
+		0	},
+	{
+		53,
+		"TLS_RSA_WITH_AES_256_CBC_SHA",
+		0	},
+	{
+		54,
+		"TLS_DH_DSS_WITH_AES_256_CBC_SHA",
+		0	},
+	{
+		55,
+		"TLS_DH_RSA_WITH_AES_256_CBC_SHA",
+		0	},
+	{
+		56,
+		"TLS_DHE_DSS_WITH_AES_256_CBC_SHA",
+		0	},
+	{
+		57,
+		"TLS_DHE_RSA_WITH_AES_256_CBC_SHA",
+		0	},
+	{
+		58,
+		"TLS_DH_anon_WITH_AES_256_CBC_SHA",
 		0	},
 	{
 		96,

@@ -78,7 +78,9 @@ static char *ciphers[]={
      "DES3",
      "RC4",
      "RC2",
-     "IDEA"
+     "IDEA",
+     "AES128",
+     "AES256"
 };
 
 
@@ -101,6 +103,11 @@ int ssl_create_rec_decoder(dp,cs,mk,sk,iv)
     /* Find the SSLeay cipher */
     if(cs->enc!=ENC_NULL){
       ciph=(EVP_CIPHER *)EVP_get_cipherbyname(ciphers[cs->enc-0x30]);
+      if(!ciph)
+        ABORT(R_INTERNAL);
+    }
+    else {
+      ciph=EVP_enc_null();
     }
 
     if(!(dec=(ssl_rec_decoder *)calloc(sizeof(ssl_rec_decoder),1)))
@@ -169,7 +176,7 @@ int ssl_decode_rec_data(ssl,d,ct,version,in,inl,out,outl)
     *outl=inl;
     
     /* Now strip off the padding*/
-    if(d->cs->block!=1){
+    if(d->cs->block>1){
       pad=out[inl-1];
       *outl-=(pad+1);
     }

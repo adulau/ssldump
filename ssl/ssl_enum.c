@@ -70,7 +70,7 @@ decoder ContentType_decoder[]={
 		"application_data",
 		decode_ContentType_application_data
 	},
-{0}
+{-1}
 };
 
 static int decode_HandshakeType_hello_request(ssl,dir,seg,data)
