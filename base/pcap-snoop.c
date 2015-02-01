@@ -366,8 +366,7 @@ int main(argc,argv)
       }
 
       if (pcap_lookupnet(interface_name, &localnet, &netmask, errbuf) < 0)
-        verr_exit("PCAP: %s\n",errbuf);
-      
+        fprintf(stderr,"PCAP: %s\n", errbuf);
     }
     else{
       if(!(p=pcap_open_offline(file,errbuf))){
