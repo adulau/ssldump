@@ -184,6 +184,7 @@ int packet_destroy(p)
       return(0);
 
     FREE(p->base);
+    FREE(p);
     return(0);
   }
     
