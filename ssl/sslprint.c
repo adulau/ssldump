@@ -209,7 +209,7 @@ int ssl_decode_switch(ssl,dtable,value,dir,seg,data)
   segment *seg;
   Data *data;
   {
-    while(dtable && dtable->type!=-1){
+    while(dtable && dtable->type!=-1  && dtable->name!=NULL){
       if(dtable->type == value){
         INDENT_INCR;
         explain(ssl,"%s",dtable->name);
