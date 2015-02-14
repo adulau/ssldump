@@ -589,20 +589,20 @@ static int tls_P_hash(ssl,secret,seed,md,out)
       HMAC_Init(&hm,secret->data,secret->len,md);
       HMAC_Update(&hm,A,A_l);
       HMAC_Final(&hm,_A,&A_l);
+      HMAC_cleanup(&hm);
       A=_A;
 
       HMAC_Init(&hm,secret->data,secret->len,md);
       HMAC_Update(&hm,A,A_l);
       HMAC_Update(&hm,seed->data,seed->len);
       HMAC_Final(&hm,tmp,&tmp_l);
+      HMAC_cleanup(&hm);
 
       tocpy=MIN(left,tmp_l);
       memcpy(ptr,tmp,tocpy);
       ptr+=tocpy;
       left-=tocpy;
     }
-
-    HMAC_cleanup(&hm);
 
     CRDUMPD("P_hash out",out);
     
