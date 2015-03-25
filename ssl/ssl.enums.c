@@ -174,7 +174,7 @@ static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
   {
 
 
-    UINT4 vj,vn,cs,cslen,complen,comp;
+    UINT4 vj,vn,cs,cslen,complen,comp,odd;
     Data session_id,random;
     int r;
 
@@ -204,6 +204,12 @@ static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
 	SSL_DECODE_UINT16(ssl,"cipher Suites len",0,data,&cslen);
         explain(ssl,"cipher suites\n");
     
+        odd = cslen % 2;
+        if(odd) {
+            printf("Wrong cipher suites length, fixing ...\n");
+            cslen -= odd;
+        }
+
 	    for(;cslen;cslen-=2){
 	      ssl_decode_enum(ssl,0,2,cipher_suite_decoder,
 	        0,data,&cs);
