@@ -158,6 +158,7 @@ int tcp_destroy_conn(conn)
     free_tcp_segment_queue(conn->i2r.oo_queue);
     free_tcp_segment_queue(conn->r2i.oo_queue);
     zero_conn(conn);
+    free(conn);
 
     return(0);
   }
