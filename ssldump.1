@@ -181,6 +181,12 @@ Print the TCP headers.
 .B \-v
 Display version and copyright information.
 .TP
+.B \-t
+Specify the TTL for inactive connections referenced in the connection pool (in seconds, default: 100).
+.TP
+.B \-F
+Specify the number of packets after which a connection pool cleaning is performed (in packets, default: 100).
+.TP
 .B \-x
 Print each record in hex, as well as decoding it.
 .TP

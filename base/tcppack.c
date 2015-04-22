@@ -107,7 +107,9 @@ int process_tcp_packet(handler,ctx,p)
     }
 
     stream=direction==DIR_R2I?&conn->r2i:&conn->i2r;
-    
+
+    memcpy(&conn->last_seen_time,&p->ts,sizeof(struct timeval));
+
     switch(conn->state){
       case TCP_STATE_SYN1:
 	if(direction != DIR_R2I)
@@ -182,6 +184,7 @@ static int new_connection(handler,ctx,p,connp)
 
     conn->state=TCP_STATE_SYN1;
     memcpy(&conn->start_time,&p->ts,sizeof(struct timeval));
+    memcpy(&conn->last_seen_time,&p->ts,sizeof(struct timeval));
     if(r=create_proto_handler(handler,ctx,&conn->analyzer,conn,&p->ts))
       ABORT(r);
     

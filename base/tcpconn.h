@@ -83,6 +83,7 @@ typedef struct tcp_conn_ {
      stream_data r2i;   /*The stream from responder to initiator*/
      
      struct timeval start_time;
+     struct timeval last_seen_time;
      proto_handler *analyzer;    /*The analyzer to call with new data*/
      struct conn_struct_ *backptr;
 } tcp_conn;
