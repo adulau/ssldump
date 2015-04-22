@@ -59,6 +59,9 @@ int conn_number=1;
 
 static conn_struct *first_conn=0;
 
+extern struct timeval last_packet_seen_time;
+extern int conn_ttl;
+
 static int zero_conn PROTO_LIST((tcp_conn *conn));
 
 static int zero_conn(conn)
@@ -162,7 +165,34 @@ int tcp_destroy_conn(conn)
 
     return(0);
   }
-    
+
+int clean_old_conn() {
+    conn_struct *conn;
+    tcp_conn *tcpconn;
+    struct timeval dt;
+    int i = 0;
+
+    for(conn=first_conn;conn;conn=conn->next) {
+        i++;
+        tcpconn = &conn->conn;
+        timestamp_diff(&last_packet_seen_time, &tcpconn->last_seen_time, &dt);
+        if(dt.tv_sec > conn_ttl) {
+            tcp_destroy_conn(&(first_conn->conn));
+        }
+    }
+    return i;
+}
+
+int destroy_all_conn() {
+    conn_struct *conn;
+    int i = 0,r;
+    while(first_conn) {
+        i++;
+        tcp_destroy_conn(&first_conn->conn);
+    }
+    return i;
+}
+
 int free_tcp_segment_queue(seg)
   segment *seg;
   {
