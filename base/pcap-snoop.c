@@ -91,8 +91,8 @@ int packet_cnt = 0;  // Packet counter used for connection pool cleaning
 int conn_freq = 100; // Number of packets after which a connection pool
                      // cleaning is performed
 int conn_ttl = 100;  // TTL of inactive connections in connection pool
-struct timeval last_packet_seen_time; // Timestamp of the last packet of the
-                                      // last block of conn_freq packets seen
+struct timeval last_packet_seen_time = // Timestamp of the last packet of the
+    (struct timeval) {0};              // last block of conn_freq packets seen
 
 int err_exit(str,num)
   char *str;
