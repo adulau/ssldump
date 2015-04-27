@@ -172,6 +172,9 @@ int clean_old_conn() {
     struct timeval dt;
     int i = 0;
 
+    if(!last_packet_seen_time.tv_sec)
+        return 0; // Still processing first block of packets
+
     for(conn=first_conn;conn;conn=conn->next) {
         i++;
         tcpconn = &conn->conn;
