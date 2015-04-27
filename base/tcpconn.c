@@ -176,8 +176,10 @@ int clean_old_conn() {
     if(!last_packet_seen_time.tv_sec)
         return 0; // Still processing first block of packets
 
-    for(conn=first_conn;conn;conn=conn->next) {
+    conn = first_conn;
+    while(conn) {
         tcpconn = &conn->conn;
+        conn=conn->next;
         timestamp_diff(&last_packet_seen_time, &tcpconn->last_seen_time, &dt);
         if(dt.tv_sec > conn_ttl) {
             i++;
