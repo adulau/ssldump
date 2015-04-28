@@ -161,6 +161,7 @@ int tcp_destroy_conn(conn)
     free_tcp_segment_queue(conn->i2r.oo_queue);
     free_tcp_segment_queue(conn->r2i.oo_queue);
     zero_conn(conn);
+    free(conn->backptr);
     free(conn);
 
     return(0);
@@ -175,12 +176,14 @@ int clean_old_conn() {
     if(!last_packet_seen_time.tv_sec)
         return 0; // Still processing first block of packets
 
-    for(conn=first_conn;conn;conn=conn->next) {
-        i++;
+    conn = first_conn;
+    while(conn) {
         tcpconn = &conn->conn;
+        conn=conn->next;
         timestamp_diff(&last_packet_seen_time, &tcpconn->last_seen_time, &dt);
         if(dt.tv_sec > conn_ttl) {
-            tcp_destroy_conn(&(first_conn->conn));
+            i++;
+            tcp_destroy_conn(tcpconn);
         }
     }
     return i;
