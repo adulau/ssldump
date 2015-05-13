@@ -70,7 +70,7 @@ struct ssl_rec_decoder_ {
 
 char *digests[]={
      "MD5",
-     "SHA1"
+     "SHA1",
      "SHA224",
      "SHA256",
      "SHA384",
