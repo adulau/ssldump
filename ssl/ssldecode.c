@@ -185,7 +185,7 @@ int ssl_decoder_create(dp,ctx)
     ssl_decoder *d=0;
 
 #ifdef OPENSSL
-    if(!(d=(ssl_decoder *)calloc(sizeof(ssl_decoder),1)))
+    if(!(d=(ssl_decoder *)calloc(1,sizeof(ssl_decoder))))
       ABORT(R_NO_MEMORY);
     d->ctx=ctx;
     

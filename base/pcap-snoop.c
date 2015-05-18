@@ -427,6 +427,7 @@ int main(argc,argv)
           }
             
           sprintf(tmp_filter,fmt,filter,filter);
+          free(filter);
           filter = tmp_filter;
       }
 
@@ -451,6 +452,22 @@ int main(argc,argv)
       printf("\n.ps\n.fi\n");
 
     printf("Cleaning %d remaining connection(s) from connection pool\n", destroy_all_conn());
+
+    pcap_close(p);
+
+    free(n);
+
+    if(filter)
+        free(filter);
+    if(file)
+        free(file);
+    if(interface_name)
+        free(interface_name);
+    if(SSL_keyfile)
+        free(SSL_keyfile);
+    if(SSL_password)
+        free(SSL_password);
+
     exit(0);
   }
       

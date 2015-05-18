@@ -222,7 +222,7 @@ int copy_tcp_segment_queue(out,in)
     segment *base=0;
     
     for(;in;in=in->next){
-      if(!(*out=(segment *)calloc(sizeof(segment),1)))
+      if(!(*out=(segment *)calloc(1,sizeof(segment))))
 	ABORT(R_NO_MEMORY);
       if(!base) base=*out;
 

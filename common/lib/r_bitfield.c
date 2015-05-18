@@ -107,7 +107,4 @@ int r_bitfield_isset(set,bit)
       return(0);
 
     return(set->data[word]&(1<<bbit));
-
-    _status=0;
-    return(_status);
   }

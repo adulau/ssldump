@@ -298,7 +298,7 @@ int r_assoc_copy(newp,old)
     r_assoc *new;
     
     if(!(new=(r_assoc *)calloc(sizeof(r_assoc),1)))
-      ABORT(r);
+      ABORT(R_NO_MEMORY);
     new->size=old->size;
     new->bits=old->bits;
     

@@ -153,7 +153,7 @@ int packet_copy(in,out)
     
     packet *p=0;
     
-    if(!(p=(packet *)calloc(sizeof(packet),1)))
+    if(!(p=(packet *)calloc(1,sizeof(packet))))
       ABORT(R_NO_MEMORY);
 
     memcpy(&p->ts,&in->ts,sizeof(struct timeval));

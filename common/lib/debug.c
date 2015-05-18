@@ -59,6 +59,7 @@ int debug(int class,char *format,...)
     va_start(ap,format);
     vfprintf(stderr,format,ap);
     fprintf(stderr,"\n");
+    va_end(ap);
     return(0);
   }
 

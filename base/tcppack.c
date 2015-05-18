@@ -283,7 +283,7 @@ static int process_data_segment(conn,handler,p,stream,direction)
 	  break;
       }
 
-      if(!(nseg=(segment *)calloc(sizeof(segment),1)))
+      if(!(nseg=(segment *)calloc(1,sizeof(segment))))
 	ABORT(R_NO_MEMORY);
       if(r=packet_copy(p,&nseg->p))
 	ABORT(r);
