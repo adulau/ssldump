@@ -119,7 +119,7 @@ int ssl_create_rec_decoder(dp,cs,mk,sk,iv)
       ciph=EVP_enc_null();
     }
 
-    if(!(dec=(ssl_rec_decoder *)calloc(sizeof(ssl_rec_decoder),1)))
+    if(!(dec=(ssl_rec_decoder *)calloc(1,sizeof(ssl_rec_decoder))))
       ABORT(R_NO_MEMORY);
 
     dec->cs=cs;

@@ -241,7 +241,7 @@ static int create_ssl_analyzer(handle,ctx,conn,objp,i_addr,i_port,r_addr,r_port,
     int r,_status;
     ssl_obj *obj=0;
     
-    if(!(obj=(ssl_obj *)calloc(sizeof(ssl_obj),1)))
+    if(!(obj=(ssl_obj *)calloc(1,sizeof(ssl_obj))))
       ABORT(R_NO_MEMORY);
     
     obj->ssl_ctx=(ssl_decode_ctx *)ctx;
@@ -314,7 +314,7 @@ static int create_r_queue(qp)
     r_queue *q=0;
     int _status;
 
-    if(!(q=(r_queue *)calloc(sizeof(r_queue),1)))
+    if(!(q=(r_queue *)calloc(1,sizeof(r_queue))))
       ABORT(R_NO_MEMORY);
 
     if(!(q->data=(UCHAR *)malloc(SSL_HEADER_SIZE)))

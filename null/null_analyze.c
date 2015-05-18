@@ -75,7 +75,7 @@ static int create_null_analyzer(handle,ctx,conn,objp,i_addr,i_port,r_addr,r_port
     null_analyzer *obj=0;
     static int ctr;
     
-    if(!(obj=(null_analyzer *)calloc(sizeof(null_analyzer),1)))
+    if(!(obj=(null_analyzer *)calloc(1,sizeof(null_analyzer))))
       ERETURN(R_NO_MEMORY);
 
     obj->num=ctr++;
