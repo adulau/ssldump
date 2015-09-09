@@ -68,7 +68,7 @@ static char *RCSSTRING="$Id: ssldecode.c,v 1.9 2002/08/17 01:33:17 ekr Exp $";
 
 static char *ssl_password;
 
-extern char *digests;
+extern char *digests[];
 extern UINT4 SSL_print_flags;
 
 struct ssl_decode_ctx_ {
