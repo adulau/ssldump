@@ -3509,7 +3509,7 @@ esac
 RECORD_MOD="dummy"
 
 ac_pcap_inc_dir="/usr/include /usr/include/pcap /usr/local/include"
-ac_pcap_lib_dir="/usr/local/lib64 /usr/local/lib /usr/lib64 /usr/lib"
+ac_pcap_lib_dir="/usr/local/lib64 /usr/local/lib /usr/lib64 /usr/lib /usr/lib/x86_64-linux-gnu /usr/lib/i386-linux-gnu"
 
 
 # Check whether --with-pcap was given.
@@ -3611,7 +3611,7 @@ else
 fi
 
 ac_use_openssl="true"
-ac_openssl_lib_dir="/usr/lib /usr/local /usr/local/ssl /usr/local/ssl/lib /usr/pkg"
+ac_openssl_lib_dir="/usr/lib /usr/local /usr/local/ssl /usr/local/ssl/lib /usr/pkg /usr/lib/x86_64-linux-gnu /usr/lib/i386-linux-gnu"
 ac_openssl_inc_dir="/usr/include /usr/local /usr/local/ssl /usr/pkg /usr/local/ssl/include"
 
 
