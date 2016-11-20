@@ -21,7 +21,7 @@ other too (but this is just a collateral damage).
 # Where do you use ssldump?
 
 I used it for a relatively small project called Passive SSL. For more information, [Passive SSL Passive Detection and Reconnaissance Techniques, to Find, Track, and Attribute Vulnerable ”Devices”](https://www.first.org/resources/papers/conf2015/first_2015_-_leverett_-_dulaunoy_-_passive_detection_20150604.pdf).
-Additional back-end code available in the  [crl-monitor ](https://github.com/adulau/crl-monitor/tree/master/bin/x509).
+Additional back-end code available is in the [crl-monitor ](https://github.com/adulau/crl-monitor/tree/master/bin/x509) repository.
 
 ## Contributing
 
