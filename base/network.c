@@ -133,8 +133,12 @@ int network_process_packet(handler,timestamp,data,length)
 
     hlen=p.ip->ip_hl * 4;
     p.data += hlen;
-    p.len =ntohs(p.ip->ip_len)-hlen;
-    
+    p.len = ntohs(p.ip->ip_len);
+    if (p.len == 0) {
+        DBG((0,"ip length reported as 0, presumed to be because of 'TCP segmentation offload' (TSO)\n"));
+        p.len = p._len;
+    }
+    p.len -= hlen;
     
     switch(p.ip->ip_p){
       case IPPROTO_TCP:

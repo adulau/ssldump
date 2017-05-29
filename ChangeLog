@@ -1,3 +1,7 @@
+Mon 29 May 2017 03:49:00 PM +03 Alper <alper.akcan@gmail.com>
+	* Fix packet length calculation if IP length is
+	  0 due to TSO.
+
 Wed Aug 21 10:48:45 2002 EKR <ekr@rtfm.com>
         * Installed Greg Stark's new Win32 patches.
 
