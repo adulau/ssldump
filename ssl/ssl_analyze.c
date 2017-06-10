@@ -347,7 +347,9 @@ static int read_ssl_record(obj,q,seg,offset,lastp,offsetp)
 
     switch(q->state){
       case SSL_READ_NONE:
-	q->read_left=SSL_HEADER_SIZE;
+	if (SSL_HEADER_SIZE<q->len)
+	  ABORT(-1);
+	q->read_left=SSL_HEADER_SIZE-q->len;
 	if(r=read_data(q,seg,offset,&last,&offset))
 	  ABORT(r);
         
@@ -374,9 +376,9 @@ static int read_ssl_record(obj,q,seg,offset,lastp,offsetp)
 	  if(!(q->data=realloc(q->data,rec_len+5)))
 	    ABORT(R_NO_MEMORY);
 	  q->_allocated=rec_len+SSL_HEADER_SIZE;
+	  q->ptr=q->data+SSL_HEADER_SIZE;
 	};
 
-	q->ptr=q->data+SSL_HEADER_SIZE;
 	q->read_left=rec_len;
 	
       case SSL_READ_HEADER:
