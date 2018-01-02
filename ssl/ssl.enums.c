@@ -1084,6 +1084,26 @@ decoder cipher_suite_decoder[]={
 		"TLS_EMPTY_RENEGOTIATION_INFO_SCSV",
 		0	},
 	{
+		4865,
+		"TLS_AES_128_GCM_SHA256",
+		0	},
+	{
+		4866,
+		"TLS_AES_256_GCM_SHA384",
+		0	},
+	{
+		4867,
+		"TLS_CHACHA20_POLY1305_SHA256",
+		0	},
+	{
+		4868,
+		"TLS_AES_128_CCM_SHA256",
+		0	},
+	{
+		4869,
+		"TLS_AES_128_CCM_8_SHA256",
+		0	},
+	{
 		22016,
 		"TLS_FALLBACK_SCSV",
 		0	},
