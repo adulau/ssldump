@@ -648,6 +648,13 @@ ClientKeyExchange(16)
     CipherSuite TLS_ECDHE_ECDSA_WITH_AES_256_CCM             = { 0xC0,0xAD };
     CipherSuite TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8           = { 0xC0,0xAE };
     CipherSuite TLS_ECDHE_ECDSA_WITH_AES_256_CCM_8           = { 0xC0,0xAF };
+    CipherSuite TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256  = { 0xCC,0xA8 };
+    CipherSuite TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256= { 0xCC,0xA9 };
+    CipherSuite TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256    = { 0xCC,0xAA };
+    CipherSuite TLS_PSK_WITH_CHACHA20_POLY1305_SHA256        = { 0xCC,0xAB };
+    CipherSuite TLS_ECDHE_PSK_WITH_CHACHA20_POLY1305_SHA256  = { 0xCC,0xAC };
+    CipherSuite TLS_DHE_PSK_WITH_CHACHA20_POLY1305_SHA256    = { 0xCC,0xAD };
+    CipherSuite TLS_RSA_PSK_WITH_CHACHA20_POLY1305_SHA256    = { 0xCC,0xAE };
     // DRAFT-IETF-TLS-ECC
     CipherSuite TLS_ECDH_ECDSA_WITH_NULL_SHA                 = { 0x00,0x47 };
     CipherSuite TLS_ECDH_ECDSA_WITH_RC4_128_SHA              = { 0x00,0x48 };
