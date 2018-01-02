@@ -1084,6 +1084,10 @@ decoder cipher_suite_decoder[]={
 		"TLS_EMPTY_RENEGOTIATION_INFO_SCSV",
 		0	},
 	{
+		22016,
+		"TLS_FALLBACK_SCSV",
+		0	},
+	{
 		49153,
 		"TLS_ECDH_ECDSA_WITH_NULL_SHA",
 		0	},

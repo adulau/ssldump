@@ -655,6 +655,7 @@ ClientKeyExchange(16)
     CipherSuite TLS_ECDHE_PSK_WITH_CHACHA20_POLY1305_SHA256  = { 0xCC,0xAC };
     CipherSuite TLS_DHE_PSK_WITH_CHACHA20_POLY1305_SHA256    = { 0xCC,0xAD };
     CipherSuite TLS_RSA_PSK_WITH_CHACHA20_POLY1305_SHA256    = { 0xCC,0xAE };
+    CipherSuite TLS_FALLBACK_SCSV                            = { 0x56,0x00 };
     // DRAFT-IETF-TLS-ECC
     CipherSuite TLS_ECDH_ECDSA_WITH_NULL_SHA                 = { 0x00,0x47 };
     CipherSuite TLS_ECDH_ECDSA_WITH_RC4_128_SHA              = { 0x00,0x48 };
