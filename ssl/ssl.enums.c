@@ -6,6 +6,7 @@
 #include <openssl/ssl.h>
 #endif
 #include "ssl.enums.h"
+static int decode_extension(ssl,dir,seg,data);
 static int decode_ContentType_ChangeCipherSpec(ssl,dir,seg,data)
   ssl_obj *ssl;
   int dir;
@@ -182,7 +183,8 @@ static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
     extern decoder compression_method_decoder[];
     extern decoder extension_decoder[];
 	
-    printf("\n");			    
+    printf("\n");
+    ssl_update_session_hash(ssl,data);
     SSL_DECODE_UINT8(ssl,0,0,data,&vj);
     SSL_DECODE_UINT8(ssl,0,0,data,&vn);    
 
@@ -233,14 +235,15 @@ static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
     if (exlen) {
       explain(ssl , "extensions\n");
       while(data->len) {
-	SSL_DECODE_UINT16(ssl, "extension type", 0, data, &ex);
-	if (ssl_decode_switch(ssl,extension_decoder,ex,dir,seg,data) == R_NOT_FOUND) {
-	  P_(P_RH){
-	    explain(ssl, "Extension type: %s not yet implemented in ssldump", ex);
-	  }
-	  continue;
-	}
-	printf("\n");
+    	SSL_DECODE_UINT16(ssl, "extension type", 0, data, &ex);
+    	if (ssl_decode_switch(ssl,extension_decoder,ex,dir,seg,data) == R_NOT_FOUND) {
+	  decode_extension(ssl,dir,seg,data);
+    	  P_(P_RH){
+    	    explain(ssl, "Extension type: %s not yet implemented in ssldump", ex);
+    	  }
+    	  continue;
+    	}
+    	printf("\n");
       }
     }
     return(0);
@@ -253,11 +256,14 @@ static int decode_HandshakeType_ServerHello(ssl,dir,seg,data)
   Data *data;
   {
 
-
     int r;
     Data rnd,session_id;	
-    UINT4 vj,vn;
-    printf("\n");			        
+    UINT4 vj,vn,exlen,ex;
+
+    extern decoder extension_decoder[];
+
+    printf("\n");
+    ssl_update_session_hash(ssl,data);
     SSL_DECODE_UINT8(ssl,0,0,data,&vj);
     SSL_DECODE_UINT8(ssl,0,0,data,&vn);    
 
@@ -283,7 +289,25 @@ static int decode_HandshakeType_ServerHello(ssl,dir,seg,data)
 
     P_(P_HL) printf("\n");
     SSL_DECODE_ENUM(ssl,"compressionMethod",1,compression_method_decoder,P_HL,data,0);
-    P_(P_HL) printf("\n");					
+    P_(P_HL) printf("\n");
+
+    /* TODO: add code to print Extensions */
+    SSL_DECODE_UINT16(ssl,"extensions len",0,data,&exlen);
+    if (exlen) {
+      explain(ssl , "extensions\n");
+      while(data->len) {
+    	SSL_DECODE_UINT16(ssl, "extension type", 0, data, &ex);
+    	if (ssl_decode_switch(ssl,extension_decoder,ex,dir,seg,data) == R_NOT_FOUND) {
+	  decode_extension(ssl,dir,seg,data);
+    	  P_(P_RH){
+    	    explain(ssl, "Extension type: %s not yet implemented in ssldump", ex);
+    	  }
+    	  continue;
+    	}
+    	printf("\n");
+      }
+    }
+
     return(0);
 
   }
@@ -300,6 +324,7 @@ static int decode_HandshakeType_Certificate(ssl,dir,seg,data)
     int r;
   
     printf("\n");
+    ssl_update_session_hash(ssl,data);
     SSL_DECODE_UINT24(ssl,"certificates len",0,data,&len);
 
     while(len){
@@ -323,7 +348,7 @@ static int decode_HandshakeType_ServerKeyExchange(ssl,dir,seg,data)
    int r;
 
     printf("\n");			      
-
+    ssl_update_session_hash(ssl,data);
    if(ssl->cs){
      P_(P_ND){
 	explain(ssl,"params\n");
@@ -361,6 +386,7 @@ static int decode_HandshakeType_CertificateRequest(ssl,dir,seg,data)
     int r;
     
     printf("\n");
+    ssl_update_session_hash(ssl,data);
     SSL_DECODE_UINT8(ssl,"certificate_types len",0,data,&len);
     for(;len;len--){
       SSL_DECODE_ENUM(ssl,"certificate_types",1,
@@ -392,6 +418,7 @@ static int decode_HandshakeType_ServerHelloDone(ssl,dir,seg,data)
 
 
   printf("\n");
+  ssl_update_session_hash(ssl,data);
   return(0);
 
   }
@@ -405,6 +432,7 @@ static int decode_HandshakeType_CertificateVerify(ssl,dir,seg,data)
 
   int r;
   printf("\n");
+  ssl_update_session_hash(ssl,data);
   SSL_DECODE_OPAQUE_ARRAY(ssl,"Signature",-(1<<15-1),P_HL,data,0);
   return(0);
 
@@ -421,6 +449,7 @@ static int decode_HandshakeType_ClientKeyExchange(ssl,dir,seg,data)
    Data pms;
 	
     printf("\n");
+    ssl_update_session_hash(ssl,data);
    if(ssl->cs){
      switch(ssl->cs->kex){
 
@@ -2552,6 +2581,19 @@ static int decode_extension_next_protocol_negotiation(ssl,dir,seg,data)
     data->data+=l;
     return(0);
   }
+static int decode_extension(ssl,dir,seg,data)
+  ssl_obj *ssl;
+  int dir;
+  segment *seg;
+  Data *data;
+  {
+    int l,r;
+    SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
+    data->len-=l;
+    data->data+=l;
+    return(0);
+  }
+
 
 decoder extension_decoder[] = {
 	{

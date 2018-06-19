@@ -91,6 +91,7 @@ struct ssl_decoder_ {
      int ephemeral_rsa;
      Data *PMS;
      Data *MS;
+     Data *handshake_messages;
      ssl_rec_decoder *c_to_s;
      ssl_rec_decoder *s_to_c;     
      ssl_rec_decoder *c_to_s_n;
@@ -214,6 +215,7 @@ int ssl_decoder_destroy(dp)
     r_data_destroy(&d->session_id);
     r_data_destroy(&d->PMS);
     r_data_destroy(&d->MS);
+    r_data_destroy(&d->handshake_messages);
     ssl_destroy_rec_decoder(&d->c_to_s);
     ssl_destroy_rec_decoder(&d->c_to_s_n);
     ssl_destroy_rec_decoder(&d->s_to_c);
@@ -562,6 +564,38 @@ int ssl_process_client_key_exchange(ssl,d,msg,len)
     return 0;
 #endif    
     
+  }
+
+
+
+int ssl_update_session_hash(ssl,data)
+  ssl_obj *ssl;
+  Data *data;
+  {
+    Data *hms;
+    UCHAR *d;
+    int l,r,_status;
+
+    hms = ssl->decoder->handshake_messages;
+    d = data->data-4;
+    l = data->len+4;
+
+    if(hms){
+      if(!(hms->data = realloc(hms->data,l+hms->len)))
+	ABORT(R_NO_MEMORY);
+
+      memcpy(hms->data+hms->len,d,l);
+      hms->len+=l;
+    }
+    else{
+      if(r=r_data_create(&hms,d,l))
+  	ABORT(r);
+      ssl->decoder->handshake_messages=hms;
+    }
+
+    _status=0;
+  abort:
+    return(_status);
   }
 
 #ifdef OPENSSL
