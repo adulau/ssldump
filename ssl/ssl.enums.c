@@ -174,12 +174,13 @@ static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
   {
 
 
-    UINT4 vj,vn,cs,cslen,complen,comp,odd;
+    UINT4 vj,vn,cs,cslen,complen,comp,odd,exlen,ex;
     Data session_id,random;
     int r;
 
     extern decoder cipher_suite_decoder[];
-    extern decoder compression_method_decoder[];    
+    extern decoder compression_method_decoder[];
+    extern decoder extension_decoder[];
 	
     printf("\n");			    
     SSL_DECODE_UINT8(ssl,0,0,data,&vj);
@@ -224,6 +225,22 @@ static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
       for(;complen;complen--){
         SSL_DECODE_ENUM(ssl,0,1,compression_method_decoder,P_HL,data,&comp);
         printf("\n");
+      }
+    }
+
+    /* TODO: add code to print Extensions */
+    SSL_DECODE_UINT16(ssl,"extensions len",0,data,&exlen);
+    if (exlen) {
+      explain(ssl , "extensions\n");
+      while(data->len) {
+	SSL_DECODE_UINT16(ssl, "extension type", 0, data, &ex);
+	if (ssl_decode_switch(ssl,extension_decoder,ex,dir,seg,data) == R_NOT_FOUND) {
+	  P_(P_RH){
+	    explain(ssl, "Extension type: %s not yet implemented in ssldump", ex);
+	  }
+	  continue;
+	}
+	printf("\n");
       }
     }
     return(0);
@@ -2403,3 +2420,195 @@ decoder client_certificate_type_decoder[]={
 {-1}
 };
 
+static int decode_extension_server_name(ssl,dir,seg,data)
+  ssl_obj *ssl;
+  int dir;
+  segment *seg;
+  Data *data;
+  {
+    int l,r;
+    SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
+    data->len-=l;
+    data->data+=l;
+    return(0);
+  }
+static int decode_extension_max_fragment_length(ssl,dir,seg,data)
+  ssl_obj *ssl;
+  int dir;
+  segment *seg;
+  Data *data;
+  {
+    int l,r;
+    SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
+    data->len-=l;
+    data->data+=l;
+    return(0);
+  }
+static int decode_extension_client_certificate_url(ssl,dir,seg,data)
+  ssl_obj *ssl;
+  int dir;
+  segment *seg;
+  Data *data;
+  {
+    int l,r;
+    SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
+    data->len-=l;
+    data->data+=l;
+    return(0);
+  }
+static int decode_extension_trusted_ca_keys(ssl,dir,seg,data)
+  ssl_obj *ssl;
+  int dir;
+  segment *seg;
+  Data *data;
+  {
+    int l,r;
+    SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
+    data->len-=l;
+    data->data+=l;
+    return(0);
+  }
+static int decode_extension_truncated_hmac(ssl,dir,seg,data)
+  ssl_obj *ssl;
+  int dir;
+  segment *seg;
+  Data *data;
+  {
+    int l,r;
+    SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
+    data->len-=l;
+    data->data+=l;
+    return(0);
+  }
+static int decode_extension_status_request(ssl,dir,seg,data)
+  ssl_obj *ssl;
+  int dir;
+  segment *seg;
+  Data *data;
+  {
+    int l,r;
+    SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
+    data->len-=l;
+    data->data+=l;
+    return(0);
+  }
+static int decode_extension_signature_algorithms(ssl,dir,seg,data)
+  ssl_obj *ssl;
+  int dir;
+  segment *seg;
+  Data *data;
+  {
+    int l,r;
+    SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
+    data->len-=l;
+    data->data+=l;
+    return(0);
+  }
+static int decode_extension_application_layer_protocol_negotiation(ssl,dir,seg,data)
+  ssl_obj *ssl;
+  int dir;
+  segment *seg;
+  Data *data;
+  {
+    int l,r;
+    SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
+    data->len-=l;
+    data->data+=l;
+    return(0);
+  }
+static int decode_extension_encrypt_then_mac(ssl,dir,seg,data)
+  ssl_obj *ssl;
+  int dir;
+  segment *seg;
+  Data *data;
+  {
+    int l,r;
+    SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
+    data->len-=l;
+    data->data+=l;
+    return(0);
+  }
+static int decode_extension_extended_master_secret(ssl,dir,seg,data)
+  ssl_obj *ssl;
+  int dir;
+  segment *seg;
+  Data *data;
+  {
+    int l,r;
+    SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
+    data->len-=l;
+    data->data+=l;
+    return(0);
+  }
+static int decode_extension_next_protocol_negotiation(ssl,dir,seg,data)
+  ssl_obj *ssl;
+  int dir;
+  segment *seg;
+  Data *data;
+  {
+    int l,r;
+    SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
+    data->len-=l;
+    data->data+=l;
+    return(0);
+  }
+
+decoder extension_decoder[] = {
+	{
+		0,
+		"server_name",
+		decode_extension_server_name
+	},
+	{
+		1,
+		"max_fragment_length",
+		decode_extension_max_fragment_length
+	},
+	{
+		2,
+		"client_certificate_url",
+		decode_extension_client_certificate_url
+	},
+	{
+		3,
+		"trusted_ca_keys",
+		decode_extension_trusted_ca_keys
+	},
+	{
+		4,
+		"truncated_hmac",
+		decode_extension_truncated_hmac
+	},
+	{
+		5,
+		"status_request",
+		decode_extension_status_request
+	},
+	{
+		13,
+		"signature_algorithms",
+		decode_extension_signature_algorithms
+	},
+	{
+		16,
+		"application_layer_protocol_negotiation",
+		decode_extension_application_layer_protocol_negotiation
+	},
+	{
+		22,
+		"encrypt_then_mac",
+		decode_extension_encrypt_then_mac
+	},
+	{
+		23,
+		"extended_master_secret",
+		decode_extension_extended_master_secret
+	},
+	{
+		13172,
+		"next_protocol_negotiation",
+		decode_extension_next_protocol_negotiation
+	},
+
+{-1}
+};
