@@ -55,6 +55,7 @@
 #include <openssl/x509v3.h>
 #endif
 #include "ssldecode.h"
+#include "ssl_rec.h"
 #include "r_assoc.h"
 static char *RCSSTRING="$Id: ssldecode.c,v 1.9 2002/08/17 01:33:17 ekr Exp $";
 
@@ -79,6 +80,22 @@ struct ssl_decode_ctx_ {
      char dummy;       /* Some compilers (Win32) don't like empty
                            structs */
 #endif     
+};
+
+struct ssl_decoder_ {
+     ssl_decode_ctx *ctx;
+     Data *session_id;
+     SSL_CipherSuite *cs;
+     Data *client_random;
+     Data *server_random;
+     int ephemeral_rsa;
+     Data *PMS;
+     Data *MS;
+     Data *handshake_messages;
+     ssl_rec_decoder *c_to_s;
+     ssl_rec_decoder *s_to_c;     
+     ssl_rec_decoder *c_to_s_n;
+     ssl_rec_decoder *s_to_c_n;
 };
 
 

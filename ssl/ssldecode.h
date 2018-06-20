@@ -43,29 +43,12 @@
    ekr@rtfm.com  Thu Apr  1 15:02:02 1999
  */
 
-#include "ssl_rec.h"
+
 #ifndef _ssldecode_h
 #define _ssldecode_h
 
 #define CRDUMP(a,b,c) P_(P_CR) {Data d; d.data=b; d.len=c; exdump(ssl,a,&d); printf("\n");}
 #define CRDUMPD(a,b) P_(P_CR) {exdump(ssl,a,b);printf("\n");}
-
-struct ssl_decoder_ {
-     ssl_decode_ctx *ctx;
-     Data *session_id;
-     SSL_CipherSuite *cs;
-     Data *client_random;
-     Data *server_random;
-     int ephemeral_rsa;
-     Data *PMS;
-     Data *MS;
-     Data *handshake_messages;
-     int extended_master_secret;
-     ssl_rec_decoder *c_to_s;
-     ssl_rec_decoder *s_to_c;
-     ssl_rec_decoder *c_to_s_n;
-     ssl_rec_decoder *s_to_c_n;
-};
 
 int ssl_decode_ctx_create PROTO_LIST((ssl_decode_ctx **ctx,
   char *keyfile,char *password));
