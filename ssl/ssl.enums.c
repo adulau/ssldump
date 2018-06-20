@@ -2479,10 +2479,15 @@ static int decode_extension_extended_master_secret(ssl,dir,seg,data)
   segment *seg;
   Data *data;
   {
-    int l,r;
+    int l,r,*ems;
+
+    ems=&ssl->decoder->extended_master_secret;
+
     SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
     data->len-=l;
     data->data+=l;
+
+    *ems=dir==DIR_I2R?1:*ems==1;
     return(0);
   }
 static int decode_extension(ssl,dir,seg,data)
