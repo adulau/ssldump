@@ -184,7 +184,7 @@ static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
     extern decoder extension_decoder[];
 	
     printf("\n");
-    ssl_update_session_hash(ssl,data);
+    ssl_update_handshake_messages(ssl,data);
     SSL_DECODE_UINT8(ssl,0,0,data,&vj);
     SSL_DECODE_UINT8(ssl,0,0,data,&vn);    
 
@@ -263,7 +263,7 @@ static int decode_HandshakeType_ServerHello(ssl,dir,seg,data)
     extern decoder extension_decoder[];
 
     printf("\n");
-    ssl_update_session_hash(ssl,data);
+    ssl_update_handshake_messages(ssl,data);
     SSL_DECODE_UINT8(ssl,0,0,data,&vj);
     SSL_DECODE_UINT8(ssl,0,0,data,&vn);    
 
@@ -324,7 +324,7 @@ static int decode_HandshakeType_Certificate(ssl,dir,seg,data)
     int r;
   
     printf("\n");
-    ssl_update_session_hash(ssl,data);
+    ssl_update_handshake_messages(ssl,data);
     SSL_DECODE_UINT24(ssl,"certificates len",0,data,&len);
 
     while(len){
@@ -348,7 +348,7 @@ static int decode_HandshakeType_ServerKeyExchange(ssl,dir,seg,data)
    int r;
 
     printf("\n");			      
-    ssl_update_session_hash(ssl,data);
+    ssl_update_handshake_messages(ssl,data);
    if(ssl->cs){
      P_(P_ND){
 	explain(ssl,"params\n");
@@ -386,7 +386,7 @@ static int decode_HandshakeType_CertificateRequest(ssl,dir,seg,data)
     int r;
     
     printf("\n");
-    ssl_update_session_hash(ssl,data);
+    ssl_update_handshake_messages(ssl,data);
     SSL_DECODE_UINT8(ssl,"certificate_types len",0,data,&len);
     for(;len;len--){
       SSL_DECODE_ENUM(ssl,"certificate_types",1,
@@ -418,7 +418,7 @@ static int decode_HandshakeType_ServerHelloDone(ssl,dir,seg,data)
 
 
   printf("\n");
-  ssl_update_session_hash(ssl,data);
+  ssl_update_handshake_messages(ssl,data);
   return(0);
 
   }
@@ -432,7 +432,7 @@ static int decode_HandshakeType_CertificateVerify(ssl,dir,seg,data)
 
   int r;
   printf("\n");
-  ssl_update_session_hash(ssl,data);
+  ssl_update_handshake_messages(ssl,data);
   SSL_DECODE_OPAQUE_ARRAY(ssl,"Signature",-(1<<15-1),P_HL,data,0);
   return(0);
 
@@ -449,7 +449,7 @@ static int decode_HandshakeType_ClientKeyExchange(ssl,dir,seg,data)
    Data pms;
 	
     printf("\n");
-    ssl_update_session_hash(ssl,data);
+    ssl_update_handshake_messages(ssl,data);
    if(ssl->cs){
      switch(ssl->cs->kex){
 
@@ -2461,90 +2461,6 @@ static int decode_extension_server_name(ssl,dir,seg,data)
     data->data+=l;
     return(0);
   }
-static int decode_extension_max_fragment_length(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
-  {
-    int l,r;
-    SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
-    data->len-=l;
-    data->data+=l;
-    return(0);
-  }
-static int decode_extension_client_certificate_url(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
-  {
-    int l,r;
-    SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
-    data->len-=l;
-    data->data+=l;
-    return(0);
-  }
-static int decode_extension_trusted_ca_keys(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
-  {
-    int l,r;
-    SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
-    data->len-=l;
-    data->data+=l;
-    return(0);
-  }
-static int decode_extension_truncated_hmac(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
-  {
-    int l,r;
-    SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
-    data->len-=l;
-    data->data+=l;
-    return(0);
-  }
-static int decode_extension_status_request(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
-  {
-    int l,r;
-    SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
-    data->len-=l;
-    data->data+=l;
-    return(0);
-  }
-static int decode_extension_signature_algorithms(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
-  {
-    int l,r;
-    SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
-    data->len-=l;
-    data->data+=l;
-    return(0);
-  }
-static int decode_extension_application_layer_protocol_negotiation(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
-  {
-    int l,r;
-    SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
-    data->len-=l;
-    data->data+=l;
-    return(0);
-  }
 static int decode_extension_encrypt_then_mac(ssl,dir,seg,data)
   ssl_obj *ssl;
   int dir;
@@ -2558,18 +2474,6 @@ static int decode_extension_encrypt_then_mac(ssl,dir,seg,data)
     return(0);
   }
 static int decode_extension_extended_master_secret(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
-  {
-    int l,r;
-    SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
-    data->len-=l;
-    data->data+=l;
-    return(0);
-  }
-static int decode_extension_next_protocol_negotiation(ssl,dir,seg,data)
   ssl_obj *ssl;
   int dir;
   segment *seg;
@@ -2604,37 +2508,37 @@ decoder extension_decoder[] = {
 	{
 		1,
 		"max_fragment_length",
-		decode_extension_max_fragment_length
+		decode_extension
 	},
 	{
 		2,
 		"client_certificate_url",
-		decode_extension_client_certificate_url
+		decode_extension
 	},
 	{
 		3,
 		"trusted_ca_keys",
-		decode_extension_trusted_ca_keys
+		decode_extension
 	},
 	{
 		4,
 		"truncated_hmac",
-		decode_extension_truncated_hmac
+		decode_extension
 	},
 	{
 		5,
 		"status_request",
-		decode_extension_status_request
+		decode_extension
 	},
 	{
 		13,
 		"signature_algorithms",
-		decode_extension_signature_algorithms
+		decode_extension
 	},
 	{
 		16,
 		"application_layer_protocol_negotiation",
-		decode_extension_application_layer_protocol_negotiation
+		decode_extension
 	},
 	{
 		22,
@@ -2649,7 +2553,7 @@ decoder extension_decoder[] = {
 	{
 		13172,
 		"next_protocol_negotiation",
-		decode_extension_next_protocol_negotiation
+		decode_extension
 	},
 
 {-1}

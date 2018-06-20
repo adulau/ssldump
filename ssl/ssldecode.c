@@ -568,7 +568,7 @@ int ssl_process_client_key_exchange(ssl,d,msg,len)
 
 
 
-int ssl_update_session_hash(ssl,data)
+int ssl_update_handshake_messages(ssl,data)
   ssl_obj *ssl;
   Data *data;
   {
