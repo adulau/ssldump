@@ -2481,7 +2481,7 @@ static int decode_extension_extended_master_secret(ssl,dir,seg,data)
   {
     int l,r,*ems;
 
-    ems=&ssl->decoder->extended_master_secret;
+    ems=&ssl->extensions->extended_master_secret;
 
     SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
     data->len-=l;
