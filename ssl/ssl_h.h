@@ -86,6 +86,7 @@ typedef struct ssl_obj_ {
      struct timeval time_last;
      ssl_decode_ctx *ssl_ctx;
      ssl_decoder *decoder;
+     ssl_extensions extensions;
 
      int process_ciphertext;
 
@@ -106,6 +107,10 @@ typedef struct decoder_ {
      char *name;
      int (*print) PROTO_LIST((ssl_obj *,int direction,segment *seg,Data *data));
 } decoder;
+
+typedef struct ssl_extensions_ {
+  int extended_master_secret;
+} ssl_extensions;
 
 #define SSL_NO_DATA	1
 #define SSL_BAD_CONTENT_TYPE 2
