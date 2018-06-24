@@ -392,9 +392,10 @@ int ssl_update_handshake_messages(ssl,data)
   ssl_obj *ssl;
   Data *data;
   {
+#ifdef OPENSSL
     Data *hms;
     UCHAR *d;
-    int l,r,_status;
+    int l,r;
 
     hms = ssl->decoder->handshake_messages;
     d = data->data-4;
@@ -402,20 +403,19 @@ int ssl_update_handshake_messages(ssl,data)
 
     if(hms){
       if(!(hms->data = realloc(hms->data,l+hms->len)))
-	ABORT(R_NO_MEMORY);
+	ERETURN(R_NO_MEMORY);
 
       memcpy(hms->data+hms->len,d,l);
       hms->len+=l;
     }
     else{
       if(r=r_data_create(&hms,d,l))
-  	ABORT(r);
+  	ERETURN(r);
       ssl->decoder->handshake_messages=hms;
     }
+#endif
+    return(0);
 
-    _status=0;
-  abort:
-    return(_status);
   }
 
 static int ssl_create_session_lookup_key(ssl,id,idlen,keyp,keyl)
@@ -846,7 +846,7 @@ static int ssl_generate_keying_material(ssl,d)
   ssl_obj *ssl;
   ssl_decoder *d;
   {
-    Data *key_block=0;
+    Data *key_block=0,temp;
     UCHAR _iv_c[8],_iv_s[8];
     UCHAR _key_c[16],_key_s[16];
     int needed;
@@ -857,8 +857,13 @@ static int ssl_generate_keying_material(ssl,d)
       if(r=r_data_alloc(&d->MS,48))
         ABORT(r);
 
-      if (ssl->extensions->extended_master_secret)
+      if (ssl->extensions->extended_master_secret) {
 	ssl_generate_session_hash(ssl,d);
+	temp.len=0;
+	if(r=PRF(ssl,d->PMS,"extended master secret",d->session_hash,&temp,
+	  d->MS))
+	  ABORT(r);
+      }
       else
 	if(r=PRF(ssl,d->PMS,"master secret",d->client_random,d->server_random,
 	  d->MS))
@@ -1000,34 +1005,48 @@ static int ssl_generate_keying_material(ssl,d)
 static int ssl_generate_session_hash(ssl,d)
   ssl_obj *ssl;
   ssl_decoder *d;
-  /* Data **sh; */
   {
-    UCHAR *out[32];
-    int dgi;
+    int r,_status,dgi;
     unsigned int len;
     const EVP_MD *md;
     EVP_MD_CTX dgictx;
 
+    if(r=r_data_alloc(&d->session_hash,EVP_MAX_MD_SIZE))
+      ABORT(r);
+
     switch(ssl->version){
-    case TLSV12_VERSION:
-      dgi = MAX(DIG_SHA256, ssl->cs->dig)-0x40;
-      if ((md=EVP_get_digestbyname(digests[dgi])) == NULL) {
-	DBG((0,"Cannot get EVP for digest %s, openssl library current?",
-	     digests[dgi]));
-	ERETURN(SSL_BAD_MAC);
-      }
-      break;
+      case TLSV12_VERSION:
+	dgi = MAX(DIG_SHA256,ssl->cs->dig)-0x40;
+	if ((md=EVP_get_digestbyname(digests[dgi])) == NULL) {
+	  DBG((0,"Cannot get EVP for digest %s, openssl library current?",
+	       digests[dgi]));
+	  ERETURN(SSL_BAD_MAC);
+	}
+
+	EVP_DigestInit(&dgictx,md);
+	EVP_DigestUpdate(&dgictx,d->handshake_messages->data,d->handshake_messages->len);
+	EVP_DigestFinal(&dgictx,d->session_hash->data,&d->session_hash->len);
+
+	break;
       case SSLV3_VERSION:
       case TLSV1_VERSION:
       case TLSV11_VERSION:
+	EVP_DigestInit(&dgictx,EVP_get_digestbyname("MD5"));
+	EVP_DigestUpdate(&dgictx,d->handshake_messages->data,d->handshake_messages->len);
+	EVP_DigestFinal_ex(&dgictx,d->session_hash->data,&d->session_hash->len);
+
+	EVP_DigestInit(&dgictx,EVP_get_digestbyname("SHA1"));
+	EVP_DigestUpdate(&dgictx,d->handshake_messages->data,d->handshake_messages->len);
+	EVP_DigestFinal(&dgictx,d->session_hash->data+d->session_hash->len,&len);
+
+	d->session_hash->len+=len;
+	break;
       default:
-	exit(1);
-	/* ABORT(SSL_CANT_DO_CIPHER);	 */
+	ABORT(SSL_CANT_DO_CIPHER);
     }
 
-    EVP_DigestInit(&dgictx, md);
-    EVP_DigestUpdate(&dgictx, d->handshake_messages->data, d->handshake_messages->len);
-    EVP_DigestFinal(&dgictx, out, &len);
-    exit(0);
+    _status=0;
+  abort:
+    return(_status);
   }
 #endif

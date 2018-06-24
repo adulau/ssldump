@@ -112,10 +112,6 @@ typedef struct decoder_ {
      int (*print) PROTO_LIST((ssl_obj *,int direction,segment *seg,Data *data));
 } decoder;
 
-typedef struct ssl_extensions_ {
-  int extended_master_secret;
-} ssl_extensions;
-
 #define SSL_NO_DATA	1
 #define SSL_BAD_CONTENT_TYPE 2
 #define SSL_BAD_PMS	     3
