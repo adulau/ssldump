@@ -231,7 +231,6 @@ static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
       }
     }
 
-    /* TODO: add code to print Extensions */
     SSL_DECODE_UINT16(ssl,"extensions len",0,data,&exlen);
     if (exlen) {
       explain(ssl , "extensions\n");
@@ -292,7 +291,6 @@ static int decode_HandshakeType_ServerHello(ssl,dir,seg,data)
     SSL_DECODE_ENUM(ssl,"compressionMethod",1,compression_method_decoder,P_HL,data,0);
     P_(P_HL) printf("\n");
 
-    /* TODO: add code to print Extensions */
     SSL_DECODE_UINT16(ssl,"extensions len",0,data,&exlen);
     if (exlen) {
       explain(ssl , "extensions\n");

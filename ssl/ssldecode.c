@@ -114,7 +114,7 @@ static int ssl3_generate_export_iv PROTO_LIST((ssl_obj *ssl,
 static int ssl_generate_keying_material PROTO_LIST((ssl_obj *ssl,
   ssl_decoder *d));
 static int ssl_generate_session_hash PROTO_LIST((ssl_obj *ssl,
-						 ssl_decoder *d));
+  ssl_decoder *d));
 #endif
 
 static int ssl_create_session_lookup_key PROTO_LIST((ssl_obj *ssl,
@@ -858,7 +858,9 @@ static int ssl_generate_keying_material(ssl,d)
         ABORT(r);
 
       if (ssl->extensions->extended_master_secret) {
-	ssl_generate_session_hash(ssl,d);
+	if(r=ssl_generate_session_hash(ssl,d))
+	  ABORT(r);
+
 	temp.len=0;
 	if(r=PRF(ssl,d->PMS,"extended master secret",d->session_hash,&temp,
 	  d->MS))
