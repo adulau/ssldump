@@ -2467,10 +2467,15 @@ static int decode_extension_encrypt_then_mac(ssl,dir,seg,data)
   segment *seg;
   Data *data;
   {
-    int l,r;
+    int l,r,*etm;
+
+    etm=&ssl->extensions->encrypt_then_mac;
+
     SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
     data->len-=l;
     data->data+=l;
+
+    *etm=dir==DIR_I2R?1:*etm==1;
     return(0);
   }
 static int decode_extension_extended_master_secret(ssl,dir,seg,data)
@@ -2508,7 +2513,7 @@ decoder extension_decoder[] = {
 	{
 		0,
 		"server_name",
-		decode_extension_server_name
+		decode_extension,
 	},
 	{
 		1,
