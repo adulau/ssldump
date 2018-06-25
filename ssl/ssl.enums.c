@@ -7,6 +7,7 @@
 #endif
 #include "ssl.enums.h"
 static int decode_extension(ssl,dir,seg,data);
+static int decode_server_name(ssl,dir,seg,data);
 static int decode_ContentType_ChangeCipherSpec(ssl,dir,seg,data)
   ssl_obj *ssl;
   int dir;
@@ -2455,10 +2456,34 @@ static int decode_extension_server_name(ssl,dir,seg,data)
   segment *seg;
   Data *data;
   {
-    int l,r;
+    UINT4 t;
+    int l,r,p;
+
+    extern decoder server_name_type_decoder[];
+
     SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
-    data->len-=l;
-    data->data+=l;
+
+    if(dir==DIR_I2R){
+      SSL_DECODE_UINT16(ssl,"server name list length",0,data,&l);
+      printf("\n");
+      while(l) {
+	p=data->len;
+	SSL_DECODE_UINT8(ssl, "server name type", 0, data, &t);
+
+	if (ssl_decode_switch(ssl,server_name_type_decoder,t,dir,seg,data) == R_NOT_FOUND) {
+	  decode_server_name(ssl,dir,seg,data);
+	  P_(P_RH){
+	    explain(ssl, "Server Name type: %s not yet implemented in ssldump", t);
+	  }
+	  continue;
+	}
+	l-=(p-data->len);
+      }
+    }
+    else{
+      data->len-=l;
+      data->data+=l;
+    }
     return(0);
   }
 static int decode_extension_encrypt_then_mac(ssl,dir,seg,data)
@@ -2513,7 +2538,7 @@ decoder extension_decoder[] = {
 	{
 		0,
 		"server_name",
-		decode_extension,
+		decode_extension_server_name,
 	},
 	{
 		1,
@@ -2566,5 +2591,43 @@ decoder extension_decoder[] = {
 		decode_extension
 	},
 
+{-1}
+};
+
+static int decode_server_name_type_host_name(ssl,dir,seg,data)
+  ssl_obj *ssl;
+  int dir;
+  segment *seg;
+  Data *data;
+  {
+    int l,r;
+    SSL_DECODE_UINT16(ssl,"server name length",0,data,&l);
+    printf(": %.*s",l,data->data);
+
+    /* Possibly use data->data to set/modify ssl->server_name */
+
+    data->len-=l;
+    data->data+=l;
+    return(0);
+  }
+static int decode_server_name(ssl,dir,seg,data)
+  ssl_obj *ssl;
+  int dir;
+  segment *seg;
+  Data *data;
+  {
+    int l,r;
+    SSL_DECODE_UINT16(ssl,"server name length",0,data,&l);
+    data->len-=l;
+    data->data+=l;
+    return(0);
+  }
+
+decoder server_name_type_decoder[]={
+	{
+		0,
+		"host_name",
+		decode_server_name_type_host_name
+	},
 {-1}
 };
