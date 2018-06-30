@@ -6,6 +6,8 @@
 #include <openssl/ssl.h>
 #endif
 #include "ssl.enums.h"
+static int decode_extension(ssl,dir,seg,data);
+static int decode_server_name(ssl,dir,seg,data);
 static int decode_ContentType_ChangeCipherSpec(ssl,dir,seg,data)
   ssl_obj *ssl;
   int dir;
@@ -174,14 +176,16 @@ static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
   {
 
 
-    UINT4 vj,vn,cs,cslen,complen,comp,odd;
+    UINT4 vj,vn,cs,cslen,complen,comp,odd,exlen,ex;
     Data session_id,random;
     int r;
 
     extern decoder cipher_suite_decoder[];
-    extern decoder compression_method_decoder[];    
+    extern decoder compression_method_decoder[];
+    extern decoder extension_decoder[];
 	
-    printf("\n");			    
+    printf("\n");
+    ssl_update_handshake_messages(ssl,data);
     SSL_DECODE_UINT8(ssl,0,0,data,&vj);
     SSL_DECODE_UINT8(ssl,0,0,data,&vn);    
 
@@ -226,6 +230,22 @@ static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
         printf("\n");
       }
     }
+
+    SSL_DECODE_UINT16(ssl,"extensions len",0,data,&exlen);
+    if (exlen) {
+      explain(ssl , "extensions\n");
+      while(data->len) {
+    	SSL_DECODE_UINT16(ssl, "extension type", 0, data, &ex);
+    	if (ssl_decode_switch(ssl,extension_decoder,ex,dir,seg,data) == R_NOT_FOUND) {
+	  decode_extension(ssl,dir,seg,data);
+    	  P_(P_RH){
+    	    explain(ssl, "Extension type: %s not yet implemented in ssldump", ex);
+    	  }
+    	  continue;
+    	}
+    	printf("\n");
+      }
+    }
     return(0);
 
   }
@@ -236,11 +256,14 @@ static int decode_HandshakeType_ServerHello(ssl,dir,seg,data)
   Data *data;
   {
 
-
     int r;
     Data rnd,session_id;	
-    UINT4 vj,vn;
-    printf("\n");			        
+    UINT4 vj,vn,exlen,ex;
+
+    extern decoder extension_decoder[];
+
+    printf("\n");
+    ssl_update_handshake_messages(ssl,data);
     SSL_DECODE_UINT8(ssl,0,0,data,&vj);
     SSL_DECODE_UINT8(ssl,0,0,data,&vn);    
 
@@ -266,7 +289,24 @@ static int decode_HandshakeType_ServerHello(ssl,dir,seg,data)
 
     P_(P_HL) printf("\n");
     SSL_DECODE_ENUM(ssl,"compressionMethod",1,compression_method_decoder,P_HL,data,0);
-    P_(P_HL) printf("\n");					
+    P_(P_HL) printf("\n");
+
+    SSL_DECODE_UINT16(ssl,"extensions len",0,data,&exlen);
+    if (exlen) {
+      explain(ssl , "extensions\n");
+      while(data->len) {
+    	SSL_DECODE_UINT16(ssl, "extension type", 0, data, &ex);
+    	if (ssl_decode_switch(ssl,extension_decoder,ex,dir,seg,data) == R_NOT_FOUND) {
+	  decode_extension(ssl,dir,seg,data);
+    	  P_(P_RH){
+    	    explain(ssl, "Extension type: %s not yet implemented in ssldump", ex);
+    	  }
+    	  continue;
+    	}
+    	printf("\n");
+      }
+    }
+
     return(0);
 
   }
@@ -283,6 +323,7 @@ static int decode_HandshakeType_Certificate(ssl,dir,seg,data)
     int r;
   
     printf("\n");
+    ssl_update_handshake_messages(ssl,data);
     SSL_DECODE_UINT24(ssl,"certificates len",0,data,&len);
 
     while(len){
@@ -306,7 +347,7 @@ static int decode_HandshakeType_ServerKeyExchange(ssl,dir,seg,data)
    int r;
 
     printf("\n");			      
-
+    ssl_update_handshake_messages(ssl,data);
    if(ssl->cs){
      P_(P_ND){
 	explain(ssl,"params\n");
@@ -344,6 +385,7 @@ static int decode_HandshakeType_CertificateRequest(ssl,dir,seg,data)
     int r;
     
     printf("\n");
+    ssl_update_handshake_messages(ssl,data);
     SSL_DECODE_UINT8(ssl,"certificate_types len",0,data,&len);
     for(;len;len--){
       SSL_DECODE_ENUM(ssl,"certificate_types",1,
@@ -375,6 +417,7 @@ static int decode_HandshakeType_ServerHelloDone(ssl,dir,seg,data)
 
 
   printf("\n");
+  ssl_update_handshake_messages(ssl,data);
   return(0);
 
   }
@@ -388,6 +431,7 @@ static int decode_HandshakeType_CertificateVerify(ssl,dir,seg,data)
 
   int r;
   printf("\n");
+  ssl_update_handshake_messages(ssl,data);
   SSL_DECODE_OPAQUE_ARRAY(ssl,"Signature",-(1<<15-1),P_HL,data,0);
   return(0);
 
@@ -404,6 +448,7 @@ static int decode_HandshakeType_ClientKeyExchange(ssl,dir,seg,data)
    Data pms;
 	
     printf("\n");
+    ssl_update_handshake_messages(ssl,data);
    if(ssl->cs){
      switch(ssl->cs->kex){
 
@@ -2403,3 +2448,184 @@ decoder client_certificate_type_decoder[]={
 {-1}
 };
 
+static int decode_extension_server_name(ssl,dir,seg,data)
+  ssl_obj *ssl;
+  int dir;
+  segment *seg;
+  Data *data;
+  {
+    UINT4 t;
+    int l,r,p;
+
+    extern decoder server_name_type_decoder[];
+
+    SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
+
+    if(dir==DIR_I2R){
+      SSL_DECODE_UINT16(ssl,"server name list length",0,data,&l);
+      printf("\n");
+      while(l) {
+	p=data->len;
+	SSL_DECODE_UINT8(ssl, "server name type", 0, data, &t);
+
+	if (ssl_decode_switch(ssl,server_name_type_decoder,t,dir,seg,data) == R_NOT_FOUND) {
+	  decode_server_name(ssl,dir,seg,data);
+	  P_(P_RH){
+	    explain(ssl, "Server Name type: %s not yet implemented in ssldump", t);
+	  }
+	  continue;
+	}
+	l-=(p-data->len);
+      }
+    }
+    else{
+      data->len-=l;
+      data->data+=l;
+    }
+    return(0);
+  }
+static int decode_extension_encrypt_then_mac(ssl,dir,seg,data)
+  ssl_obj *ssl;
+  int dir;
+  segment *seg;
+  Data *data;
+  {
+    int l,r,*etm;
+
+    etm=&ssl->extensions->encrypt_then_mac;
+
+    SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
+    data->len-=l;
+    data->data+=l;
+
+    *etm=dir==DIR_I2R?1:*etm==1;
+    return(0);
+  }
+static int decode_extension_extended_master_secret(ssl,dir,seg,data)
+  ssl_obj *ssl;
+  int dir;
+  segment *seg;
+  Data *data;
+  {
+    int l,r,*ems;
+
+    ems=&ssl->extensions->extended_master_secret;
+
+    SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
+    data->len-=l;
+    data->data+=l;
+
+    *ems=dir==DIR_I2R?1:*ems==1;
+    return(0);
+  }
+static int decode_extension(ssl,dir,seg,data)
+  ssl_obj *ssl;
+  int dir;
+  segment *seg;
+  Data *data;
+  {
+    int l,r;
+    SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
+    data->len-=l;
+    data->data+=l;
+    return(0);
+  }
+
+
+decoder extension_decoder[] = {
+	{
+		0,
+		"server_name",
+		decode_extension_server_name,
+	},
+	{
+		1,
+		"max_fragment_length",
+		decode_extension
+	},
+	{
+		2,
+		"client_certificate_url",
+		decode_extension
+	},
+	{
+		3,
+		"trusted_ca_keys",
+		decode_extension
+	},
+	{
+		4,
+		"truncated_hmac",
+		decode_extension
+	},
+	{
+		5,
+		"status_request",
+		decode_extension
+	},
+	{
+		13,
+		"signature_algorithms",
+		decode_extension
+	},
+	{
+		16,
+		"application_layer_protocol_negotiation",
+		decode_extension
+	},
+	{
+		22,
+		"encrypt_then_mac",
+		decode_extension_encrypt_then_mac
+	},
+	{
+		23,
+		"extended_master_secret",
+		decode_extension_extended_master_secret
+	},
+	{
+		13172,
+		"next_protocol_negotiation",
+		decode_extension
+	},
+
+{-1}
+};
+
+static int decode_server_name_type_host_name(ssl,dir,seg,data)
+  ssl_obj *ssl;
+  int dir;
+  segment *seg;
+  Data *data;
+  {
+    int l,r;
+    SSL_DECODE_UINT16(ssl,"server name length",0,data,&l);
+    printf(": %.*s",l,data->data);
+
+    /* Possibly use data->data to set/modify ssl->server_name */
+
+    data->len-=l;
+    data->data+=l;
+    return(0);
+  }
+static int decode_server_name(ssl,dir,seg,data)
+  ssl_obj *ssl;
+  int dir;
+  segment *seg;
+  Data *data;
+  {
+    int l,r;
+    SSL_DECODE_UINT16(ssl,"server name length",0,data,&l);
+    data->len-=l;
+    data->data+=l;
+    return(0);
+  }
+
+decoder server_name_type_decoder[]={
+	{
+		0,
+		"host_name",
+		decode_server_name_type_host_name
+	},
+{-1}
+};

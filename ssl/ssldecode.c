@@ -91,6 +91,8 @@ struct ssl_decoder_ {
      int ephemeral_rsa;
      Data *PMS;
      Data *MS;
+     Data *handshake_messages;
+     Data *session_hash;
      ssl_rec_decoder *c_to_s;
      ssl_rec_decoder *s_to_c;     
      ssl_rec_decoder *c_to_s_n;
@@ -110,6 +112,8 @@ static int ssl3_prf PROTO_LIST((ssl_obj *ssl,Data *secret,char *usage,
 static int ssl3_generate_export_iv PROTO_LIST((ssl_obj *ssl,
   Data *rnd1,Data *rnd2,Data *out));
 static int ssl_generate_keying_material PROTO_LIST((ssl_obj *ssl,
+  ssl_decoder *d));
+static int ssl_generate_session_hash PROTO_LIST((ssl_obj *ssl,
   ssl_decoder *d));
 #endif
 
@@ -214,6 +218,8 @@ int ssl_decoder_destroy(dp)
     r_data_destroy(&d->session_id);
     r_data_destroy(&d->PMS);
     r_data_destroy(&d->MS);
+    r_data_destroy(&d->handshake_messages);
+    r_data_destroy(&d->session_hash);
     ssl_destroy_rec_decoder(&d->c_to_s);
     ssl_destroy_rec_decoder(&d->c_to_s_n);
     ssl_destroy_rec_decoder(&d->s_to_c);
@@ -382,6 +388,35 @@ int ssl_decode_record(ssl,dec,direction,ct,version,d)
 #endif    
   }
 
+int ssl_update_handshake_messages(ssl,data)
+  ssl_obj *ssl;
+  Data *data;
+  {
+#ifdef OPENSSL
+    Data *hms;
+    UCHAR *d;
+    int l,r;
+
+    hms = ssl->decoder->handshake_messages;
+    d = data->data-4;
+    l = data->len+4;
+
+    if(hms){
+      if(!(hms->data = realloc(hms->data,l+hms->len)))
+	ERETURN(R_NO_MEMORY);
+
+      memcpy(hms->data+hms->len,d,l);
+      hms->len+=l;
+    }
+    else{
+      if(r=r_data_create(&hms,d,l))
+  	ERETURN(r);
+      ssl->decoder->handshake_messages=hms;
+    }
+#endif
+    return(0);
+
+  }
 
 static int ssl_create_session_lookup_key(ssl,id,idlen,keyp,keyl)
   ssl_obj *ssl;
@@ -563,6 +598,7 @@ int ssl_process_client_key_exchange(ssl,d,msg,len)
 #endif    
     
   }
+
 
 #ifdef OPENSSL
 static int tls_P_hash(ssl,secret,seed,md,out)
@@ -810,7 +846,7 @@ static int ssl_generate_keying_material(ssl,d)
   ssl_obj *ssl;
   ssl_decoder *d;
   {
-    Data *key_block=0;
+    Data *key_block=0,temp;
     UCHAR _iv_c[8],_iv_s[8];
     UCHAR _key_c[16],_key_s[16];
     int needed;
@@ -820,10 +856,20 @@ static int ssl_generate_keying_material(ssl,d)
     if(!d->MS){
       if(r=r_data_alloc(&d->MS,48))
         ABORT(r);
-    
-      if(r=PRF(ssl,d->PMS,"master secret",d->client_random,d->server_random,
-        d->MS))
-        ABORT(r);
+
+      if (ssl->extensions->extended_master_secret) {
+	if(r=ssl_generate_session_hash(ssl,d))
+	  ABORT(r);
+
+	temp.len=0;
+	if(r=PRF(ssl,d->PMS,"extended master secret",d->session_hash,&temp,
+	  d->MS))
+	  ABORT(r);
+      }
+      else
+	if(r=PRF(ssl,d->PMS,"master secret",d->client_random,d->server_random,
+	  d->MS))
+	  ABORT(r);
 
       CRDUMPD("MS",d->MS);
     }
@@ -958,4 +1004,51 @@ static int ssl_generate_keying_material(ssl,d)
     return(_status);
   }
 
+static int ssl_generate_session_hash(ssl,d)
+  ssl_obj *ssl;
+  ssl_decoder *d;
+  {
+    int r,_status,dgi;
+    unsigned int len;
+    const EVP_MD *md;
+    EVP_MD_CTX dgictx;
+
+    if(r=r_data_alloc(&d->session_hash,EVP_MAX_MD_SIZE))
+      ABORT(r);
+
+    switch(ssl->version){
+      case TLSV12_VERSION:
+	dgi = MAX(DIG_SHA256,ssl->cs->dig)-0x40;
+	if ((md=EVP_get_digestbyname(digests[dgi])) == NULL) {
+	  DBG((0,"Cannot get EVP for digest %s, openssl library current?",
+	       digests[dgi]));
+	  ERETURN(SSL_BAD_MAC);
+	}
+
+	EVP_DigestInit(&dgictx,md);
+	EVP_DigestUpdate(&dgictx,d->handshake_messages->data,d->handshake_messages->len);
+	EVP_DigestFinal(&dgictx,d->session_hash->data,&d->session_hash->len);
+
+	break;
+      case SSLV3_VERSION:
+      case TLSV1_VERSION:
+      case TLSV11_VERSION:
+	EVP_DigestInit(&dgictx,EVP_get_digestbyname("MD5"));
+	EVP_DigestUpdate(&dgictx,d->handshake_messages->data,d->handshake_messages->len);
+	EVP_DigestFinal_ex(&dgictx,d->session_hash->data,&d->session_hash->len);
+
+	EVP_DigestInit(&dgictx,EVP_get_digestbyname("SHA1"));
+	EVP_DigestUpdate(&dgictx,d->handshake_messages->data,d->handshake_messages->len);
+	EVP_DigestFinal(&dgictx,d->session_hash->data+d->session_hash->len,&len);
+
+	d->session_hash->len+=len;
+	break;
+      default:
+	ABORT(SSL_CANT_DO_CIPHER);
+    }
+
+    _status=0;
+  abort:
+    return(_status);
+  }
 #endif

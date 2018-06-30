@@ -67,6 +67,11 @@ typedef struct d_queue_ {
      int offset;	/*How far into the first segment this record starts*/
 } r_queue;
 
+typedef struct ssl_extensions_ {
+  int encrypt_then_mac;
+  int extended_master_secret;
+} ssl_extensions;
+
 typedef struct ssl_obj_ {
      tcp_conn *conn;
      int r_state;
@@ -86,6 +91,7 @@ typedef struct ssl_obj_ {
      struct timeval time_last;
      ssl_decode_ctx *ssl_ctx;
      ssl_decoder *decoder;
+     ssl_extensions *extensions;
 
      int process_ciphertext;
 

@@ -94,7 +94,7 @@ char *ciphers[]={
 
 
 static int tls_check_mac PROTO_LIST((ssl_rec_decoder *d,int ct,
-  int ver,UCHAR *data,UINT4 datalen,UCHAR *mac));
+  int ver,UCHAR *data,UINT4 datalen,UCHAR *iv,UINT4 ivlen,UCHAR *mac));
 static int fmt_seq PROTO_LIST((UINT4 num,UCHAR *buf));
 
 int ssl_create_rec_decoder(dp,cs,mk,sk,iv)
@@ -161,7 +161,8 @@ int ssl_destroy_rec_decoder(dp)
     *dp=0;
     return(0);
   }
-    
+
+
 int ssl_decode_rec_data(ssl,d,ct,version,in,inl,out,outl)
   ssl_obj *ssl;
   ssl_rec_decoder *d;
@@ -174,50 +175,91 @@ int ssl_decode_rec_data(ssl,d,ct,version,in,inl,out,outl)
   {
 #ifdef OPENSSL
     int pad;
-    int r;
-    UCHAR *mac;
+    int r,encpadl;
+    UCHAR *mac,*iv;
     
     CRDUMP("Ciphertext",in,inl);
-    /* First decrypt*/
-    EVP_Cipher(d->evp,out,in,inl);
 
-    CRDUMP("Plaintext",out,inl);    
-    *outl=inl;
-    
-    /* Now strip off the padding*/
-    if(d->cs->block>1){
-      pad=out[inl-1];
-      *outl-=(pad+1);
-    }
+    if(ssl->extensions->encrypt_then_mac){
+      *outl=inl;
 
-    /* And the MAC */
-    *outl-=d->cs->dig_len;
-    mac=out+(*outl);
-    CRDUMP("Record data",out,*outl);
+      /* First strip off the MAC */
+      *outl-=d->cs->dig_len;
+      mac=in+(*outl);
 
-    /* Now check the MAC */
-    if(ssl->version==0x300){
-      if(r=ssl3_check_mac(d,ct,version,out,*outl,mac))
-        ERETURN(r);
-    }
-    else{
+      encpadl=*outl;
+      /* Now decrypt */
+      EVP_Cipher(d->evp,out,in,*outl);
+      CRDUMP("Plaintext",out,*outl);
+
+      /* And then strip off the padding*/
+      if(d->cs->block>1){
+	pad=out[*outl-1];
+	*outl-=(pad+1);
+      }
       /* TLS 1.1 and beyond: remove explicit IV, only used with
        * non-stream ciphers. */
       if (ssl->version>=0x0302 && ssl->cs->block > 1) {
           UINT4 blk = ssl->cs->block;
           if (blk <= *outl) {
-              *outl-=blk;
-              memmove(out, out+blk, *outl);
+	    *outl-=blk;
+	    memmove(out, out+blk, *outl);
           }
           else {
               DBG((0,"Block size greater than Plaintext!"));
               ERETURN(SSL_BAD_MAC);
           }
+
+	  if(r=tls_check_mac(d,ct,version,in+blk,encpadl,in,blk,mac))
+	    ERETURN(r);
+
       }
-      if(r=tls_check_mac(d,ct,version,out,*outl,mac))
-        ERETURN(r);
+      else
+	if(r=tls_check_mac(d,ct,version,in,encpadl,NULL,0,mac))
+	  ERETURN(r);
+
     }
+    else {
+      /* First decrypt*/
+      EVP_Cipher(d->evp,out,in,inl);
+
+      CRDUMP("Plaintext",out,inl);
+      *outl=inl;
     
+      /* Now strip off the padding*/
+      if(d->cs->block>1){
+	pad=out[inl-1];
+	*outl-=(pad+1);
+      }
+
+      /* And the MAC */
+      *outl-=d->cs->dig_len;
+      mac=out+(*outl);
+      CRDUMP("Record data",out,*outl);
+
+      /* Now check the MAC */
+      if(ssl->version==0x300){
+	if(r=ssl3_check_mac(d,ct,version,out,*outl,mac))
+	  ERETURN(r);
+      }
+      else{
+	/* TLS 1.1 and beyond: remove explicit IV, only used with
+	 * non-stream ciphers. */
+	if (ssl->version>=0x0302 && ssl->cs->block > 1) {
+          UINT4 blk = ssl->cs->block;
+          if (blk <= *outl) {
+	    *outl-=blk;
+	    memmove(out, out+blk, *outl);
+          }
+          else {
+	    DBG((0,"Block size greater than Plaintext!"));
+	    ERETURN(SSL_BAD_MAC);
+          }
+	}
+	if(r=tls_check_mac(d,ct,version,out,*outl,NULL,0,mac))
+	  ERETURN(r);
+      }
+    }
 #endif    
     return(0);
   }
@@ -241,13 +283,15 @@ static int fmt_seq(num,buf)
 
     return(0);
   }
-  
-static int tls_check_mac(d,ct,ver,data,datalen,mac)
+
+static int tls_check_mac(d,ct,ver,data,datalen,iv,ivlen,mac)
   ssl_rec_decoder *d;
   int ct;
   int ver;
   UCHAR *data;
   UINT4 datalen;
+  UCHAR *iv;
+  UINT4 ivlen;
   UCHAR *mac;
   {
     HMAC_CTX hm;
@@ -272,7 +316,13 @@ static int tls_check_mac(d,ct,ver,data,datalen,mac)
     buf[1]=LSB(datalen);
     HMAC_Update(&hm,buf,2);
 
-    HMAC_Update(&hm,data,datalen);
+    /* for encrypt-then-mac with an explicit IV */
+    if(ivlen && iv){
+      HMAC_Update(&hm,iv,ivlen);
+      HMAC_Update(&hm,data,datalen-ivlen);
+    }
+    else
+      HMAC_Update(&hm,data,datalen);
     
     HMAC_Final(&hm,buf,&l);
     if(memcmp(mac,buf,l))

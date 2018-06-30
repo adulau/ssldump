@@ -66,7 +66,8 @@ int ssl_process_client_key_exchange PROTO_LIST((struct ssl_obj_ *,
   ssl_decoder *d,UCHAR *msg,int len));
 int ssl_process_change_cipher_spec PROTO_LIST((ssl_obj *ssl,
   ssl_decoder *d,int direction));
-
+int ssl_update_handshake_messages PROTO_LIST((ssl_obj *ssl,
+  Data *data));
 int ssl_decode_record PROTO_LIST((ssl_obj *ssl,ssl_decoder *dec,int direction,
   int ct,int version,Data *d));
 

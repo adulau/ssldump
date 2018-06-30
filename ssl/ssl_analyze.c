@@ -265,6 +265,9 @@ static int create_ssl_analyzer(handle,ctx,conn,objp,i_addr,i_port,r_addr,r_port,
 
     if(r=ssl_decoder_create(&obj->decoder,obj->ssl_ctx))
       ABORT(r);
+
+    if (!(obj->extensions=malloc(sizeof(ssl_extensions))))
+      ABORT(R_NO_MEMORY);
     
     *objp=(proto_obj *)obj;
 
@@ -291,7 +294,8 @@ static int destroy_ssl_analyzer(objp)
     free_r_queue(obj->r2i_queue);
     ssl_decoder_destroy(&obj->decoder);
     free(obj->client_name);
-    free(obj->server_name);    
+    free(obj->server_name);
+    free(obj->extensions);
     free(*objp);
     *objp=0;
 
