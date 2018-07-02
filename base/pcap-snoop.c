@@ -104,7 +104,7 @@ int err_exit(str,num)
 
 int usage()
   {
-    fprintf(stderr,"Usage: ssldump [-r dumpfile] [-i interface] \n");
+    fprintf(stderr,"Usage: ssldump [-r dumpfile] [-i interface] [-l sslkeylogfile] \n");
     fprintf(stderr,"               [-k keyfile] [-p password] [-vtaTnsAxVNde]\n");
     fprintf(stderr,"               [filter]\n");
     exit(0);
@@ -293,7 +293,7 @@ int main(argc,argv)
 
     signal(SIGINT,sig_handler);
     
-    while((c=getopt(argc,argv,"vr:F:f:S:yTt:ai:k:p:nsAxXhHVNdqem:P"))!=EOF){
+    while((c=getopt(argc,argv,"vr:F:f:S:yTt:ai:k:l:p:nsAxXhHVNdqem:P"))!=EOF){
       switch(c){
         case 'v':
           print_version();
@@ -326,6 +326,9 @@ int main(argc,argv)
         case 'k':
           SSL_keyfile=strdup(optarg);
           break;
+        case 'l':
+	  SSL_keylogfile=strdup(optarg);
+	  break;
         case 'p':
           SSL_password=strdup(optarg);
           break;
@@ -465,6 +468,8 @@ int main(argc,argv)
         free(interface_name);
     if(SSL_keyfile)
         free(SSL_keyfile);
+    if(SSL_keylogfile)
+        free(SSL_keylogfile);
     if(SSL_password)
         free(SSL_password);
 

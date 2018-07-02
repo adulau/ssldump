@@ -77,6 +77,7 @@ static int print_ssl_record PROTO_LIST((ssl_obj *obj,int direction,
   segment *q,UCHAR *data,int len));
 char *SSL_keyfile=0;
 char *SSL_password=0;
+char *SSL_keylogfile=0;
 
 #define NEGATE 0x800000
 
