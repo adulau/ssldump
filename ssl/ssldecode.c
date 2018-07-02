@@ -857,7 +857,7 @@ static int ssl_generate_keying_material(ssl,d)
       if(r=r_data_alloc(&d->MS,48))
         ABORT(r);
 
-      if (ssl->extensions->extended_master_secret) {
+      if (ssl->extensions->extended_master_secret==2) {
 	if(r=ssl_generate_session_hash(ssl,d))
 	  ABORT(r);
 

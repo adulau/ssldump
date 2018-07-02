@@ -180,7 +180,7 @@ int ssl_decode_rec_data(ssl,d,ct,version,in,inl,out,outl)
     
     CRDUMP("Ciphertext",in,inl);
 
-    if(ssl->extensions->encrypt_then_mac){
+    if(ssl->extensions->encrypt_then_mac==2){
       *outl=inl;
 
       /* First strip off the MAC */
