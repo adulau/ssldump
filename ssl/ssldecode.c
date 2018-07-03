@@ -116,6 +116,7 @@ static int ssl_generate_keying_material PROTO_LIST((ssl_obj *ssl,
   ssl_decoder *d));
 static int ssl_generate_session_hash PROTO_LIST((ssl_obj *ssl,
   ssl_decoder *d));
+static int ssl_read_key_log_file PROTO_LIST((ssl_decoder *d));
 #endif
 
 static int ssl_create_session_lookup_key PROTO_LIST((ssl_obj *ssl,
@@ -1055,6 +1056,48 @@ static int ssl_generate_session_hash(ssl,d)
 
     _status=0;
   abort:
+    return(_status);
+  }
+
+static int ssl_read_key_log_file(d)
+  ssl_decoder *d;
+  {
+    int r,_status,dgi,n;
+    unsigned int t;
+    size_t l=0;
+    char *line,*label_data;
+
+    while ((n=getline(&line,&l,d->ctx->ssl_key_log_file))!=-1) {
+      if(n==(d->client_random->len*2)+112 &&
+	 !strncmp(line,"CLIENT_RANDOM",13)) {
+
+	if(!(label_data=malloc((d->client_random->len*2)+1)))
+	  ABORT(r);
+
+	for(int i=0;i<d->client_random->len;i++)
+	  if(snprintf(label_data+(i*2),3,"%02x",d->client_random->data[i])!=2)
+	    ABORT(r);
+
+	if(strncmp(line+14,label_data,64))
+	  continue;
+
+	if(r=r_data_alloc(&d->MS,48))
+	  ABORT(r);
+
+	for(int i=0; i < d->MS->len; i++) {
+	  if(sscanf(line+14+65+(i*2),"%2x",&t)!=1)
+	    ABORT(r);
+	  *(d->MS->data+i)=(char)t;
+	}
+      }
+      /*
+	 Eventually add support for other labels defined here:
+	 https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS/Key_Log_Format
+      */
+    }
+    _status=0;
+  abort:
+    fseek(d->ctx->ssl_key_log_file, SEEK_SET, 0);
     return(_status);
   }
 #endif
