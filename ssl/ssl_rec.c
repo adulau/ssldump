@@ -89,7 +89,9 @@ char *ciphers[]={
      "CAMELLIA128",
      "CAMELLIA256",
      "SEED",
-     NULL
+     NULL,
+     "aes-128-gcm",
+     "aes-256-gcm"
 };
 
 
