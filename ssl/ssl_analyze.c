@@ -219,7 +219,7 @@ static int create_ssl_ctx(handle,ctxp)
     ssl_decode_ctx *ctx=0;
     int r,_status;
     
-    if(r=ssl_decode_ctx_create(&ctx,SSL_keyfile,SSL_password))
+    if(r=ssl_decode_ctx_create(&ctx,SSL_keyfile,SSL_password,SSL_keylogfile))
       ABORT(r);
 
     *ctxp=(proto_ctx *)ctx;

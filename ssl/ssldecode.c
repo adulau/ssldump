@@ -76,6 +76,7 @@ struct ssl_decode_ctx_ {
      SSL_CTX *ssl_ctx;
      SSL *ssl;
      r_assoc *session_cache;
+     FILE *ssl_key_log_file;
 #else
      char dummy;       /* Some compilers (Win32) don't like empty
                            structs */
@@ -132,10 +133,11 @@ static int password_cb(char *buf,int num,int rwflag,void *userdata)
     return(strlen(ssl_password));
   }
 
-int ssl_decode_ctx_create(dp,keyfile,pass)
+int ssl_decode_ctx_create(dp,keyfile,pass,keylogfile)
   ssl_decode_ctx **dp;
   char *keyfile;
   char *pass;
+  char *keylogfile;
   {
 #ifdef OPENSSL    
     ssl_decode_ctx *d=0;
@@ -168,6 +170,11 @@ int ssl_decode_ctx_create(dp,keyfile,pass)
     
     if(r_assoc_create(&d->session_cache))
       ABORT(R_NO_MEMORY);
+
+    if(keylogfile && !(d->ssl_key_log_file=fopen(keylogfile, "r"))){
+      fprintf(stderr,"Failed to open ssl key log file");
+      ABORT(R_INTERNAL);
+    }
 
     X509V3_add_standard_extensions();
 
@@ -539,9 +546,8 @@ int ssl_process_client_key_exchange(ssl,d,msg,len)
 #ifdef OPENSSL
     int r,_status;
     int i;
-
     EVP_PKEY *pk;
-    
+
     if(ssl->cs->kex!=KEX_RSA)
       return(-1);
 
