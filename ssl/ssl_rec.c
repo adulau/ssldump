@@ -61,6 +61,8 @@ static char *RCSSTRING="$Id: ssl_rec.c,v 1.3 2000/11/03 06:38:06 ekr Exp $";
 struct ssl_rec_decoder_ {
      SSL_CipherSuite *cs;
      Data *mac_key;
+     Data *implicit_iv; /* for AEAD ciphers */
+     Data *write_key; /* for AEAD ciphers */
 #ifdef OPENSSL     
      EVP_CIPHER_CTX *evp;
 #endif     
@@ -125,8 +127,28 @@ int ssl_create_rec_decoder(dp,cs,mk,sk,iv)
       ABORT(R_NO_MEMORY);
 
     dec->cs=cs;
-    if(r=r_data_create(&dec->mac_key,mk,cs->dig_len))
+
+    if(r=r_data_alloc(&dec->mac_key,cs->dig_len))
       ABORT(r);
+
+    if(r=r_data_alloc(&dec->implicit_iv,cs->block))
+      ABORT(r);
+    memcpy(dec->implicit_iv->data,iv,cs->block);
+
+    if(r=r_data_create(&dec->write_key,sk,cs->eff_bits/8))
+      ABORT(r);
+
+    /*
+       This is necessary for AEAD ciphers, because we must wait to fully initialize the cipher
+       in order to include the implicit IV
+    */
+    if(cs->enc==0x3b || cs->enc==0x3c){
+      sk=NULL;
+      iv=NULL;
+    }
+    else
+      memcpy(dec->mac_key->data,mk,cs->dig_len);
+
     if(!(dec->evp=(EVP_CIPHER_CTX *)malloc(sizeof(EVP_CIPHER_CTX))))
       ABORT(R_NO_MEMORY);
     EVP_CIPHER_CTX_init(dec->evp);
@@ -152,6 +174,8 @@ int ssl_destroy_rec_decoder(dp)
     d=*dp;
 
     r_data_destroy(&d->mac_key);
+    r_data_destroy(&d->implicit_iv);
+    r_data_destroy(&d->write_key);
 #ifdef OPENSSL    
     if(d->evp){
       EVP_CIPHER_CTX_cleanup(d->evp);
@@ -165,6 +189,9 @@ int ssl_destroy_rec_decoder(dp)
   }
 
 
+#define MSB(a) ((a>>8)&0xff)
+#define LSB(a) (a&0xff)
+
 int ssl_decode_rec_data(ssl,d,ct,version,in,inl,out,outl)
   ssl_obj *ssl;
   ssl_rec_decoder *d;
@@ -177,12 +204,44 @@ int ssl_decode_rec_data(ssl,d,ct,version,in,inl,out,outl)
   {
 #ifdef OPENSSL
     int pad;
-    int r,encpadl;
-    UCHAR *mac,*iv;
+    int r,encpadl,x;
+    UCHAR *mac,*iv,aead_tag[13],aead_nonce[12];
     
     CRDUMP("Ciphertext",in,inl);
 
-    if(ssl->extensions->encrypt_then_mac==2){
+    if(d->cs->enc==0x3b || d->cs->enc==0x3c){
+      memcpy(aead_nonce,d->implicit_iv->data,d->implicit_iv->len);
+      memcpy(aead_nonce+d->implicit_iv->len,in,12-d->implicit_iv->len);
+      in+=12-d->implicit_iv->len;
+      inl-=12-d->implicit_iv->len;
+
+      EVP_DecryptInit(d->evp,
+		      NULL,
+		      d->write_key->data,
+		      aead_nonce);
+      EVP_CIPHER_CTX_ctrl(d->evp,EVP_CTRL_GCM_SET_TAG,16,in+(inl-16));
+      inl-=d->cs->eff_bits/8;
+
+      fmt_seq(d->seq,aead_tag);
+      d->seq++;
+      aead_tag[8]=ct;
+      aead_tag[9]=MSB(version);
+      aead_tag[10]=LSB(version);
+      aead_tag[11]=MSB(inl);
+      aead_tag[12]=LSB(inl);
+
+      EVP_DecryptUpdate(d->evp,NULL,outl,aead_tag,13);
+      EVP_DecryptUpdate(d->evp,out,outl,in,inl);
+
+      if (!(x=EVP_DecryptFinal(d->evp,NULL,&x)))
+	ERETURN(SSL_BAD_MAC);
+    }
+
+    /*
+       Encrypt-then-MAC is not used with AEAD ciphers, as per:
+       https://tools.ietf.org/html/rfc7366#section-3
+    */
+    else if(ssl->extensions->encrypt_then_mac==2){
       *outl=inl;
 
       /* First strip off the MAC */
@@ -267,8 +326,6 @@ int ssl_decode_rec_data(ssl,d,ct,version,in,inl,out,outl)
   }
     
 
-#define MSB(a) ((a>>8)&0xff)
-#define LSB(a) (a&0xff)
 #ifdef OPENSSL
 
 /* This should go to 2^128, but we're never really going to see
