@@ -742,7 +742,8 @@ static int tls12_prf(ssl,secret,usage,rnd1,rnd2,out)
     memcpy(ptr,rnd2->data,rnd2->len); ptr+=rnd2->len;    
 
     /* Earlier versions of openssl didn't have SHA256 of course... */
-    dgi = MAX(DIG_SHA256, ssl->cs->dig)-0x40;
+    dgi = MAX(DIG_SHA256, ssl->cs->dig);
+    dgi-=0x40;
     if ((md=EVP_get_digestbyname(digests[dgi])) == NULL) {
         DBG((0,"Cannot get EVP for digest %s, openssl library current?",
                     digests[dgi]));
@@ -1086,7 +1087,7 @@ static int ssl_read_key_log_file(d)
 	  if(snprintf(label_data+(i*2),3,"%02x",d->client_random->data[i])!=2)
 	    ABORT(r);
 
-	if(strncmp(line+14,label_data,64))
+	if(STRNICMP(line+14,label_data,64))
 	  continue;
 
 	if(r=r_data_alloc(&d->MS,48))

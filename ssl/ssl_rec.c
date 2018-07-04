@@ -219,8 +219,13 @@ int ssl_decode_rec_data(ssl,d,ct,version,in,inl,out,outl)
 		      NULL,
 		      d->write_key->data,
 		      aead_nonce);
+
+      /*
+	 Then tag is always 16 bytes, as per:
+	 https://tools.ietf.org/html/rfc5116#section-5.2
+      */
       EVP_CIPHER_CTX_ctrl(d->evp,EVP_CTRL_GCM_SET_TAG,16,in+(inl-16));
-      inl-=d->cs->eff_bits/8;
+      inl-=16;
 
       fmt_seq(d->seq,aead_tag);
       d->seq++;
