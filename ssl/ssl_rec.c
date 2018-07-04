@@ -142,7 +142,7 @@ int ssl_create_rec_decoder(dp,cs,mk,sk,iv)
        This is necessary for AEAD ciphers, because we must wait to fully initialize the cipher
        in order to include the implicit IV
     */
-    if(cs->enc==0x3b || cs->enc==0x3c){
+    if(IS_AEAD_CIPHER(cs)){
       sk=NULL;
       iv=NULL;
     }
@@ -208,8 +208,7 @@ int ssl_decode_rec_data(ssl,d,ct,version,in,inl,out,outl)
     UCHAR *mac,*iv,aead_tag[13],aead_nonce[12];
     
     CRDUMP("Ciphertext",in,inl);
-
-    if(d->cs->enc==0x3b || d->cs->enc==0x3c){
+    if(IS_AEAD_CIPHER(d->cs)){
       memcpy(aead_nonce,d->implicit_iv->data,d->implicit_iv->len);
       memcpy(aead_nonce+d->implicit_iv->len,in,12-d->implicit_iv->len);
       in+=12-d->implicit_iv->len;

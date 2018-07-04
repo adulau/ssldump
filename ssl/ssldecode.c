@@ -889,7 +889,7 @@ static int ssl_generate_keying_material(ssl,d)
     /* Compute the key block. First figure out how much data
          we need*/
     /* Ideally find a cleaner way to check for AEAD cipher */
-    needed=(ssl->cs->enc!=0x3b && ssl->cs->enc!=0x3c)?ssl->cs->dig_len*2:0;
+    needed=!IS_AEAD_CIPHER(ssl->cs)?ssl->cs->dig_len*2:0;
     needed+=ssl->cs->bits / 4;
     if(ssl->cs->block>1) needed+=ssl->cs->block*2;
 
@@ -902,7 +902,7 @@ static int ssl_generate_keying_material(ssl,d)
     
     ptr=key_block->data;
     /* Ideally find a cleaner way to check for AEAD cipher */
-    if(ssl->cs->enc!=0x3b && ssl->cs->enc!=0x3c){
+    if(!IS_AEAD_CIPHER(ssl->cs)){
       c_mk=ptr; ptr+=ssl->cs->dig_len;
       s_mk=ptr; ptr+=ssl->cs->dig_len;
     }
