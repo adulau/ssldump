@@ -549,36 +549,40 @@ int ssl_process_client_key_exchange(ssl,d,msg,len)
     int i;
     EVP_PKEY *pk;
 
-    if(ssl->cs->kex!=KEX_RSA)
-      return(-1);
-
-    if(d->ephemeral_rsa)
-      return(-1);
-
-    pk=SSL_get_privatekey(d->ctx->ssl);
-    if(!pk)
-      return(-1);
-
-    if(pk->type!=EVP_PKEY_RSA)
-      return(-1);
- 
-    if(r=r_data_alloc(&d->PMS,BN_num_bytes(pk->pkey.rsa->n)))
-      ABORT(r);
-
-    i=RSA_private_decrypt(len,msg,d->PMS->data,
-      pk->pkey.rsa,RSA_PKCS1_PADDING);
-
-    if(i!=48)
-      ABORT(SSL_BAD_PMS);
-
-    d->PMS->len=48;
-      
-    CRDUMPD("PMS",d->PMS);
-
     /* Remove the master secret if it was there
        to force keying material regeneration in
        case we're renegotiating */
     r_data_destroy(&d->MS);
+
+    if(!d->ctx->ssl_key_log_file ||
+       ssl_read_key_log_file(d) ||
+       !d->MS){
+      if(ssl->cs->kex!=KEX_RSA)
+	return(-1);
+
+      if(d->ephemeral_rsa)
+	return(-1);
+
+      pk=SSL_get_privatekey(d->ctx->ssl);
+      if(!pk)
+	return(-1);
+
+      if(pk->type!=EVP_PKEY_RSA)
+	return(-1);
+ 
+      if(r=r_data_alloc(&d->PMS,BN_num_bytes(pk->pkey.rsa->n)))
+	ABORT(r);
+
+      i=RSA_private_decrypt(len,msg,d->PMS->data,
+			    pk->pkey.rsa,RSA_PKCS1_PADDING);
+
+      if(i!=48)
+	ABORT(SSL_BAD_PMS);
+
+      d->PMS->len=48;
+      
+      CRDUMPD("PMS",d->PMS);
+    }
     
     switch(ssl->version){
       case SSLV3_VERSION:
@@ -883,7 +887,8 @@ static int ssl_generate_keying_material(ssl,d)
 
     /* Compute the key block. First figure out how much data
          we need*/
-    needed=ssl->cs->dig_len*2;
+    /* Ideally find a cleaner way to check for AEAD cipher */
+    needed=(ssl->cs->enc!=0x3b && ssl->cs->enc!=0x3c)?ssl->cs->dig_len*2:0;
     needed+=ssl->cs->bits / 4;
     if(ssl->cs->block>1) needed+=ssl->cs->block*2;
 
@@ -895,8 +900,11 @@ static int ssl_generate_keying_material(ssl,d)
       ABORT(r);
     
     ptr=key_block->data;
-    c_mk=ptr; ptr+=ssl->cs->dig_len;
-    s_mk=ptr; ptr+=ssl->cs->dig_len;
+    /* Ideally find a cleaner way to check for AEAD cipher */
+    if(ssl->cs->enc!=0x3b && ssl->cs->enc!=0x3c){
+      c_mk=ptr; ptr+=ssl->cs->dig_len;
+      s_mk=ptr; ptr+=ssl->cs->dig_len;
+    }
 
     c_wk=ptr; ptr+=ssl->cs->eff_bits/8;
     s_wk=ptr; ptr+=ssl->cs->eff_bits/8;
