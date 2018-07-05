@@ -51,7 +51,7 @@
 #define CRDUMPD(a,b) P_(P_CR) {exdump(ssl,a,b);printf("\n");}
 
 int ssl_decode_ctx_create PROTO_LIST((ssl_decode_ctx **ctx,
-  char *keyfile,char *password));
+  char *keyfile,char *password,char *keylogfile));
 int ssl_decoder_destroy PROTO_LIST((ssl_decoder **dp));
 int ssl_decoder_create PROTO_LIST((ssl_decoder **dp,ssl_decode_ctx *ctx));
 int ssl_set_client_random PROTO_LIST((ssl_decoder *dp,

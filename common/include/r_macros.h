@@ -108,5 +108,18 @@ int debug(int class,char *format,...);
 
 #define UNIMPLEMENTED do { fprintf(stderr,"Function %s unimplemented\n",__FUNCTION__); abort(); } while(0)
 
+#ifdef STDC_HEADERS
+#include <string.h>
+#endif
+
+#ifndef STRNICMP
+
+#ifdef _WIN32
+#define STRNICMP(a,b,n) strnicmp(a,b,n)
+#else
+#define STRNICMP(a,b,n) strncasecmp(a,b,n)
+#endif
+
+#endif
 
 #endif 

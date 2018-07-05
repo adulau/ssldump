@@ -466,8 +466,10 @@ static int decode_HandshakeType_ClientKeyExchange(ssl,dir,seg,data)
 
             break;
         case KEX_DH:
-            SSL_DECODE_OPAQUE_ARRAY(ssl,"DiffieHellmanClientPublicValue",
-	        -(1<<15-1),P_HL,data,0);
+	  SSL_DECODE_OPAQUE_ARRAY(ssl,"DiffieHellmanClientPublicValue",
+				  -((1<<7)-1),P_HL,data,0);
+	  ssl_process_client_key_exchange(ssl,
+					  ssl->decoder,NULL,0);
       }
    }
    return(0);

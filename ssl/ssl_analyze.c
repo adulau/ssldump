@@ -77,6 +77,7 @@ static int print_ssl_record PROTO_LIST((ssl_obj *obj,int direction,
   segment *q,UCHAR *data,int len));
 char *SSL_keyfile=0;
 char *SSL_password=0;
+char *SSL_keylogfile=0;
 
 #define NEGATE 0x800000
 
@@ -218,7 +219,7 @@ static int create_ssl_ctx(handle,ctxp)
     ssl_decode_ctx *ctx=0;
     int r,_status;
     
-    if(r=ssl_decode_ctx_create(&ctx,SSL_keyfile,SSL_password))
+    if(r=ssl_decode_ctx_create(&ctx,SSL_keyfile,SSL_password,SSL_keylogfile))
       ABORT(r);
 
     *ctxp=(proto_ctx *)ctx;

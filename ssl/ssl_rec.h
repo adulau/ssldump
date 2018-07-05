@@ -55,5 +55,6 @@ int ssl_create_rec_decoder PROTO_LIST((ssl_rec_decoder **dp,
 int ssl_decode_rec_data PROTO_LIST((ssl_obj *ssl,ssl_rec_decoder *d,
   int ct,int version,UCHAR *in,int inl,UCHAR *out,int *outl));
 
+#define IS_AEAD_CIPHER(cs) (cs->enc==0x3b||cs->enc==0x3c)
 #endif
 

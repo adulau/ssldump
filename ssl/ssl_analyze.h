@@ -82,6 +82,7 @@ extern proto_mod ssl_mod;
 extern UINT4 SSL_print_flags;
 extern char *SSL_keyfile;
 extern char *SSL_password;
+extern char *SSL_keylogfile;
 
 #endif
 

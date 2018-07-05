@@ -76,6 +76,7 @@ struct ssl_decode_ctx_ {
      SSL_CTX *ssl_ctx;
      SSL *ssl;
      r_assoc *session_cache;
+     FILE *ssl_key_log_file;
 #else
      char dummy;       /* Some compilers (Win32) don't like empty
                            structs */
@@ -115,6 +116,7 @@ static int ssl_generate_keying_material PROTO_LIST((ssl_obj *ssl,
   ssl_decoder *d));
 static int ssl_generate_session_hash PROTO_LIST((ssl_obj *ssl,
   ssl_decoder *d));
+static int ssl_read_key_log_file PROTO_LIST((ssl_decoder *d));
 #endif
 
 static int ssl_create_session_lookup_key PROTO_LIST((ssl_obj *ssl,
@@ -132,10 +134,11 @@ static int password_cb(char *buf,int num,int rwflag,void *userdata)
     return(strlen(ssl_password));
   }
 
-int ssl_decode_ctx_create(dp,keyfile,pass)
+int ssl_decode_ctx_create(dp,keyfile,pass,keylogfile)
   ssl_decode_ctx **dp;
   char *keyfile;
   char *pass;
+  char *keylogfile;
   {
 #ifdef OPENSSL    
     ssl_decode_ctx *d=0;
@@ -168,6 +171,11 @@ int ssl_decode_ctx_create(dp,keyfile,pass)
     
     if(r_assoc_create(&d->session_cache))
       ABORT(R_NO_MEMORY);
+
+    if(keylogfile && !(d->ssl_key_log_file=fopen(keylogfile, "r"))){
+      fprintf(stderr,"Failed to open ssl key log file");
+      ABORT(R_INTERNAL);
+    }
 
     X509V3_add_standard_extensions();
 
@@ -539,39 +547,42 @@ int ssl_process_client_key_exchange(ssl,d,msg,len)
 #ifdef OPENSSL
     int r,_status;
     int i;
-
     EVP_PKEY *pk;
-    
-    if(ssl->cs->kex!=KEX_RSA)
-      return(-1);
-
-    if(d->ephemeral_rsa)
-      return(-1);
-
-    pk=SSL_get_privatekey(d->ctx->ssl);
-    if(!pk)
-      return(-1);
-
-    if(pk->type!=EVP_PKEY_RSA)
-      return(-1);
- 
-    if(r=r_data_alloc(&d->PMS,BN_num_bytes(pk->pkey.rsa->n)))
-      ABORT(r);
-
-    i=RSA_private_decrypt(len,msg,d->PMS->data,
-      pk->pkey.rsa,RSA_PKCS1_PADDING);
-
-    if(i!=48)
-      ABORT(SSL_BAD_PMS);
-
-    d->PMS->len=48;
-      
-    CRDUMPD("PMS",d->PMS);
 
     /* Remove the master secret if it was there
        to force keying material regeneration in
        case we're renegotiating */
     r_data_destroy(&d->MS);
+
+    if(!d->ctx->ssl_key_log_file ||
+       ssl_read_key_log_file(d) ||
+       !d->MS){
+      if(ssl->cs->kex!=KEX_RSA)
+	return(-1);
+
+      if(d->ephemeral_rsa)
+	return(-1);
+
+      pk=SSL_get_privatekey(d->ctx->ssl);
+      if(!pk)
+	return(-1);
+
+      if(pk->type!=EVP_PKEY_RSA)
+	return(-1);
+ 
+      if(r=r_data_alloc(&d->PMS,BN_num_bytes(pk->pkey.rsa->n)))
+	ABORT(r);
+
+      i=RSA_private_decrypt(len,msg,d->PMS->data,
+			    pk->pkey.rsa,RSA_PKCS1_PADDING);
+
+      if(i!=48)
+	ABORT(SSL_BAD_PMS);
+
+      d->PMS->len=48;
+      
+      CRDUMPD("PMS",d->PMS);
+    }
     
     switch(ssl->version){
       case SSLV3_VERSION:
@@ -731,7 +742,8 @@ static int tls12_prf(ssl,secret,usage,rnd1,rnd2,out)
     memcpy(ptr,rnd2->data,rnd2->len); ptr+=rnd2->len;    
 
     /* Earlier versions of openssl didn't have SHA256 of course... */
-    dgi = MAX(DIG_SHA256, ssl->cs->dig)-0x40;
+    dgi = MAX(DIG_SHA256, ssl->cs->dig);
+    dgi-=0x40;
     if ((md=EVP_get_digestbyname(digests[dgi])) == NULL) {
         DBG((0,"Cannot get EVP for digest %s, openssl library current?",
                     digests[dgi]));
@@ -876,7 +888,8 @@ static int ssl_generate_keying_material(ssl,d)
 
     /* Compute the key block. First figure out how much data
          we need*/
-    needed=ssl->cs->dig_len*2;
+    /* Ideally find a cleaner way to check for AEAD cipher */
+    needed=!IS_AEAD_CIPHER(ssl->cs)?ssl->cs->dig_len*2:0;
     needed+=ssl->cs->bits / 4;
     if(ssl->cs->block>1) needed+=ssl->cs->block*2;
 
@@ -888,8 +901,11 @@ static int ssl_generate_keying_material(ssl,d)
       ABORT(r);
     
     ptr=key_block->data;
-    c_mk=ptr; ptr+=ssl->cs->dig_len;
-    s_mk=ptr; ptr+=ssl->cs->dig_len;
+    /* Ideally find a cleaner way to check for AEAD cipher */
+    if(!IS_AEAD_CIPHER(ssl->cs)){
+      c_mk=ptr; ptr+=ssl->cs->dig_len;
+      s_mk=ptr; ptr+=ssl->cs->dig_len;
+    }
 
     c_wk=ptr; ptr+=ssl->cs->eff_bits/8;
     s_wk=ptr; ptr+=ssl->cs->eff_bits/8;
@@ -1049,6 +1065,48 @@ static int ssl_generate_session_hash(ssl,d)
 
     _status=0;
   abort:
+    return(_status);
+  }
+
+static int ssl_read_key_log_file(d)
+  ssl_decoder *d;
+  {
+    int r,_status,dgi,n;
+    unsigned int t;
+    size_t l=0;
+    char *line,*label_data;
+
+    while ((n=getline(&line,&l,d->ctx->ssl_key_log_file))!=-1) {
+      if(n==(d->client_random->len*2)+112 &&
+	 !strncmp(line,"CLIENT_RANDOM",13)) {
+
+	if(!(label_data=malloc((d->client_random->len*2)+1)))
+	  ABORT(r);
+
+	for(int i=0;i<d->client_random->len;i++)
+	  if(snprintf(label_data+(i*2),3,"%02x",d->client_random->data[i])!=2)
+	    ABORT(r);
+
+	if(STRNICMP(line+14,label_data,64))
+	  continue;
+
+	if(r=r_data_alloc(&d->MS,48))
+	  ABORT(r);
+
+	for(int i=0; i < d->MS->len; i++) {
+	  if(sscanf(line+14+65+(i*2),"%2x",&t)!=1)
+	    ABORT(r);
+	  *(d->MS->data+i)=(char)t;
+	}
+      }
+      /*
+	 Eventually add support for other labels defined here:
+	 https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS/Key_Log_Format
+      */
+    }
+    _status=0;
+  abort:
+    fseek(d->ctx->ssl_key_log_file, SEEK_SET, 0);
     return(_status);
   }
 #endif

@@ -74,6 +74,10 @@ ssldump \- dump SSL traffic on a network
 .I keyfile
 ]
 [
+.B \-l
+.I sslkeylogfile
+]
+[
 .B \-p
 .I password
 ]
@@ -209,6 +213,10 @@ traffic.
 Use \fIkeyfile\fP as the location of the SSL keyfile (OpenSSL format)
 Previous versions of ssldump automatically looked in ./server.pem.
 Now you must specify your keyfile every time.
+.TP
+.BI \-l " sslkeylogfile"
+Use \fIsslkeylogfile\fP as the location of the SSLKEYLOGFILE
+(https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS/Key_Log_Format)
 .TP
 .BI \-p " password"
 Use \fIpassword\fP as the SSL keyfile password.
