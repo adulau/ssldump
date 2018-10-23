@@ -2050,6 +2050,70 @@ decoder cipher_suite_decoder[]={
 		524416,
 		"SSL2_RC4_64_WITH_MD5",
 		0	},
+	{
+		2570,
+		"GREASE 0x0A0A",
+		0	},
+	{
+		6682,
+		"GREASE 0x1A1A",
+		0	},
+	{
+		10794,
+		"GREASE 0x2A2A",
+		0	},
+	{
+		14906,
+		"GREASE 0x3A3A",
+		0	},
+	{
+		19018,
+		"GREASE 0x4A4A",
+		0	},
+	{
+		23130,
+		"GREASE 0x5A5A",
+		0	},
+	{
+		27242,
+		"GREASE 0x6A6A",
+		0	},
+	{
+		31354,
+		"GREASE 0x7A7A",
+		0	},
+	{
+		35466,
+		"GREASE 0x8A8A",
+		0	},
+	{
+		39578,
+		"GREASE 0x9A9A",
+		0	},
+	{
+		43690,
+		"GREASE 0xAAAA",
+		0	},
+	{
+		47802,
+		"GREASE 0xBABA",
+		0	},
+	{
+		51914,
+		"GREASE 0xCACA",
+		0	},
+	{
+		56026,
+		"GREASE 0xDADA",
+		0	},
+	{
+		60138,
+		"GREASE 0xEAEA",
+		0	},
+	{
+		64250,
+		"GREASE 0xFAFA",
+		0	},
 {-1}
 };
 
