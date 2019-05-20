@@ -1,0 +1,9 @@
+*~
+.#*
+*.o
+ssldump
+Makefile
+config.log
+config.status
+dist
+autom4te.cache
