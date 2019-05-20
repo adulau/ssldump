@@ -39,6 +39,9 @@ CC=@CC@
 
 all: ssldump
 
+PACKAGE_TARNAME=@PACKAGE_TARNAME@
+PACKAGE_VERSION=@PACKAGE_VERSION@
+
 OBJSUFFIX=o
 LIBSUFFIX=a
 INSTALL=@INSTALL@
@@ -73,6 +76,8 @@ LIBS += @LDFLAGS@ @LIBS@
 CFLAGS += @CFLAGS@ @DEFS@
 
 
+.PHONY: clean install dist
+
 ssldump: $(OBJECTS)
 	$(CC) $(OBJECTS) -o $@ $(LIBS)
 
@@ -86,28 +91,29 @@ install:
 	$(INSTALL) -m 444 ssldump.1 $(MANDIR)/man1/ssldump.1
 
 dist:	
-	perl "./version-check.pl"
-	- name=ssldump-`cat VERSION`; \
-	rm -rf /dist/ship/$$name; \
-	mkdir /dist/ship/$$name; \
-	cp -pR * /dist/ship/$$name; \
-	cd /dist/ship/$$name; \
-	make -f Makefile.in clean; \
-	rm Makefile; \
-	find . -name '*~' -exec rm {} \; -print;\
-	find . -name '*.o' -exec rm {} \; -print;\
-	find . -name '#*#' -exec rm {} \; -print;\
-	find . -name 'CVS' -exec rm -rf {} \; -print;\
-	find . -name '*bak' -exec rm -rf {} \; -print;\
-	find . -name '*.core' -exec rm -rf {} \; -print;\
-	find . -name '*.tr' -exec rm -rf {} \; -print;\
-	find . -name '*.pl' -exec rm -rf {} \; -print;\
-	find . -name '*.pem' -exec rm -rf {} \; -print;\
-	find . -name '*orig' -exec rm -rf {} \; -print;\
-	find . -name '*.rej' -exec rm -rf {} \; -print;\
-	rm -f TODO TAGS; \
-	rm -f config.status config.log config.cache config.h; \
-	rm -f ssl/a.out all;  \
-	cd /dist/ship; tar cf - $$name | gzip > $$name.tar.gz 
-
-
+	rm -rf dist/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)
+	mkdir -p dist/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)
+	ls -1| grep -vx -e dist -e autom4te.cache \
+		| xargs cp -pR -t dist/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)
+	make -C dist/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION) clean
+	rm dist/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)/Makefile
+	find dist/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION) -name '*~' -exec rm {} \; -print
+	find dist/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION) -name '*.o' -exec rm {} \; -print
+	find dist/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION) -name '#*#' -exec rm {} \; -print
+	find dist/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION) -name '.#*' -exec rm {} \; -print
+	find dist/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION) -name 'CVS' -exec rm -rf {} \; -print
+	find dist/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION) -name '*bak' -exec rm -rf {} \; -print
+	find dist/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION) -name '*.core' -exec rm -rf {} \; -print
+	find dist/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION) -name '*.tr' -exec rm -rf {} \; -print
+	find dist/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION) -name '*.pl' -exec rm -rf {} \; -print
+	find dist/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION) -name '*.pem' -exec rm -rf {} \; -print
+	find dist/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION) -name '*orig' -exec rm -rf {} \; -print
+	find dist/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION) -name '*.rej' -exec rm -rf {} \; -print
+	rm -f dist/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)/config.status
+	rm -f dist/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)/config.log
+	rm -f dist/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)/config.cache
+	rm -f dist/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)/config.h
+	rm -f dist/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)/ssl/a.out
+	rm -f dist/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)/all
+	tar cf - -C dist $(PACKAGE_TARNAME)-$(PACKAGE_VERSION) \
+		| gzip >dist/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar.gz
