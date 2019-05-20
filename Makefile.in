@@ -49,6 +49,8 @@ prefix=@prefix@
 exec_prefix=@exec_prefix@
 sbindir=@sbindir@
 mandir=@mandir@
+datarootdir=@datarootdir@
+docdir=@docdir@
 RM=rm -f
 
 ROOT=./
@@ -85,10 +87,16 @@ clean:
 	rm -f $(OBJECTS) ssldump
 
 install: 
-	[ -d $(sbindir) ] || mkdir -p $(sbindir)
+	$(INSTALL) -m 755 -d $(sbindir)
+	$(INSTALL) -m 755 -d $(mandir)/man1
+	$(INSTALL) -m 755 -d $(docdir)
 	$(INSTALL) -m 755 ssldump $(sbindir)/ssldump
-	[ -d $(mandir) ] || mkdir -p $(mandir)/man1
-	$(INSTALL) -m 444 ssldump.1 $(mandir)/man1/ssldump.1
+	$(INSTALL) -m 644 ssldump.1 $(mandir)/man1/ssldump.1
+	$(INSTALL) -m 644 README $(docdir)
+	$(INSTALL) -m 644 README.md $(docdir)
+	$(INSTALL) -m 644 ChangeLog $(docdir)
+	$(INSTALL) -m 644 COPYRIGHT $(docdir)
+	$(INSTALL) -m 644 CREDITS $(docdir)
 
 dist:	
 	rm -rf dist/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)
