@@ -1071,7 +1071,7 @@ static int ssl_generate_session_hash(ssl,d)
 static int ssl_read_key_log_file(d)
   ssl_decoder *d;
   {
-    int r,_status,dgi,n;
+    int r,_status,dgi,n,i;
     unsigned int t;
     size_t l=0;
     char *line,*label_data;
@@ -1083,7 +1083,7 @@ static int ssl_read_key_log_file(d)
 	if(!(label_data=malloc((d->client_random->len*2)+1)))
 	  ABORT(r);
 
-	for(int i=0;i<d->client_random->len;i++)
+        for(i=0;i<d->client_random->len;i++)
 	  if(snprintf(label_data+(i*2),3,"%02x",d->client_random->data[i])!=2)
 	    ABORT(r);
 
@@ -1093,7 +1093,7 @@ static int ssl_read_key_log_file(d)
 	if(r=r_data_alloc(&d->MS,48))
 	  ABORT(r);
 
-	for(int i=0; i < d->MS->len; i++) {
+        for(i=0; i < d->MS->len; i++) {
 	  if(sscanf(line+14+65+(i*2),"%2x",&t)!=1)
 	    ABORT(r);
 	  *(d->MS->data+i)=(char)t;
