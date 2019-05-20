@@ -47,8 +47,8 @@ LIBSUFFIX=a
 INSTALL=@INSTALL@
 prefix=@prefix@
 exec_prefix=@exec_prefix@
-BINDIR=@sbindir@
-MANDIR=@mandir@
+sbindir=@sbindir@
+mandir=@mandir@
 RM=rm -f
 
 ROOT=./
@@ -85,10 +85,10 @@ clean:
 	rm -f $(OBJECTS) ssldump
 
 install: 
-	[ -d $(BINDIR) ] || mkdir -p $(BINDIR)
-	$(INSTALL) -m 755 ssldump $(BINDIR)/ssldump
-	[ -d $(MANDIR) ] || mkdir -p $(MANDIR)/man1
-	$(INSTALL) -m 444 ssldump.1 $(MANDIR)/man1/ssldump.1
+	[ -d $(sbindir) ] || mkdir -p $(sbindir)
+	$(INSTALL) -m 755 ssldump $(sbindir)/ssldump
+	[ -d $(mandir) ] || mkdir -p $(mandir)/man1
+	$(INSTALL) -m 444 ssldump.1 $(mandir)/man1/ssldump.1
 
 dist:	
 	rm -rf dist/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)
