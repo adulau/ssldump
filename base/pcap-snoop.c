@@ -115,7 +115,7 @@ int usage()
 
 int print_version()
   {
-    printf("ssldump 0.9b3\n");
+    printf(PACKAGE_STRING "\n");
     printf("Copyright (C) 1998-2001 RTFM, Inc.\n");
     printf("All rights reserved.\n");
 #ifdef OPENSSL    
