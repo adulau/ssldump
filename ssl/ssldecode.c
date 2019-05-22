@@ -172,9 +172,13 @@ int ssl_decode_ctx_create(dp,keyfile,pass,keylogfile)
     if(r_assoc_create(&d->session_cache))
       ABORT(R_NO_MEMORY);
 
-    if(keylogfile && !(d->ssl_key_log_file=fopen(keylogfile, "r"))){
-      fprintf(stderr,"Failed to open ssl key log file");
-      ABORT(R_INTERNAL);
+    if (keylogfile) {
+      if(!(d->ssl_key_log_file=fopen(keylogfile, "r"))){
+        fprintf(stderr,"Failed to open ssl key log file");
+        ABORT(R_INTERNAL);
+      }
+    } else {
+      d->ssl_key_log_file = NULL;
     }
 
     X509V3_add_standard_extensions();
@@ -1106,7 +1110,8 @@ static int ssl_read_key_log_file(d)
     }
     _status=0;
   abort:
-    fseek(d->ctx->ssl_key_log_file, SEEK_SET, 0);
+    if (d->ctx->ssl_key_log_file != NULL)
+      fseek(d->ctx->ssl_key_log_file, 0, SEEK_SET);
     return(_status);
   }
 #endif
