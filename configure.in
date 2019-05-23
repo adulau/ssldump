@@ -1,39 +1,42 @@
 dnl Copyright (C) 1999-2000 RTFM, Inc.
 dnl All Rights Reserved
 
-dnl This package is a SSLv3/TLS protocol analyzer written by Eric Rescorla
-dnl <ekr\@rtfm.com> and licensed by RTFM, Inc.
+dnl This package is a SSLv3/TLS protocol analyzer written by Eric
+dnl Rescorla <ekr@rtfm.com> and licensed by RTFM, Inc.
 
 dnl Redistribution and use in source and binary forms, with or without
 dnl modification, are permitted provided that the following conditions
 dnl are met:
 dnl 1. Redistributions of source code must retain the above copyright
 dnl    notice, this list of conditions and the following disclaimer.
-dnl 2. Redistributions in binary form must reproduce the above copyright
-dnl    notice, this list of conditions and the following disclaimer in the
-dnl    documentation and/or other materials provided with the distribution.
-dnl 3. All advertising materials mentioning features or use of this software
-dnl    must display the following acknowledgement:
-dnl 
+dnl 2. Redistributions in binary form must reproduce the above
+dnl    copyright notice, this list of conditions and the following
+dnl    disclaimer in the documentation and/or other materials provided
+dnl    with the distribution.
+dnl 3. All advertising materials mentioning features or use of this
+dnl    software must display the following acknowledgement:
+dnl
 dnl    This product includes software developed by Eric Rescorla for
 dnl    RTFM, Inc.
 dnl
-dnl 4. Neither the name of RTFM, Inc. nor the name of Eric Rescorla may be
-dnl    used to endorse or promote products derived from this
+dnl 4. Neither the name of RTFM, Inc. nor the name of Eric Rescorla
+dnl    may be used to endorse or promote products derived from this
 dnl    software without specific prior written permission.
 dnl
-dnl THIS SOFTWARE IS PROVIDED BY ERIC RESCORLA AND RTFM, INC. ``AS IS'' AND
-dnl ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-dnl IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-dnl ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
-dnl FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-dnl DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
-dnl OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-dnl HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-dnl LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-dnl OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+dnl THIS SOFTWARE IS PROVIDED BY ERIC RESCORLA AND RTFM, INC. ``AS
+dnl IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+dnl LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+dnl FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+dnl REGENTS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+dnl INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+dnl (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+dnl SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+dnl HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+dnl CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+dnl OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+dnl EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(base/pcap-snoop.c)
+AC_INIT(ssldump, 0.9b3p1)
 AC_CANONICAL_SYSTEM
 
 dnl Checks for programs.
@@ -104,7 +107,7 @@ ac_found_pcap_lib_dir="no"
 for dir in $ac_pcap_lib_dir; do
 	if test -f $dir/libpcap.a -o -f $dir/libpcap.so; then
 	dnl Ok, we think we've found them, but check that they
-	dnl actually ontain the right functions
+        dnl actually contain the right functions.
 		save_LIBS=$LIBS
 		save_LDFLAGS=$LDFLAGS
 		LIBS="-lpcap $LIBS"
@@ -182,7 +185,7 @@ if test "$ac_use_openssl" != "false"; then
 		fi
 		if $found_ssl != "false"; then
 		dnl Ok, we think we've found them, but check that they
-		dnl actually ontain the right functions
+                dnl actually contain the right functions.
 		save_LIBS=$LIBS
 		save_LDFLAGS=$LDFLAGS
 		LIBS="-lssl -lcrypto $LIBS"
