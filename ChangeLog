@@ -1,3 +1,204 @@
+
+Changelog
+=========
+
+v1.0 (2019-05-26)
+-----------------
+- Merge pull request #21 from qha/repair-make-targets. [Alexandre
+  Dulaunoy]
+
+  Repair make targets and ssl/ssldecode.c, bump version
+- Rerun autoconf. [Ulrik Haugen]
+- Bump version. [Ulrik Haugen]
+- Repair ssl_key_log_file handling. [Ulrik Haugen]
+
+  Set ssl_key_log_file to null in ssl_decode_ctx_create if no
+  file name was supplied.
+
+  Only seek ssl_key_log_file in ssl_read_key_log_file if it
+  is non null.
+
+  Repair order of fseek parameters.
+- Take project name and version from configure define. [Ulrik Haugen]
+
+  ... in print_version.
+- Enable compiling without std c99 when OPENSSL is defined. [Ulrik
+  Haugen]
+- Repair spelling in comments. [Ulrik Haugen]
+- Remove presumably extraneous files. [Ulrik Haugen]
+- Remove extraneous files. [Ulrik Haugen]
+- Add .gitignore. [Ulrik Haugen]
+- Make install target install doc files. [Ulrik Haugen]
+- Repair installdir variable names. [Ulrik Haugen]
+- Repair dist target. [Ulrik Haugen]
+
+  Mark phony targets as such.
+
+  Cease use of unobtainable version-check.pl.
+
+  Take version from configure substituted variable.
+
+  Adjust dist archive location.
+
+  Prune more backup files.
+- Whitespace. [Ulrik Haugen]
+- Set package name in configure.in, move version there. [Ulrik Haugen]
+- Merge pull request #19 from 1div0/master. [Alexandre Dulaunoy]
+
+  GREASE
+- GREASE. [Peter Kovář]
+- Merge pull request #18 from mathewmarcus/dh_aes_gcm_support.
+  [Alexandre Dulaunoy]
+
+  Dh aes gcm support
+- Use macro to check if cipher is AEAD. [mathewmarcus]
+- Update man page with -l sslkeylogfile option. [mathewmarcus]
+- Updated relevant ciphersuites with GCM enc. [mathewmarcus]
+- Added fix for AES256 GCM decryption. [mathewmarcus]
+- Added case insensitive string comparison macro. [mathewmarcus]
+- Added support for AES GCM decryption. [mathewmarcus]
+- Use sslkeylogfile to get MS if possible. [mathewmarcus]
+- Added function to extract MS from sslkeylogfile. [mathewmarcus]
+- Added GCM specific ciphersuite info. [mathewmarcus]
+- Added sslkeylogfile pointer to decode ctx. [mathewmarcus]
+- Fix decoding and printing of DiffieHellman Client params.
+  [mathewmarcus]
+- Add l option for SSLKEYLOGFILE. [mathewmarcus]
+- Merge pull request #17 from mathewmarcus/fix_extension_bug. [Alexandre
+  Dulaunoy]
+
+  correctly handle case where server hello does not request extension s…
+- Improve syntax. [mathewmarcus]
+- Correctly handle case where server hello does not request extension
+  specified by client. [mathewmarcus]
+- Merge pull request #16 from mathewmarcus/tls_extensions. [Alexandre
+  Dulaunoy]
+
+  Tls extensions
+- Code cleanup. [mathewmarcus]
+- Added support for SNI. [mathewmarcus]
+- Added support for encrypt-then-mac. [mathewmarcus]
+- Finished support for extended master secret. [mathewmarcus]
+- Calculate session hash. [mathewmarcus]
+- Added struct to store extensions. [mathewmarcus]
+- Added struct to store extensions. [mathewmarcus]
+- Revert "moved struct ssl_decoder_ definition into header file because
+  we need it in ssl.enums.c" [Mathew Marcus]
+
+  This reverts commit 193c6001086920c0623593aba373f948aa275f8d.
+- Moved struct ssl_decoder_ definition into header file because we need
+  it in ssl.enums.c. [mathewmarcus]
+- Added handler for extended master secret extension. [mathewmarcus]
+- Rename functions. [mathewmarcus]
+- Record handshake messages for session hash. [Mathew Marcus]
+- Include extensions in output. [mathewmarcus]
+- Merge pull request #15 from Whissi/update-ciphers. [Alexandre
+  Dulaunoy]
+
+  Update ciphers
+- Adjust cipher suite formation. [Thomas Deutschmann]
+- Add TLS 1.3 cipher suites. [Thomas Deutschmann]
+- Add fallback signaling cipher suite. [Thomas Deutschmann]
+- Add CHACHA20_POLY1305 cipher suite. [Thomas Deutschmann]
+- Merge pull request #14 from davidkretch/fix-typo. [Alexandre Dulaunoy]
+
+  Fix a typo in the man page
+- Fix a typo in the man page. [David Kretch]
+
+  Delete the extra "to" in "To decrypt traffic to to host" under the examples section.
+- Merge pull request #13 from alperakcan/master. [Alexandre Dulaunoy]
+
+  fix ssl record queue data read
+- - fix mis calculation of read_left if queue already has some data,
+  which might not be bigger than ssl_header_size - update q->ptr only if
+  q->data is changed. [Alper Akcan]
+- Merge pull request #1 from adulau/master. [Alper Akcan]
+
+  Merge pull request #12 from alperakcan/master
+- Merge pull request #12 from alperakcan/master. [Alexandre Dulaunoy]
+
+  Fix packet length calculation if IP length is 0, due to TSO
+- Fix packet length calculation if IP length is 0, due to TSO. [Alper
+  Akcan]
+- Typo fixed. [Alexandre Dulaunoy]
+- Explanation added in a new README. [Alexandre Dulaunoy]
+- Merge pull request #9 from PequalsNP-team/master. [Alexandre Dulaunoy]
+
+  updated configure for new libpcap location on most linux distro
+- Updated configure for new libpcap location on most linux distro.
+  [thez3ro]
+- Merge pull request #7 from knowtoto/master. [Alexandre Dulaunoy]
+
+  Fix a null pointer dereference bug
+- Fix a null pointer dereference bug of tls12_prf be caused by invalid
+  extern declaration for digests variable. [hyunkyu.oh]
+- Merge pull request #5 from wllm-rbnt/master. [Alexandre Dulaunoy]
+
+  More code cleaning
+- Include string.h (remove warnings about memcpy) [William Robinet]
+- Fix order of arguments in calls to calloc. [William Robinet]
+- "Each invocation of va_start() must be matched by a corresponding
+  invocation of va_end()" [William Robinet]
+- Remove dead code. [William Robinet]
+- Do not use uninitialized variable. [William Robinet]
+- Make valgrind/memcheck happy. [William Robinet]
+- Add missing comma (introduced by
+  2d067c26503ace1466d132e7efd9f0ff7885295a) [William Robinet]
+- Merge pull request #4 from wllm-rbnt/master. [Alexandre Dulaunoy]
+
+  Fix cleanup loop
+- Avoid auto-vivisection during connection clean-up ... [William
+  Robinet]
+- Fix inactive connection removal. [William Robinet]
+- Merge pull request #3 from wllm-rbnt/master. [Alexandre Dulaunoy]
+
+  [bugfix] Initialize initial reference timeval
+- Initialize initial reference timeval Avoids wrong cleaning of first
+  connection(s) [William Robinet]
+- Merge pull request #2 from wllm-rbnt/master. [Alexandre Dulaunoy]
+
+  Fixes for 2 memory leaks and in flight structure cleaning
+- Fix memory leak if SSL session id is not present. [William Robinet]
+- In flight connection pool cleaning. [William Robinet]
+- Fix memory leak at connection closing. [William Robinet]
+- Merge pull request #1 from wllm-rbnt/csloop. [Alexandre Dulaunoy]
+
+  Fix for infinite loop in Ciphers Suite decoding
+- Fix for infinite loop in Ciphers Suite decoding. [William Robinet]
+- Dtable bug fixed: list overrun (from NetBSD tree) [Alexandre Dulaunoy]
+- Memory leak per TLS session removed. Call cleanup after each
+  finalization. [Alexandre Dulaunoy]
+- Free also the packet structure. [Alexandre Dulaunoy]
+- Snaplen increased to the default jumbo frame size. [Alexandre
+  Dulaunoy]
+
+  If the snaplen is lower than the total frame length announced,
+  ssldump won't be able to reassemble the payload. "Length mismatch"
+  error. Tested on Ethernet uplinks supporting jumbo frame.
+- Continue even if no IP address is assigned on the interface.
+  [Alexandre Dulaunoy]
+
+  ssldump in a production environment can be used on a capture
+  interface where no IP addresses are assigned. Print a warning instead
+  of exiting.
+- Modern config.guess/sub from Ubuntu ssldump package. [Alexandre
+  Dulaunoy]
+- Ssldump-0.9-ciphersuites.patch. [Alexandre Dulaunoy]
+- Ssldump-0.9-ssl-enums.patch. [Alexandre Dulaunoy]
+- Ssldump-0.9-tlsv12.patch. [Alexandre Dulaunoy]
+- Ssldump-0.9-pcap-vlan.patch. [Alexandre Dulaunoy]
+- Ssldump-0.9-link_layer.patch. [Alexandre Dulaunoy]
+- Ssldump-0.9-table-stops.patch. [Alexandre Dulaunoy]
+- Sldump-0.9-cvs-20060619.patch. [Alexandre Dulaunoy]
+- Sldump-0.9-aes.patch. [Alexandre Dulaunoy]
+- Sldump-0.9-libpcap.patch. [Alexandre Dulaunoy]
+- Ssldump-0.9-openssl.patch. [Alexandre Dulaunoy]
+- Ssldump_0.9b3.orig.tar.gz Import. [Alexandre Dulaunoy]
+
+
+Original changelog file
+-----------------------
+
 Mon 29 May 2017 03:49:00 PM +03 Alper <alper.akcan@gmail.com>
 	* Fix packet length calculation if IP length is
 	  0 due to TSO.
