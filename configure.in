@@ -36,7 +36,7 @@ dnl CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 dnl OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 dnl EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(ssldump, 0.9b3p1)
+AC_INIT(ssldump, 1.0)
 AC_CANONICAL_SYSTEM
 
 dnl Checks for programs.
