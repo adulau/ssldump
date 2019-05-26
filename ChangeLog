@@ -1,9 +1,18 @@
-
 Changelog
 =========
 
+
 v1.0 (2019-05-26)
 -----------------
+
+Changes
+~~~~~~~
+- [build] v1.0 released. [Alexandre Dulaunoy]
+- [changelog] v1.0 released. [Alexandre Dulaunoy]
+- [build] gitchangelogrc configuration added. [Alexandre Dulaunoy]
+
+Other
+~~~~~
 - Merge pull request #21 from qha/repair-make-targets. [Alexandre
   Dulaunoy]
 
@@ -194,6 +203,7 @@ v1.0 (2019-05-26)
 - Sldump-0.9-libpcap.patch. [Alexandre Dulaunoy]
 - Ssldump-0.9-openssl.patch. [Alexandre Dulaunoy]
 - Ssldump_0.9b3.orig.tar.gz Import. [Alexandre Dulaunoy]
+
 
 
 Original changelog file
