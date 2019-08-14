@@ -91,18 +91,13 @@ int process_tcp_packet(handler,ctx,p)
       if(r!=R_NOT_FOUND)
 	ABORT(r);
 
-      /*Note that we MUST receive the 3-way handshake in the
-	proper order. This shouldn't be a problem, though,
-        except for simultaneous connects*/
-      if((p->tcp->th_flags & (TH_SYN|TH_ACK))!=TH_SYN){
+      if((p->tcp->th_flags & TH_SYN)!=TH_SYN){
 	DBG((0,"TCP: rejecting packet from unknown connection, seq: %u\n",ntohl(p->tcp->th_seq)));
 	return(0);
       }
-      
-      DBG((0,"SYN1 seq: %u",ntohl(p->tcp->th_seq)));
+
       if(r=new_connection(handler,ctx,p,&conn))
 	ABORT(r);
-      conn->i2r.seq=ntohl(p->tcp->th_seq)+1;
       return(0);
     }
 
@@ -112,16 +107,22 @@ int process_tcp_packet(handler,ctx,p)
 
     switch(conn->state){
       case TCP_STATE_SYN1:
-	if(direction != DIR_R2I)
-	  break;
-	if((p->tcp->th_flags & (TH_SYN|TH_ACK))!=(TH_SYN|TH_ACK))
- 	  break;
-	conn->r2i.seq=ntohl(p->tcp->th_seq)+1;
-	conn->r2i.ack=ntohl(p->tcp->th_ack)+1;
-	conn->state=TCP_STATE_SYN2;
-	DBG((0,"SYN2 seq: %u",ntohl(p->tcp->th_seq)));
-	break;
+      	if(direction == DIR_R2I && (p->tcp->th_flags & TH_SYN)) {
+         	DBG((0,"SYN2 seq: %u",ntohl(p->tcp->th_seq)));
+        	conn->r2i.seq=ntohl(p->tcp->th_seq)+1;
+        	conn->r2i.ack=ntohl(p->tcp->th_ack)+1;
+        	conn->state=TCP_STATE_ACK;
+        }
+      	break;
       case TCP_STATE_SYN2:
+        if(direction == DIR_I2R && (p->tcp->th_flags & TH_SYN)) {
+         	DBG((0,"SYN1 seq: %u",ntohl(p->tcp->th_seq)));
+        	conn->i2r.seq=ntohl(p->tcp->th_seq)+1;
+        	conn->i2r.ack=ntohl(p->tcp->th_ack)+1;
+        	conn->state=TCP_STATE_ACK;
+        }
+        break;
+      case TCP_STATE_ACK:
         {
           char *sn=0,*dn=0;
 	if(direction != DIR_I2R)
@@ -178,11 +179,23 @@ static int new_connection(handler,ctx,p,connp)
     int r,_status;
     tcp_conn *conn=0;
 
-    if(r=tcp_create_conn(&conn,&p->ip->ip_src,ntohs(p->tcp->th_sport),
-      &p->ip->ip_dst,ntohs(p->tcp->th_dport)))
-      ABORT(r);
-
-    conn->state=TCP_STATE_SYN1;
+    if ((p->tcp->th_flags & (TH_SYN|TH_ACK))==TH_SYN) {
+      if(r=tcp_create_conn(&conn,&p->ip->ip_src,ntohs(p->tcp->th_sport),
+        &p->ip->ip_dst,ntohs(p->tcp->th_dport)))
+        ABORT(r);
+      DBG((0,"SYN1 seq: %u",ntohl(p->tcp->th_seq)));
+      conn->i2r.seq=ntohl(p->tcp->th_seq)+1;
+      conn->i2r.ack=ntohl(p->tcp->th_ack)+1;
+      conn->state=TCP_STATE_SYN1;
+    } else { // SYN&ACK comes first somehow
+      if(r=tcp_create_conn(&conn,&p->ip->ip_dst,ntohs(p->tcp->th_dport),
+        &p->ip->ip_src,ntohs(p->tcp->th_sport)))
+        ABORT(r);
+      DBG((0,"SYN2 seq: %u",ntohl(p->tcp->th_seq)));
+      conn->r2i.seq=ntohl(p->tcp->th_seq)+1;
+      conn->r2i.ack=ntohl(p->tcp->th_ack)+1;
+      conn->state=TCP_STATE_SYN2;
+    }
     memcpy(&conn->start_time,&p->ts,sizeof(struct timeval));
     memcpy(&conn->last_seen_time,&p->ts,sizeof(struct timeval));
     if(r=create_proto_handler(handler,ctx,&conn->analyzer,conn,&p->ts))
