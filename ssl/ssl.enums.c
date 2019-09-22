@@ -6,8 +6,8 @@
 #include <openssl/ssl.h>
 #endif
 #include "ssl.enums.h"
-static int decode_extension(ssl,dir,seg,data);
-static int decode_server_name(ssl,dir,seg,data);
+static int decode_extension(ssl_obj *ssl, int dir, segment *seg, Data *data);
+static int decode_server_name(ssl_obj *ssl, int dir, segment *seg, Data *data);
 static int decode_ContentType_ChangeCipherSpec(ssl,dir,seg,data)
   ssl_obj *ssl;
   int dir;
