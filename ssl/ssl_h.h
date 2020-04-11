@@ -74,6 +74,7 @@ typedef struct ssl_extensions_ {
 
 typedef struct ssl_obj_ {
      tcp_conn *conn;
+     proto_obj *logger_obj;
      int r_state;
      int i_state;
      int version;
