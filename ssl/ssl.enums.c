@@ -2669,6 +2669,17 @@ static int decode_server_name_type_host_name(ssl,dir,seg,data)
     printf(": %.*s",l,data->data);
 
     /* Possibly use data->data to set/modify ssl->server_name */
+	if (l!=0)
+	{
+		char* server_name;
+		server_name = calloc(l+1,sizeof(char));
+		if (server_name != NULL)
+		{
+			if (ssl->server_name) free(ssl->server_name);
+			memcpy(server_name,data->data,l);
+			ssl->server_name = server_name;
+		}
+	}
 
     data->len-=l;
     data->data+=l;
