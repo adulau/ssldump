@@ -24,7 +24,7 @@ static int decode_ContentType_ChangeCipherSpec(ssl,dir,seg,data)
     else{
       ssl->r_state=SSL_ST_SENT_CHANGE_CIPHER_SPEC;
     }
-    
+
     printf("\n");
     return(0);
 
@@ -36,7 +36,6 @@ static int decode_ContentType_Alert(ssl,dir,seg,data)
   Data *data;
   {
 
- 
    int r;
 
    if(ssl->record_encryption==REC_CIPHERTEXT){
@@ -63,7 +62,6 @@ static int decode_ContentType_Alert(ssl,dir,seg,data)
 	 printf("\n");
    }
    return(0);
-	
 
   }
 static int decode_ContentType_Handshake(ssl,dir,seg,data)
@@ -78,7 +76,7 @@ static int decode_ContentType_Handshake(ssl,dir,seg,data)
     int r;
     UINT4 t,l;
     int rs=0;
-    Data d;	
+    Data d;
 
     if(ssl->record_encryption==REC_CIPHERTEXT){
       printf("\n");
@@ -88,17 +86,17 @@ static int decode_ContentType_Handshake(ssl,dir,seg,data)
     while(data->len>0){
       SSL_DECODE_UINT8(ssl,0,0,data,&t);
       SSL_DECODE_UINT24(ssl,0,0,data,&l);
-	
+
       if(data->len<l){
         fprintf(stderr,"Error: short handshake length: expected %d got %d\n",
         l,data->len);
         ERETURN(R_EOD);
       }
-	
+
       d.data=data->data;
       d.len=l;
       data->len-=l;
-      data->data+=l;	
+      data->data+=l;
       P_(P_HL){
 	if(!rs){
 	  printf("\n");
@@ -117,18 +115,18 @@ static int decode_ContentType_application_data(ssl,dir,seg,data)
   Data *data;
   {
 
-  
+
     int r;
     Data d;
-    		
+
     SSL_DECODE_OPAQUE_ARRAY(ssl,"data",data->len,0,data,&d);
 
-    P_(P_AD){	
+    P_(P_AD){
 	    print_data(ssl,&d);
     }
     else {
 	printf("\n");
-    }      
+    }
     return(0);
 
   }
@@ -183,11 +181,11 @@ static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
     extern decoder cipher_suite_decoder[];
     extern decoder compression_method_decoder[];
     extern decoder extension_decoder[];
-	
+
     printf("\n");
     ssl_update_handshake_messages(ssl,data);
     SSL_DECODE_UINT8(ssl,0,0,data,&vj);
-    SSL_DECODE_UINT8(ssl,0,0,data,&vn);    
+    SSL_DECODE_UINT8(ssl,0,0,data,&vn);
 
     P_(P_HL) {explain(ssl,"Version %d.%d ",vj,vn);
         printf("\n");
@@ -207,7 +205,7 @@ static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
     P_(P_HL){
 	SSL_DECODE_UINT16(ssl,"cipher Suites len",0,data,&cslen);
         explain(ssl,"cipher suites\n");
-    
+
         odd = cslen % 2;
         if(odd) {
             printf("Wrong cipher suites length, fixing ...\n");
@@ -257,7 +255,7 @@ static int decode_HandshakeType_ServerHello(ssl,dir,seg,data)
   {
 
     int r;
-    Data rnd,session_id;	
+    Data rnd,session_id;
     UINT4 vj,vn,exlen,ex;
 
     extern decoder extension_decoder[];
@@ -265,14 +263,14 @@ static int decode_HandshakeType_ServerHello(ssl,dir,seg,data)
     printf("\n");
     ssl_update_handshake_messages(ssl,data);
     SSL_DECODE_UINT8(ssl,0,0,data,&vj);
-    SSL_DECODE_UINT8(ssl,0,0,data,&vn);    
+    SSL_DECODE_UINT8(ssl,0,0,data,&vn);
 
-    ssl->version=vj*256+vn;	        
+    ssl->version=vj*256+vn;
     P_(P_HL) {explain(ssl,"Version %d.%d ",vj,vn);
         printf("\n");
    }
-    	 
-	       
+
+
     SSL_DECODE_OPAQUE_ARRAY(ssl,"random",32,P_ND,data,&rnd);
     ssl_set_server_random(ssl->decoder,rnd.data,rnd.len);
     SSL_DECODE_OPAQUE_ARRAY(ssl,"session_id",-32,P_HL,data,&session_id);
@@ -280,7 +278,7 @@ static int decode_HandshakeType_ServerHello(ssl,dir,seg,data)
       0,data,&ssl->cipher_suite);
     P_(P_HL){
      explain(ssl,"cipherSuite ");
-     ssl_print_cipher_suite(ssl,ssl->version,P_HL,ssl->cipher_suite);      
+     ssl_print_cipher_suite(ssl,ssl->version,P_HL,ssl->cipher_suite);
     }
     ssl_find_cipher(ssl->cipher_suite,&ssl->cs);
 
@@ -321,7 +319,7 @@ static int decode_HandshakeType_Certificate(ssl,dir,seg,data)
     UINT4 len;
     Data cert;
     int r;
-  
+
     printf("\n");
     ssl_update_handshake_messages(ssl,data);
     SSL_DECODE_UINT24(ssl,"certificates len",0,data,&len);
@@ -346,7 +344,7 @@ static int decode_HandshakeType_ServerKeyExchange(ssl,dir,seg,data)
 
    int r;
 
-    printf("\n");			      
+    printf("\n");
     ssl_update_handshake_messages(ssl,data);
    if(ssl->cs){
      P_(P_ND){
@@ -357,8 +355,8 @@ static int decode_HandshakeType_ServerKeyExchange(ssl,dir,seg,data)
      switch(ssl->cs->kex){
 	case KEX_DH:
 	  SSL_DECODE_OPAQUE_ARRAY(ssl,"DH_p",-((1<<15)-1),P_ND,data,0);
-	  SSL_DECODE_OPAQUE_ARRAY(ssl,"DH_g",-((1<<15)-1),P_ND,data,0);	  
-	  SSL_DECODE_OPAQUE_ARRAY(ssl,"DH_Ys",-((1<<15)-1),P_ND,data,0);	  
+	  SSL_DECODE_OPAQUE_ARRAY(ssl,"DH_g",-((1<<15)-1),P_ND,data,0);
+	  SSL_DECODE_OPAQUE_ARRAY(ssl,"DH_Ys",-((1<<15)-1),P_ND,data,0);
 	  break;
 	case KEX_RSA:
 	  SSL_DECODE_OPAQUE_ARRAY(ssl,"RSA_modulus",-((1<<15)-1),P_ND,data,0);
@@ -368,7 +366,7 @@ static int decode_HandshakeType_ServerKeyExchange(ssl,dir,seg,data)
       INDENT_POP;
       SSL_DECODE_OPAQUE_ARRAY(ssl,"signature",-((1<<15)-1),P_ND,data,0);
    }
-     
+
    return(0);
 
   }
@@ -383,7 +381,7 @@ static int decode_HandshakeType_CertificateRequest(ssl,dir,seg,data)
     UINT4 len;
     Data ca;
     int r;
-    
+
     printf("\n");
     ssl_update_handshake_messages(ssl,data);
     SSL_DECODE_UINT8(ssl,"certificate_types len",0,data,&len);
@@ -398,7 +396,7 @@ static int decode_HandshakeType_CertificateRequest(ssl,dir,seg,data)
     SSL_DECODE_UINT16(ssl,"certificate_authorities len",0,data,&len);
     while(len){
       SSL_DECODE_OPAQUE_ARRAY(ssl,"certificate_authorities",
-        -((1<<15)-1),0,data,&ca); 
+        -((1<<15)-1),0,data,&ca);
       explain(ssl,"certificate_authority\n");
       INDENT_INCR;
       sslx_print_dn(ssl,&ca,P_HL);
@@ -446,7 +444,7 @@ static int decode_HandshakeType_ClientKeyExchange(ssl,dir,seg,data)
 
    int r;
    Data pms;
-	
+
     printf("\n");
     ssl_update_handshake_messages(ssl,data);
    if(ssl->cs){
@@ -456,10 +454,10 @@ static int decode_HandshakeType_ClientKeyExchange(ssl,dir,seg,data)
 	   if(ssl->version > 768) {
 	           SSL_DECODE_OPAQUE_ARRAY(ssl,"EncryptedPreMasterSecret",-(1<<15-1),
 	             P_ND,data,&pms);
-		     
+
 	        }
 	        else {
-	           SSL_DECODE_OPAQUE_ARRAY(ssl,"EncryptedPreMasterSecret",data->len,P_ND,data,&pms);   
+	           SSL_DECODE_OPAQUE_ARRAY(ssl,"EncryptedPreMasterSecret",data->len,P_ND,data,&pms);
 	        }
 	        ssl_process_client_key_exchange(ssl,
 	        ssl->decoder,pms.data,pms.len);
@@ -485,7 +483,7 @@ static int decode_HandshakeType_Finished(ssl,dir,seg,data)
 
    int r;
 
-    printf("\n");   
+    printf("\n");
    switch(ssl->version){
      case 0x300:
        SSL_DECODE_OPAQUE_ARRAY(ssl,"md5_hash",16,P_ND,data,0);
