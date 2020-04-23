@@ -17,6 +17,6 @@ jobs:
       run: |
        sudo apt install libpcap-dev libssl-dev
     - name: configure
-      run: ./configure
+      run: ./configure --with-pcap-lib=/usr/lib/x86_64-linux-gnu/
     - name: make
       run: make
