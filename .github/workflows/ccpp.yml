@@ -15,7 +15,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install dependencies
       run: |
-       sudo apt install libpcap-dev libpcap libssl-dev libssl
+       sudo apt install libpcap-dev libssl-dev
     - name: configure
       run: ./configure
     - name: make
