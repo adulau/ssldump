@@ -325,7 +325,46 @@ int ssl_process_server_session_id(ssl,d,msg,len)
     return(0);
 #endif      
   }
-  
+
+int ssl_process_client_session_id(ssl,d,msg,len)
+  ssl_obj *ssl;
+  ssl_decoder *d;
+  UCHAR *msg;
+  int len;
+  {
+#ifdef OPENSSL    
+    int _status;
+    
+    /* First check if the client set session id */
+    //todo: check that session_id in decoder and msg are the same (and if not then take from msg?)
+    if(d->session_id)
+    {
+      /* Remove the master secret */
+      //todo: better save and destroy only when successfully read key log
+      r_data_destroy(&d->MS);
+
+      if(d->ctx->ssl_key_log_file && (ssl_read_key_log_file(d)==0) && d->MS)
+      {
+        //we found master secret for session in keylog
+        //try to save session
+        _status = ssl_save_session(ssl,d); 
+      }
+      else
+      {
+        //just return error 
+        _status = -1;
+      }
+    }
+    else
+    {
+      _status = -1;
+    }
+    return(_status);
+#else
+    return(0);
+#endif      
+  }
+
 int ssl_process_change_cipher_spec(ssl,d,direction)
   ssl_obj *ssl;
   ssl_decoder *d;
