@@ -202,6 +202,9 @@ static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
         exdump(ssl,"resume ",&session_id);
     }
 
+    ssl_process_client_session_id(ssl,ssl->decoder,session_id.data,
+      session_id.len);
+
     P_(P_HL){
 	SSL_DECODE_UINT16(ssl,"cipher Suites len",0,data,&cslen);
         explain(ssl,"cipher suites\n");

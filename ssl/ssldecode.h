@@ -62,6 +62,8 @@ int ssl_set_client_session_id PROTO_LIST((ssl_decoder *dp,
   UCHAR *msg,int len));
 int ssl_process_server_session_id PROTO_LIST((ssl_obj *obj,ssl_decoder *dp,
   UCHAR *msg,int len));
+int ssl_process_client_session_id PROTO_LIST((ssl_obj *obj,ssl_decoder *dp,
+  UCHAR *msg,int len));
 int ssl_process_client_key_exchange PROTO_LIST((struct ssl_obj_ *,
   ssl_decoder *d,UCHAR *msg,int len));
 int ssl_process_change_cipher_spec PROTO_LIST((ssl_obj *ssl,
