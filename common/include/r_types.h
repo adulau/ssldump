@@ -47,6 +47,10 @@
 #ifndef _r_types_h
 #define _r_types_h
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #ifndef R_DEFINED_UINT4
 #ifndef SIZEOF_UNSIGNED_INT
 typedef unsigned int UINT4;

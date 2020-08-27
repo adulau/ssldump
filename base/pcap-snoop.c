@@ -86,7 +86,7 @@ static int pcap_if_type=DLT_NULL;
 int err_exit PROTO_LIST((char *str,int num));
 int usage PROTO_LIST((void));
 int print_version PROTO_LIST((void));
-RETSIGTYPE sig_handler PROTO_LIST((void));
+void sig_handler PROTO_LIST((void));
 void pcap_cb PROTO_LIST((u_char *ptr,struct pcap_pkthdr *hdr,u_char *data));
 int main PROTO_LIST((int argc,char **argv));
 
@@ -124,7 +124,7 @@ int print_version()
     exit(0);
   }
 
-RETSIGTYPE sig_handler()
+void sig_handler()
   {
     fflush(stdout);
     exit(0);
