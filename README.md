@@ -33,6 +33,7 @@ Additional back-end code available is in the [crl-monitor ](https://github.com/a
 # Build instructions
 
 ```
+apt install build-essential autoconf libssl-dev libpcap-dev
 ./autogen.sh
 ./configure --prefix=/usr/local
 make
