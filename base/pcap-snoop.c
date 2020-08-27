@@ -87,7 +87,7 @@ int err_exit PROTO_LIST((char *str,int num));
 int usage PROTO_LIST((void));
 int print_version PROTO_LIST((void));
 void sig_handler PROTO_LIST((int sig));
-void pcap_cb PROTO_LIST((u_char *ptr,struct pcap_pkthdr *hdr,u_char *data));
+void pcap_cb PROTO_LIST((u_char *ptr,const struct pcap_pkthdr *hdr,const u_char *data));
 int main PROTO_LIST((int argc,char **argv));
 
 int packet_cnt = 0;  // Packet counter used for connection pool cleaning
@@ -132,8 +132,8 @@ void sig_handler(int sig)
     
 void pcap_cb(ptr,hdr,data)
   u_char *ptr;
-  struct pcap_pkthdr *hdr;
-  u_char *data;
+  const struct pcap_pkthdr *hdr;
+  const u_char *data;
   {
     n_handler *n;
     int len;
@@ -240,7 +240,7 @@ void pcap_cb(ptr,hdr,data)
         break;
 #endif
     }
-    network_process_packet(n,&hdr->ts,data,len);
+    network_process_packet(n,(struct timeval *) &hdr->ts,(u_char *)data,len);
 
     if(packet_cnt == conn_freq) {
         packet_cnt = 0;
