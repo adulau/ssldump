@@ -32,10 +32,12 @@ Additional back-end code available is in the [crl-monitor ](https://github.com/a
 
 # Build instructions
 
+```
 ./autogen.sh
 ./configure --prefix=/usr/local
 make
 make install
+```
 
 ## Contributing
 
