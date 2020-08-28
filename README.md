@@ -32,13 +32,22 @@ Additional back-end code available is in the [crl-monitor ](https://github.com/a
 
 # Build instructions
 
-For Debian & Ubuntu
+On Debian & Ubuntu:
 ```
 apt install build-essential autoconf libssl-dev libpcap-dev
 ./autogen.sh
 ./configure --prefix=/usr/local
 make
-make install
+(optional) make install
+```
+
+On Fedora, Centos & RHEL:
+```
+dnf install autoconf automake gcc make openssl-devel libpcap-devel
+./autogen.sh
+./configure --prefix=/usr/local
+make
+(optional) make install
 ```
 
 ## Contributing
