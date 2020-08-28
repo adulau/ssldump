@@ -16,7 +16,8 @@ AC_PROG_INSTALL
 
 # Checks for header files.
 AC_FUNC_ALLOCA
-AC_CHECK_HEADERS([arpa/inet.h malloc.h memory.h netdb.h netinet/in.h stdlib.h string.h sys/param.h sys/socket.h sys/time.h unistd.h],,[AC_MSG_ERROR([Missing header.])])
+AC_FUNC_MALLOC
+AC_CHECK_HEADERS([arpa/inet.h memory.h netdb.h netinet/in.h stdlib.h string.h sys/param.h sys/socket.h sys/time.h unistd.h],,[AC_MSG_ERROR([Missing header.])])
 AC_HEADER_STDC
 AC_HEADER_TIME
 
