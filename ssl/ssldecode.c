@@ -591,6 +591,7 @@ int ssl_process_client_key_exchange(ssl,d,msg,len)
     int r,_status;
     int i;
     EVP_PKEY *pk;
+    const BIGNUM *n;
 
     /* Remove the master secret if it was there
        to force keying material regeneration in
@@ -610,14 +611,15 @@ int ssl_process_client_key_exchange(ssl,d,msg,len)
       if(!pk)
 	return(-1);
 
-      if(pk->type!=EVP_PKEY_RSA)
+      if(EVP_PKEY_id(pk)!=EVP_PKEY_RSA)
 	return(-1);
  
-      if(r=r_data_alloc(&d->PMS,BN_num_bytes(pk->pkey.rsa->n)))
+      RSA_get0_key(EVP_PKEY_get0_RSA(pk), &n, NULL, NULL);
+      if(r=r_data_alloc(&d->PMS,BN_num_bytes(n)))
 	ABORT(r);
 
       i=RSA_private_decrypt(len,msg,d->PMS->data,
-			    pk->pkey.rsa,RSA_PKCS1_PADDING);
+        EVP_PKEY_get0_RSA(pk),RSA_PKCS1_PADDING);
 
       if(i!=48)
 	ABORT(SSL_BAD_PMS);
@@ -668,7 +670,7 @@ static int tls_P_hash(ssl,secret,seed,md,out)
     UCHAR *A;
     UCHAR _A[128],tmp[128];
     unsigned int A_l,tmp_l;
-    HMAC_CTX hm;
+    HMAC_CTX *hm = HMAC_CTX_new();
 
     CRDUMPD("P_hash secret",secret);
     CRDUMPD("P_hash seed",seed);
@@ -677,17 +679,15 @@ static int tls_P_hash(ssl,secret,seed,md,out)
     A_l=seed->len;
 
     while(left){
-      HMAC_Init(&hm,secret->data,secret->len,md);
-      HMAC_Update(&hm,A,A_l);
-      HMAC_Final(&hm,_A,&A_l);
-      HMAC_cleanup(&hm);
+      HMAC_Init(hm,secret->data,secret->len,md);
+      HMAC_Update(hm,A,A_l);
+      HMAC_Final(hm,_A,&A_l);
       A=_A;
 
-      HMAC_Init(&hm,secret->data,secret->len,md);
-      HMAC_Update(&hm,A,A_l);
-      HMAC_Update(&hm,seed->data,seed->len);
-      HMAC_Final(&hm,tmp,&tmp_l);
-      HMAC_cleanup(&hm);
+      HMAC_Init(hm,secret->data,secret->len,md);
+      HMAC_Update(hm,A,A_l);
+      HMAC_Update(hm,seed->data,seed->len);
+      HMAC_Final(hm,tmp,&tmp_l);
 
       tocpy=MIN(left,tmp_l);
       memcpy(ptr,tmp,tocpy);
@@ -695,6 +695,7 @@ static int tls_P_hash(ssl,secret,seed,md,out)
       left-=tocpy;
     }
 
+    HMAC_CTX_free(hm);
     CRDUMPD("P_hash out",out);
     
     return (0);
@@ -1070,7 +1071,7 @@ static int ssl_generate_session_hash(ssl,d)
     int r,_status,dgi;
     unsigned int len;
     const EVP_MD *md;
-    EVP_MD_CTX dgictx;
+    HMAC_CTX *dgictx = HMAC_CTX_new();
 
     if(r=r_data_alloc(&d->session_hash,EVP_MAX_MD_SIZE))
       ABORT(r);
@@ -1084,21 +1085,21 @@ static int ssl_generate_session_hash(ssl,d)
 	  ERETURN(SSL_BAD_MAC);
 	}
 
-	EVP_DigestInit(&dgictx,md);
-	EVP_DigestUpdate(&dgictx,d->handshake_messages->data,d->handshake_messages->len);
-	EVP_DigestFinal(&dgictx,d->session_hash->data,&d->session_hash->len);
+	EVP_DigestInit(dgictx,md);
+	EVP_DigestUpdate(dgictx,d->handshake_messages->data,d->handshake_messages->len);
+	EVP_DigestFinal(dgictx,d->session_hash->data,&d->session_hash->len);
 
 	break;
       case SSLV3_VERSION:
       case TLSV1_VERSION:
       case TLSV11_VERSION:
-	EVP_DigestInit(&dgictx,EVP_get_digestbyname("MD5"));
-	EVP_DigestUpdate(&dgictx,d->handshake_messages->data,d->handshake_messages->len);
-	EVP_DigestFinal_ex(&dgictx,d->session_hash->data,&d->session_hash->len);
+	EVP_DigestInit(dgictx,EVP_get_digestbyname("MD5"));
+	EVP_DigestUpdate(dgictx,d->handshake_messages->data,d->handshake_messages->len);
+	EVP_DigestFinal_ex(dgictx,d->session_hash->data,&d->session_hash->len);
 
-	EVP_DigestInit(&dgictx,EVP_get_digestbyname("SHA1"));
-	EVP_DigestUpdate(&dgictx,d->handshake_messages->data,d->handshake_messages->len);
-	EVP_DigestFinal(&dgictx,d->session_hash->data+d->session_hash->len,&len);
+	EVP_DigestInit(dgictx,EVP_get_digestbyname("SHA1"));
+	EVP_DigestUpdate(dgictx,d->handshake_messages->data,d->handshake_messages->len);
+	EVP_DigestFinal(dgictx,d->session_hash->data+d->session_hash->len,&len);
 
 	d->session_hash->len+=len;
 	break;

@@ -149,7 +149,7 @@ int ssl_create_rec_decoder(dp,cs,mk,sk,iv)
     else
       memcpy(dec->mac_key->data,mk,cs->dig_len);
 
-    if(!(dec->evp=(EVP_CIPHER_CTX *)malloc(sizeof(EVP_CIPHER_CTX))))
+    if(!(dec->evp=EVP_CIPHER_CTX_new()))
       ABORT(R_NO_MEMORY);
     EVP_CIPHER_CTX_init(dec->evp);
     EVP_CipherInit(dec->evp,ciph,sk,iv,0);
@@ -178,8 +178,7 @@ int ssl_destroy_rec_decoder(dp)
     r_data_destroy(&d->write_key);
 #ifdef OPENSSL    
     if(d->evp){
-      EVP_CIPHER_CTX_cleanup(d->evp);
-      free(d->evp);
+        EVP_CIPHER_CTX_free(d->evp);
     }
     free(*dp);
 #endif    
@@ -357,41 +356,43 @@ static int tls_check_mac(d,ct,ver,data,datalen,iv,ivlen,mac)
   UINT4 ivlen;
   UCHAR *mac;
   {
-    HMAC_CTX hm;
+    HMAC_CTX *hm = HMAC_CTX_new();
+    if(!hm)
+      ERETURN(R_NO_MEMORY);
     const EVP_MD *md;
     UINT4 l;
     UCHAR buf[128];
     
     md=EVP_get_digestbyname(digests[d->cs->dig-0x40]);
-    HMAC_Init(&hm,d->mac_key->data,d->mac_key->len,md);
+    HMAC_Init(hm,d->mac_key->data,d->mac_key->len,md);
 
     fmt_seq(d->seq,buf);
     d->seq++;
-    HMAC_Update(&hm,buf,8);
+    HMAC_Update(hm,buf,8);
     buf[0]=ct;
-    HMAC_Update(&hm,buf,1);
+    HMAC_Update(hm,buf,1);
 
     buf[0]=MSB(ver);
     buf[1]=LSB(ver);
-    HMAC_Update(&hm,buf,2);
+    HMAC_Update(hm,buf,2);
 
     buf[0]=MSB(datalen);
     buf[1]=LSB(datalen);
-    HMAC_Update(&hm,buf,2);
+    HMAC_Update(hm,buf,2);
 
     /* for encrypt-then-mac with an explicit IV */
     if(ivlen && iv){
-      HMAC_Update(&hm,iv,ivlen);
-      HMAC_Update(&hm,data,datalen-ivlen);
+      HMAC_Update(hm,iv,ivlen);
+      HMAC_Update(hm,data,datalen-ivlen);
     }
     else
-      HMAC_Update(&hm,data,datalen);
+      HMAC_Update(hm,data,datalen);
     
-    HMAC_Final(&hm,buf,&l);
+    HMAC_Final(hm,buf,&l);
     if(memcmp(mac,buf,l))
       ERETURN(SSL_BAD_MAC);
 
-    HMAC_cleanup(&hm);
+    HMAC_CTX_free(hm);
     return(0);
   }
 
@@ -403,7 +404,7 @@ int ssl3_check_mac(d,ct,ver,data,datalen,mac)
   UINT4 datalen;
   UCHAR *mac;
   {
-    EVP_MD_CTX mc;
+    EVP_MD_CTX *mc = EVP_MD_CTX_new();
     const EVP_MD *md;
     UINT4 l;
     UCHAR buf[64],dgst[20];
@@ -412,41 +413,43 @@ int ssl3_check_mac(d,ct,ver,data,datalen,mac)
     pad_ct=(d->cs->dig==DIG_SHA)?40:48;
     
     md=EVP_get_digestbyname(digests[d->cs->dig-0x40]);
-    EVP_DigestInit(&mc,md);
+    EVP_DigestInit(mc,md);
 
-    EVP_DigestUpdate(&mc,d->mac_key->data,d->mac_key->len);
+    EVP_DigestUpdate(mc,d->mac_key->data,d->mac_key->len);
 
     memset(buf,0x36,pad_ct);
-    EVP_DigestUpdate(&mc,buf,pad_ct);
+    EVP_DigestUpdate(mc,buf,pad_ct);
 
     fmt_seq(d->seq,buf);
     d->seq++;
-    EVP_DigestUpdate(&mc,buf,8);
+    EVP_DigestUpdate(mc,buf,8);
 
     buf[0]=ct;
-    EVP_DigestUpdate(&mc,buf,1);
+    EVP_DigestUpdate(mc,buf,1);
     
     buf[0]=MSB(datalen);
     buf[1]=LSB(datalen);
-    EVP_DigestUpdate(&mc,buf,2);    
+    EVP_DigestUpdate(mc,buf,2);
 
-    EVP_DigestUpdate(&mc,data,datalen);
+    EVP_DigestUpdate(mc,data,datalen);
 
-    EVP_DigestFinal(&mc,dgst,&l);
+    EVP_DigestFinal(mc,dgst,&l);
     
-    EVP_DigestInit(&mc,md);
+    EVP_DigestInit(mc,md);
 
-    EVP_DigestUpdate(&mc,d->mac_key->data,d->mac_key->len);
+    EVP_DigestUpdate(mc,d->mac_key->data,d->mac_key->len);
     
     memset(buf,0x5c,pad_ct);
-    EVP_DigestUpdate(&mc,buf,pad_ct);
+    EVP_DigestUpdate(mc,buf,pad_ct);
 
-    EVP_DigestUpdate(&mc,dgst,l);
+    EVP_DigestUpdate(mc,dgst,l);
 
-    EVP_DigestFinal(&mc,dgst,&l);
+    EVP_DigestFinal(mc,dgst,&l);
 
     if(memcmp(mac,dgst,l))
       ERETURN(SSL_BAD_MAC);
+
+    EVP_MD_CTX_free(mc);
 
     return(0);
   }
