@@ -283,6 +283,7 @@ int main(argc,argv)
     extern char *optarg;
     extern int optind;
 #endif
+    pcap_if_t *interfaces;
     char *interface_name=0;
     char *file=0;
     char *filter=0;
@@ -382,7 +383,11 @@ int main(argc,argv)
     
     if(!file){
       if(!interface_name){
-        interface_name=pcap_lookupdev(errbuf);
+        if(pcap_findalldevs(&interfaces,errbuf)==-1) {
+          fprintf(stderr,"PCAP: %s\n",errbuf);
+          err_exit("Aborting",-1);
+        }
+        interface_name=interfaces->name;
         if(!interface_name){
           fprintf(stderr,"PCAP: %s\n",errbuf);
           err_exit("Aborting",-1);
