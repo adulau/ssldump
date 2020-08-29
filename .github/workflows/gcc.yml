@@ -19,6 +19,6 @@ jobs:
     - name: autogen
       run: ./autogen.sh
     - name: configure
-      run: ./configure
+      run: CC=/usr/bin/gcc ./configure
     - name: make
       run: make
