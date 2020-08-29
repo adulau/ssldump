@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: Clang CI
 
 on:
   push:
@@ -15,10 +15,10 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install dependencies
       run: |
-       sudo apt install autoconf libpcap-dev libssl-dev
+       sudo apt install clang autoconf libpcap-dev libssl-dev
     - name: autogen
       run: ./autogen.sh
     - name: configure
-      run: ./configure
+      run: CC=/usr/bin/clang ./configure
     - name: make
       run: make
