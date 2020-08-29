@@ -61,8 +61,8 @@ int create_proto_handler(mod,ctx,handlerp,conn,first_packet)
     if(!(handler=(proto_handler *)calloc(1,sizeof(proto_handler))))
       ABORT(R_NO_MEMORY);
     handler->vtbl=mod->vtbl;
-    if(r=mod->vtbl->create(mod->handle,ctx,conn,&handler->obj,
-      &conn->i_addr,conn->i_port,&conn->r_addr,conn->r_port,first_packet))
+    if((r=mod->vtbl->create(mod->handle,ctx,conn,&handler->obj,
+      &conn->i_addr,conn->i_port,&conn->r_addr,conn->r_port,first_packet)))
       ABORT(r);
 
     *handlerp=handler;

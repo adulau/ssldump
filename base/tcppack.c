@@ -86,8 +86,8 @@ int process_tcp_packet(handler,ctx,p)
 
     print_tcp_packet(p);
 
-    if(r=tcp_find_conn(&conn,&direction,&p->ip->ip_src,
-      ntohs(p->tcp->th_sport),&p->ip->ip_dst,ntohs(p->tcp->th_dport))){
+    if((r=tcp_find_conn(&conn,&direction,&p->ip->ip_src,
+      ntohs(p->tcp->th_sport),&p->ip->ip_dst,ntohs(p->tcp->th_dport)))){
       if(r!=R_NOT_FOUND)
 	ABORT(r);
 
@@ -96,7 +96,7 @@ int process_tcp_packet(handler,ctx,p)
 	return(0);
       }
 
-      if(r=new_connection(handler,ctx,p,&conn))
+      if((r=new_connection(handler,ctx,p,&conn)))
 	ABORT(r);
       return(0);
     }
@@ -152,7 +152,7 @@ int process_tcp_packet(handler,ctx,p)
 	  if(p->tcp->th_flags & TH_SYN)
 	    break;
 	  length=p->len - (p->tcp->th_off * 4);
-	  if(r=process_data_segment(conn,handler,p,stream,direction))
+	  if((r=process_data_segment(conn,handler,p,stream,direction)))
 	    ABORT(r);
 	}
 	break;
@@ -180,16 +180,16 @@ static int new_connection(handler,ctx,p,connp)
     tcp_conn *conn=0;
 
     if ((p->tcp->th_flags & (TH_SYN|TH_ACK))==TH_SYN) {
-      if(r=tcp_create_conn(&conn,&p->ip->ip_src,ntohs(p->tcp->th_sport),
-        &p->ip->ip_dst,ntohs(p->tcp->th_dport)))
+      if((r=tcp_create_conn(&conn,&p->ip->ip_src,ntohs(p->tcp->th_sport),
+        &p->ip->ip_dst,ntohs(p->tcp->th_dport))))
         ABORT(r);
       DBG((0,"SYN1 seq: %u",ntohl(p->tcp->th_seq)));
       conn->i2r.seq=ntohl(p->tcp->th_seq)+1;
       conn->i2r.ack=ntohl(p->tcp->th_ack)+1;
       conn->state=TCP_STATE_SYN1;
     } else { // SYN&ACK comes first somehow
-      if(r=tcp_create_conn(&conn,&p->ip->ip_dst,ntohs(p->tcp->th_dport),
-        &p->ip->ip_src,ntohs(p->tcp->th_sport)))
+      if((r=tcp_create_conn(&conn,&p->ip->ip_dst,ntohs(p->tcp->th_dport),
+        &p->ip->ip_src,ntohs(p->tcp->th_sport))))
         ABORT(r);
       DBG((0,"SYN2 seq: %u",ntohl(p->tcp->th_seq)));
       conn->r2i.seq=ntohl(p->tcp->th_seq)+1;
@@ -198,7 +198,7 @@ static int new_connection(handler,ctx,p,connp)
     }
     memcpy(&conn->start_time,&p->ts,sizeof(struct timeval));
     memcpy(&conn->last_seen_time,&p->ts,sizeof(struct timeval));
-    if(r=create_proto_handler(handler,ctx,&conn->analyzer,conn,&p->ts))
+    if((r=create_proto_handler(handler,ctx,&conn->analyzer,conn,&p->ts)))
       ABORT(r);
     
     *connp=conn;
@@ -265,7 +265,7 @@ static int process_data_segment(conn,handler,p,stream,direction)
       
       if(acked && !l){
         /*
-	if(r=timestamp_diff(&p->ts,&conn->start_time,&dt))
+	if((r=timestamp_diff(&p->ts,&conn->start_time,&dt)))
 	  ERETURN(r);
           	printf("%d%c%4.4d ",dt.tv_sec,'.',dt.tv_usec/100);
 	if(direction == DIR_R2I)
@@ -298,7 +298,7 @@ static int process_data_segment(conn,handler,p,stream,direction)
 
       if(!(nseg=(segment *)calloc(1,sizeof(segment))))
 	ABORT(R_NO_MEMORY);
-      if(r=packet_copy(p,&nseg->p))
+      if((r=packet_copy(p,&nseg->p)))
 	ABORT(r);
       nseg->s_seq=seq;
       
@@ -366,7 +366,7 @@ static int process_data_segment(conn,handler,p,stream,direction)
         stream->seq=seg->s_seq + seg->len;
 
         DBG((0,"Analyzing segment: %u:%u(%u)", seg->s_seq, seg->s_seq+seg->len, seg->len));
-        if(r=conn->analyzer->vtbl->data(conn->analyzer->obj,&_seg,direction)) {
+        if((r=conn->analyzer->vtbl->data(conn->analyzer->obj,&_seg,direction))) {
           DBG((0,"ABORT due to segment: %u:%u(%u)", seg->s_seq, seg->s_seq+seg->len, seg->len));
           ABORT(r);
         }
@@ -374,7 +374,7 @@ static int process_data_segment(conn,handler,p,stream,direction)
 
       if(stream->close){
         DBG((0,"Closing with segment: %u:%u(%u)", seg->s_seq, stream->seq, seg->len));
-        if(r=conn->analyzer->vtbl->close(conn->analyzer->obj,p,direction)) {
+        if((r=conn->analyzer->vtbl->close(conn->analyzer->obj,p,direction))) {
           DBG((0,"ABORT due to segment: %u:%u(%u)", seg->s_seq, stream->seq, seg->len));
           ABORT(r);
         }

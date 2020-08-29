@@ -204,7 +204,7 @@ static int sslx__print_dn(ssl,x)
     if(*x=='/') x++;
     
     while (x){
-      if(slash=strchr(x,'/')){
+      if((slash=strchr(x,'/'))){
 	*slash=0;
       }
 

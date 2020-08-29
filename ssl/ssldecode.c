@@ -490,8 +490,8 @@ static int ssl_create_session_lookup_key(ssl,id,idlen,keyp,keyl)
     *keyl=idlen;
     key+=idlen;
     
-    sprintf(key,"%s:%d",ssl->server_name,ssl->server_port);
-    *keyl+=strlen(key);
+    sprintf((char *)key,"%s:%d",ssl->server_name,ssl->server_port);
+    *keyl+=strlen((char *)key);
 
     _status=0;
   abort:
