@@ -15,8 +15,6 @@ AC_PROG_INSTALL
 
 
 # Checks for header files.
-AC_FUNC_ALLOCA
-AC_FUNC_MALLOC
 AC_CHECK_HEADERS([arpa/inet.h memory.h netdb.h netinet/in.h stdlib.h string.h sys/param.h sys/socket.h sys/time.h unistd.h],,[AC_MSG_ERROR([Missing header.])])
 AC_HEADER_STDC
 AC_HEADER_TIME
@@ -74,9 +72,7 @@ AC_CHECK_SIZEOF([unsigned long])
 AC_CHECK_SIZEOF([unsigned long long])
 
 # Checks for library functions.
-AC_FUNC_MALLOC
-AC_FUNC_REALLOC
-AC_CHECK_FUNCS([gethostbyaddr gettimeofday inet_ntoa isascii memmove memset strchr strdup strstr strtol])
+AC_CHECK_FUNCS([malloc realloc gethostbyaddr gettimeofday inet_ntoa isascii memmove memset strchr strdup strstr strtol])
 
 AC_CONFIG_FILES([Makefile
                  common/Makefile
