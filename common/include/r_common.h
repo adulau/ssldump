@@ -47,6 +47,10 @@
 #ifndef _r_common_h
 #define _r_common_h
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "r_defaults.h"
 #include "r_includes.h"
 #include "r_types.h"

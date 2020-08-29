@@ -86,8 +86,8 @@ static int pcap_if_type=DLT_NULL;
 int err_exit PROTO_LIST((char *str,int num));
 int usage PROTO_LIST((void));
 int print_version PROTO_LIST((void));
-RETSIGTYPE sig_handler PROTO_LIST((void));
-void pcap_cb PROTO_LIST((u_char *ptr,struct pcap_pkthdr *hdr,u_char *data));
+void sig_handler PROTO_LIST((int sig));
+void pcap_cb PROTO_LIST((u_char *ptr,const struct pcap_pkthdr *hdr,const u_char *data));
 int main PROTO_LIST((int argc,char **argv));
 
 int packet_cnt = 0;  // Packet counter used for connection pool cleaning
@@ -124,7 +124,7 @@ int print_version()
     exit(0);
   }
 
-RETSIGTYPE sig_handler()
+void sig_handler(int sig)
   {
     fflush(stdout);
     exit(0);
@@ -132,8 +132,8 @@ RETSIGTYPE sig_handler()
     
 void pcap_cb(ptr,hdr,data)
   u_char *ptr;
-  struct pcap_pkthdr *hdr;
-  u_char *data;
+  const struct pcap_pkthdr *hdr;
+  const u_char *data;
   {
     n_handler *n;
     int len;
@@ -240,7 +240,7 @@ void pcap_cb(ptr,hdr,data)
         break;
 #endif
     }
-    network_process_packet(n,&hdr->ts,data,len);
+    network_process_packet(n,(struct timeval *) &hdr->ts,(u_char *)data,len);
 
     if(packet_cnt == conn_freq) {
         packet_cnt = 0;
@@ -283,6 +283,7 @@ int main(argc,argv)
     extern char *optarg;
     extern int optind;
 #endif
+    pcap_if_t *interfaces;
     char *interface_name=0;
     char *file=0;
     char *filter=0;
@@ -382,7 +383,11 @@ int main(argc,argv)
     
     if(!file){
       if(!interface_name){
-        interface_name=pcap_lookupdev(errbuf);
+        if(pcap_findalldevs(&interfaces,errbuf)==-1) {
+          fprintf(stderr,"PCAP: %s\n",errbuf);
+          err_exit("Aborting",-1);
+        }
+        interface_name=interfaces->name;
         if(!interface_name){
           fprintf(stderr,"PCAP: %s\n",errbuf);
           err_exit("Aborting",-1);

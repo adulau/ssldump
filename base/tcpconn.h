@@ -100,6 +100,9 @@ int tcp_create_conn PROTO_LIST((tcp_conn **connp,
 int tcp_destroy_conn PROTO_LIST((tcp_conn *conn));
 int free_tcp_segment_queue PROTO_LIST((segment *seg));
 int copy_tcp_segment_queue PROTO_LIST((segment **out,segment *in));
-    
+
+int clean_old_conn(void);
+int destroy_all_conn(void);
+
 #endif
 

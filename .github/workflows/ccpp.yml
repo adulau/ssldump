@@ -15,8 +15,10 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install dependencies
       run: |
-       sudo apt install libpcap-dev libssl-dev
+       sudo apt install autoconf libpcap-dev libssl-dev
+    - name: autogen
+      run: ./autogen.sh
     - name: configure
-      run: ./configure --with-pcap-lib=/usr/lib/x86_64-linux-gnu/
+      run: ./configure
     - name: make
       run: make

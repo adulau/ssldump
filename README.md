@@ -30,6 +30,26 @@ Additional back-end code available is in the [crl-monitor ](https://github.com/a
 
 - Current version of ssldump is v1.1 (released: 2019-12-28) - [ChangeLog](https://raw.githubusercontent.com/adulau/ssldump/master/ChangeLog)
 
+# Build instructions
+
+On Debian & Ubuntu:
+```
+apt install build-essential autoconf libssl-dev libpcap-dev
+./autogen.sh
+./configure --prefix=/usr/local
+make
+(optional) make install
+```
+
+On Fedora, Centos & RHEL:
+```
+dnf install autoconf automake gcc make openssl-devel libpcap-devel
+./autogen.sh
+./configure --prefix=/usr/local
+make
+(optional) make install
+```
+
 ## Contributing
 
 The contributing policy is simple. If you have a patch to propose, make a pull-request

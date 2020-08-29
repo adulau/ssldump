@@ -47,6 +47,10 @@
 #ifndef _r_time_h
 #define _r_time_h
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #ifdef _WIN32
 # include <winsock2.h>
 #else
