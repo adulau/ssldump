@@ -44,7 +44,6 @@
  */
 
 
-static char *RCSSTRING="$Id: debug.c,v 1.3 2001/12/24 06:06:26 ekr Exp $";
 
 
 #include <stdarg.h>

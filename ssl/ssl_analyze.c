@@ -44,7 +44,6 @@
  */
 
 
-static char *RCSSTRING="$Id: ssl_analyze.c,v 1.8 2002/01/21 18:46:13 ekr Exp $";
 
 #include "network.h"
 #include "debug.h"

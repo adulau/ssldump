@@ -44,7 +44,6 @@
  */
 
 
-static char *RCSSTRING="$Id: proto_mod.c,v 1.3 2001/07/20 23:33:14 ekr Exp $";
 
 #include "network.h"
 

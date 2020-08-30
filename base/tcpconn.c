@@ -43,7 +43,6 @@
    ekr@rtfm.com  Tue Dec 29 15:13:03 1998
  */
 
-static char *RCSSTRING="$Id: tcpconn.c,v 1.7 2002/08/17 01:33:16 ekr Exp $";
 
 #include "network.h"
 #include "tcpconn.h"
