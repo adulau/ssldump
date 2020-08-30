@@ -19,6 +19,8 @@ common/lib/Makefile.in
 compile
 config.h
 config.h.in
+config.guess
+config.sub
 configure
 depcomp
 install-sh
