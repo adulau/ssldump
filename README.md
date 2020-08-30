@@ -59,6 +59,15 @@ Optional configuration features (aka ./configure options):
 	use libasan with GCC and embedded ASAN with Clang
 ```
 
+Configuration examples:
+```
+- Use GCC with libasan, debug info and custom CFLAGS:
+	./configure CC=/usr/bin/gcc --enable-asan --enable-debug CFLAGS="-Wall"
+
+- Use Clang with ASAN and no optimizations (-O0)
+	./configure CC=/usr/bin/clang --enable-asan --disable-optimization
+```
+
 ## Contributing
 
 The contributing policy is simple. If you have a patch to propose, make a pull-request
