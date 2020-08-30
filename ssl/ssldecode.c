@@ -250,7 +250,7 @@ int ssl_set_client_random(d,msg,len)
 #ifdef OPENSSL    
     int r;
     
-    if(r=r_data_create(&d->client_random,msg,len))
+    if((r=r_data_create(&d->client_random,msg,len)))
       ERETURN(r);
 #endif
     return(0);
@@ -264,7 +264,7 @@ int ssl_set_server_random(d,msg,len)
 #ifdef OPENSSL    
     int r;
     
-    if(r=r_data_create(&d->server_random,msg,len))
+    if((r=r_data_create(&d->server_random,msg,len)))
       ERETURN(r);
 #endif    
     return(0);
@@ -279,7 +279,7 @@ int ssl_set_client_session_id(d,msg,len)
     int r;
 
     if(len>0)
-        if(r=r_data_create(&d->session_id,msg,len))
+        if((r=r_data_create(&d->session_id,msg,len)))
             ERETURN(r);
 #endif
     return(0);
@@ -307,7 +307,7 @@ int ssl_process_server_session_id(ssl,d,msg,len)
       /* Now try to look up the session. We may not be able
          to find it if, for instance, the original session
          was initiated with something other than static RSA */
-      if(r=ssl_restore_session(ssl,d))
+      if((r=ssl_restore_session(ssl,d)))
         ABORT(r);
 
       restored=1;
@@ -421,7 +421,7 @@ int ssl_decode_record(ssl,dec,direction,ct,version,d)
     if(!(out=(UCHAR *)malloc(d->len)))
       ABORT(R_NO_MEMORY);
 
-    if(r=ssl_decode_rec_data(ssl,rd,ct,version,d->data,d->len,out,&outl)){
+    if((r=ssl_decode_rec_data(ssl,rd,ct,version,d->data,d->len,out,&outl))){
       ABORT(r);
     }
     
@@ -460,7 +460,7 @@ int ssl_update_handshake_messages(ssl,data)
       hms->len+=l;
     }
     else{
-      if(r=r_data_create(&hms,d,l))
+      if((r=r_data_create(&hms,d,l)))
   	ERETURN(r);
       ssl->decoder->handshake_messages=hms;
     }
@@ -510,15 +510,15 @@ int ssl_restore_session(ssl,d)
     int lookup_key_len;
     int r,_status;
 #ifdef OPENSSL    
-    if(r=ssl_create_session_lookup_key(ssl,
+    if((r=ssl_create_session_lookup_key(ssl,
       d->session_id->data,d->session_id->len,&lookup_key,
-      &lookup_key_len))
+      (UINT4 *) &lookup_key_len)))
       ABORT(r);
-    if(r=r_assoc_fetch(d->ctx->session_cache,lookup_key,lookup_key_len,
-      &msv))
+    if((r=r_assoc_fetch(d->ctx->session_cache,(char *) lookup_key,lookup_key_len,
+      &msv)))
       ABORT(r);
     msd=(Data *)msv;
-    if(r=r_data_create(&d->MS,msd->data,msd->len))
+    if((r=r_data_create(&d->MS,msd->data,msd->len)))
       ABORT(r);
     CRDUMPD("Restored MS",d->MS);
 
@@ -527,7 +527,7 @@ int ssl_restore_session(ssl,d)
       case TLSV1_VERSION:
       case TLSV11_VERSION:
       case TLSV12_VERSION:
-	if(r=ssl_generate_keying_material(ssl,d))
+	if((r=ssl_generate_keying_material(ssl,d)))
 	  ABORT(r);
 	break;
       default:
@@ -556,15 +556,15 @@ int ssl_save_session(ssl,d)
     int lookup_key_len;
     int r,_status;
     
-    if(r=ssl_create_session_lookup_key(ssl,d->session_id->data,
+    if((r=ssl_create_session_lookup_key(ssl,d->session_id->data,
       d->session_id->len,&lookup_key,
-      &lookup_key_len))
+      (UINT4 *) &lookup_key_len)))
       ABORT(r);
-    if(r=r_data_create(&msd,d->MS->data,d->MS->len))
+    if((r=r_data_create(&msd,d->MS->data,d->MS->len)))
       ABORT(r);
-    if(r=r_assoc_insert(d->ctx->session_cache,lookup_key,lookup_key_len,
+    if((r=r_assoc_insert(d->ctx->session_cache,(char *)lookup_key,lookup_key_len,
       (void *)msd,0,(int (*)(void *))r_data_zfree,
-      R_ASSOC_NEW | R_ASSOC_REPLACE))
+      R_ASSOC_NEW | R_ASSOC_REPLACE)))
       ABORT(r);
     
     _status=0;
@@ -615,7 +615,7 @@ int ssl_process_client_key_exchange(ssl,d,msg,len)
 	return(-1);
  
       RSA_get0_key(EVP_PKEY_get0_RSA(pk), &n, NULL, NULL);
-      if(r=r_data_alloc(&d->PMS,BN_num_bytes(n)))
+      if((r=r_data_alloc(&d->PMS,BN_num_bytes(n))))
 	ABORT(r);
 
       i=RSA_private_decrypt(len,msg,d->PMS->data,
@@ -634,7 +634,7 @@ int ssl_process_client_key_exchange(ssl,d,msg,len)
       case TLSV1_VERSION:
       case TLSV11_VERSION:
       case TLSV12_VERSION:
-	if(r=ssl_generate_keying_material(ssl,d))
+	if((r=ssl_generate_keying_material(ssl,d)))
 	  ABORT(r);
 	break;
       default:
@@ -643,7 +643,7 @@ int ssl_process_client_key_exchange(ssl,d,msg,len)
 
          
     /* Now store the data in the session cache */
-    if(r=ssl_save_session(ssl,d))
+    if((r=ssl_save_session(ssl,d)))
       ABORT(r);
       
     _status=0;
@@ -679,12 +679,12 @@ static int tls_P_hash(ssl,secret,seed,md,out)
     A_l=seed->len;
 
     while(left){
-      HMAC_Init(hm,secret->data,secret->len,md);
+      HMAC_Init_ex(hm,secret->data,secret->len,md,NULL);
       HMAC_Update(hm,A,A_l);
       HMAC_Final(hm,_A,&A_l);
       A=_A;
 
-      HMAC_Init(hm,secret->data,secret->len,md);
+      HMAC_Init_ex(hm,secret->data,secret->len,md,NULL);
       HMAC_Update(hm,A,A_l);
       HMAC_Update(hm,seed->data,seed->len);
       HMAC_Final(hm,tmp,&tmp_l);
@@ -717,11 +717,11 @@ static int tls_prf(ssl,secret,usage,rnd1,rnd2,out)
     Data *S1=0,*S2=0;
     int i,S_l;
 
-    if(r=r_data_alloc(&md5_out,MAX(out->len,16)))
+    if((r=r_data_alloc(&md5_out,MAX(out->len,16))))
       ABORT(r);
-    if(r=r_data_alloc(&sha_out,MAX(out->len,20)))
+    if((r=r_data_alloc(&sha_out,MAX(out->len,20))))
       ABORT(r);
-    if(r=r_data_alloc(&seed,strlen(usage)+rnd1->len+rnd2->len))
+    if((r=r_data_alloc(&seed,strlen(usage)+rnd1->len+rnd2->len)))
       ABORT(r);
     ptr=seed->data;
     memcpy(ptr,usage,strlen(usage)); ptr+=strlen(usage);
@@ -730,18 +730,18 @@ static int tls_prf(ssl,secret,usage,rnd1,rnd2,out)
 
     S_l=secret->len/2 + secret->len%2;
     
-    if(r=r_data_alloc(&S1,S_l))
+    if((r=r_data_alloc(&S1,S_l)))
       ABORT(r);
-    if(r=r_data_alloc(&S2,S_l))
+    if((r=r_data_alloc(&S2,S_l)))
       ABORT(r);
     
     memcpy(S1->data,secret->data,S_l);
     memcpy(S2->data,secret->data + (secret->len - S_l),S_l);
     
-    if(r=tls_P_hash
-      (ssl,S1,seed,EVP_get_digestbyname("MD5"),md5_out))
+    if((r=tls_P_hash
+      (ssl,S1,seed,EVP_get_digestbyname("MD5"),md5_out)))
       ABORT(r);
-    if(r=tls_P_hash(ssl,S2,seed,EVP_get_digestbyname("SHA1"),sha_out))
+    if((r=tls_P_hash(ssl,S2,seed,EVP_get_digestbyname("SHA1"),sha_out)))
       ABORT(r);
 
 
@@ -776,9 +776,9 @@ static int tls12_prf(ssl,secret,usage,rnd1,rnd2,out)
     UCHAR *ptr;
     int i, dgi;
 
-    if(r=r_data_alloc(&sha_out,MAX(out->len,64))) /* assume max SHA512 */
+    if((r=r_data_alloc(&sha_out,MAX(out->len,64)))) /* assume max SHA512 */
       ABORT(r);
-    if(r=r_data_alloc(&seed,strlen(usage)+rnd1->len+rnd2->len))
+    if((r=r_data_alloc(&seed,strlen(usage)+rnd1->len+rnd2->len)))
       ABORT(r);
     ptr=seed->data;
     memcpy(ptr,usage,strlen(usage)); ptr+=strlen(usage);
@@ -793,7 +793,7 @@ static int tls12_prf(ssl,secret,usage,rnd1,rnd2,out)
                     digests[dgi]));
         ERETURN(SSL_BAD_MAC);
     }
-    if(r=tls_P_hash(ssl,secret,seed,md,sha_out))
+    if((r=tls_P_hash(ssl,secret,seed,md,sha_out)))
       ABORT(r);
 
     for(i=0;i<out->len;i++)
@@ -887,10 +887,10 @@ static int ssl3_prf(ssl,secret,usage,r1,r2,out)
       
       MD5_Update(&md5,secret->data,secret->len);
       MD5_Update(&md5,buf,20);
-      MD5_Final(outbuf,&md5);
+      MD5_Final((unsigned char *)outbuf,&md5);
       tocpy=MIN(out->len-off,16);
       memcpy(out->data+off,outbuf,tocpy);
-      CRDUMP("MD5 out",outbuf,16);
+      CRDUMP("MD5 out",(UCHAR *)outbuf,16);
       
       MD5_Init(&md5);
     }
@@ -910,21 +910,21 @@ static int ssl_generate_keying_material(ssl,d)
     UCHAR *ptr,*c_wk,*s_wk,*c_mk,*s_mk,*c_iv,*s_iv;
 
     if(!d->MS){
-      if(r=r_data_alloc(&d->MS,48))
+      if((r=r_data_alloc(&d->MS,48)))
         ABORT(r);
 
       if (ssl->extensions->extended_master_secret==2) {
-	if(r=ssl_generate_session_hash(ssl,d))
+	if((r=ssl_generate_session_hash(ssl,d)))
 	  ABORT(r);
 
 	temp.len=0;
-	if(r=PRF(ssl,d->PMS,"extended master secret",d->session_hash,&temp,
-	  d->MS))
+	if((r=PRF(ssl,d->PMS,"extended master secret",d->session_hash,&temp,
+	  d->MS)))
 	  ABORT(r);
       }
       else
-	if(r=PRF(ssl,d->PMS,"master secret",d->client_random,d->server_random,
-	  d->MS))
+	if((r=PRF(ssl,d->PMS,"master secret",d->client_random,d->server_random,
+	  d->MS)))
 	  ABORT(r);
 
       CRDUMPD("MS",d->MS);
@@ -938,10 +938,10 @@ static int ssl_generate_keying_material(ssl,d)
     if(ssl->cs->block>1) needed+=ssl->cs->block*2;
 
       
-    if(r=r_data_alloc(&key_block,needed))
+    if((r=r_data_alloc(&key_block,needed)))
       ABORT(r);
-    if(r=PRF(ssl,d->MS,"key expansion",d->server_random,d->client_random,
-      key_block))
+    if((r=PRF(ssl,d->MS,"key expansion",d->server_random,d->client_random,
+      key_block)))
       ABORT(r);
     
     ptr=key_block->data;
@@ -970,11 +970,11 @@ static int ssl_generate_keying_material(ssl,d)
         ATTACH_DATA(iv_s,_iv_s);
         
         if(ssl->version==SSLV3_VERSION){
-          if(r=ssl3_generate_export_iv(ssl,d->client_random,
-            d->server_random,&iv_c))
+          if((r=ssl3_generate_export_iv(ssl,d->client_random,
+            d->server_random,&iv_c)))
             ABORT(r);
-          if(r=ssl3_generate_export_iv(ssl,d->server_random,
-            d->client_random,&iv_s))
+          if((r=ssl3_generate_export_iv(ssl,d->server_random,
+            d->client_random,&iv_s)))
             ABORT(r);
         }
         else{
@@ -992,8 +992,8 @@ static int ssl_generate_keying_material(ssl,d)
           
           ATTACH_DATA(iv_block,_iv_block);
 
-          if(r=PRF(ssl,&key_null,"IV block",d->client_random,
-            d->server_random,&iv_block))
+          if((r=PRF(ssl,&key_null,"IV block",d->client_random,
+            d->server_random,&iv_block)))
             ABORT(r);
 
           memcpy(_iv_c,iv_block.data,8);
@@ -1025,13 +1025,13 @@ static int ssl_generate_keying_material(ssl,d)
         ATTACH_DATA(key_c,_key_c);
         ATTACH_DATA(key_s,_key_s);
         INIT_DATA(k,c_wk,ssl->cs->eff_bits/8);
-        if(r=PRF(ssl,&k,"client write key",d->client_random,d->server_random,
-          &key_c))
+        if((r=PRF(ssl,&k,"client write key",d->client_random,d->server_random,
+          &key_c)))
           ABORT(r);
         c_wk=_key_c;
         INIT_DATA(k,s_wk,ssl->cs->eff_bits/8);
-        if(r=PRF(ssl,&k,"server write key",d->client_random,d->server_random,
-          &key_s))
+        if((r=PRF(ssl,&k,"server write key",d->client_random,d->server_random,
+          &key_s)))
           ABORT(r);
         s_wk=_key_s;
       }
@@ -1047,11 +1047,11 @@ static int ssl_generate_keying_material(ssl,d)
       CRDUMP("Server Write IV",s_iv,ssl->cs->block);
     }
 
-    if(r=ssl_create_rec_decoder(&d->c_to_s_n,
-      ssl->cs,c_mk,c_wk,c_iv))
+    if((r=ssl_create_rec_decoder(&d->c_to_s_n,
+      ssl->cs,c_mk,c_wk,c_iv)))
       ABORT(r);
-    if(r=ssl_create_rec_decoder(&d->s_to_c_n,
-      ssl->cs,s_mk,s_wk,s_iv))
+    if((r=ssl_create_rec_decoder(&d->s_to_c_n,
+      ssl->cs,s_mk,s_wk,s_iv)))
       ABORT(r);
 
     
@@ -1071,9 +1071,9 @@ static int ssl_generate_session_hash(ssl,d)
     int r,_status,dgi;
     unsigned int len;
     const EVP_MD *md;
-    HMAC_CTX *dgictx = HMAC_CTX_new();
+    EVP_MD_CTX *dgictx = EVP_MD_CTX_create();
 
-    if(r=r_data_alloc(&d->session_hash,EVP_MAX_MD_SIZE))
+    if((r=r_data_alloc(&d->session_hash,EVP_MAX_MD_SIZE)))
       ABORT(r);
 
     switch(ssl->version){
@@ -1087,7 +1087,7 @@ static int ssl_generate_session_hash(ssl,d)
 
 	EVP_DigestInit(dgictx,md);
 	EVP_DigestUpdate(dgictx,d->handshake_messages->data,d->handshake_messages->len);
-	EVP_DigestFinal(dgictx,d->session_hash->data,&d->session_hash->len);
+	EVP_DigestFinal(dgictx,d->session_hash->data,(unsigned int *) &d->session_hash->len);
 
 	break;
       case SSLV3_VERSION:
@@ -1095,7 +1095,7 @@ static int ssl_generate_session_hash(ssl,d)
       case TLSV11_VERSION:
 	EVP_DigestInit(dgictx,EVP_get_digestbyname("MD5"));
 	EVP_DigestUpdate(dgictx,d->handshake_messages->data,d->handshake_messages->len);
-	EVP_DigestFinal_ex(dgictx,d->session_hash->data,&d->session_hash->len);
+	EVP_DigestFinal_ex(dgictx,d->session_hash->data,(unsigned int *) &d->session_hash->len);
 
 	EVP_DigestInit(dgictx,EVP_get_digestbyname("SHA1"));
 	EVP_DigestUpdate(dgictx,d->handshake_messages->data,d->handshake_messages->len);
@@ -1134,7 +1134,7 @@ static int ssl_read_key_log_file(d)
 	if(STRNICMP(line+14,label_data,64))
 	  continue;
 
-	if(r=r_data_alloc(&d->MS,48))
+	if((r=r_data_alloc(&d->MS,48)))
 	  ABORT(r);
 
         for(i=0; i < d->MS->len; i++) {
