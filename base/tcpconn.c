@@ -180,8 +180,7 @@ int clean_old_conn() {
 }
 
 int destroy_all_conn() {
-    conn_struct *conn;
-    int i = 0,r;
+    int i = 0;
     while(first_conn) {
         i++;
         tcp_destroy_conn(&first_conn->conn);

@@ -203,7 +203,7 @@ int ssl_decode_rec_data(ssl,d,ct,version,in,inl,out,outl)
 #ifdef OPENSSL
     int pad;
     int r,encpadl,x;
-    UCHAR *mac,*iv,aead_tag[13],aead_nonce[12];
+    UCHAR *mac,aead_tag[13],aead_nonce[12];
     
     CRDUMP("Ciphertext",in,inl);
     if(IS_AEAD_CIPHER(d->cs)){

@@ -538,9 +538,7 @@ static int print_ssl_header(obj,direction,q,data,len)
   int len;
   {
     int ct=0;
-    int r;
     segment *s;
-    struct timeval dt;
 
     ssl_print_record_num(obj);
 

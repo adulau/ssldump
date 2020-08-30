@@ -65,8 +65,6 @@ int process_beginning_plaintext(ssl,seg,direction)
   int direction;
   {
     Data d;
-    int r;
-    struct timeval dt;
     if(seg->len==0)
       return(SSL_NO_DATA);
     
@@ -102,7 +100,6 @@ int process_v2_hello(ssl,seg)
     Data d;
     Data chall;
     UCHAR random[32];
-    struct timeval dt;
     
     if(seg->len==0)
       return(SSL_NO_DATA);
@@ -157,7 +154,6 @@ int process_v2_hello(ssl,seg)
     
     for(;cs_len;cs_len-=3){
       UINT4 val;
-      char *str;
 
       SSL_DECODE_UINT24(ssl,0,0,&d,&val);
       ssl_print_cipher_suite(ssl,ver,P_HL,val);

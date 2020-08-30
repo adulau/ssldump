@@ -146,11 +146,8 @@ int process_tcp_packet(handler,ctx,p)
       case TCP_STATE_ESTABLISHED:
       case TCP_STATE_FIN1:
 	{
-	  UINT4 length;
-	  
 	  if(p->tcp->th_flags & TH_SYN)
 	    break;
-	  length=p->len - (p->tcp->th_off * 4);
 	  if((r=process_data_segment(conn,handler,p,stream,direction)))
 	    ABORT(r);
 	}
