@@ -7,8 +7,10 @@ AM_INIT_AUTOMAKE([subdir-objects])
 AC_CONFIG_SRCDIR([base/pcap-snoop.c])
 AC_CONFIG_HEADERS([config.h])
 
+AC_CANONICAL_HOST
+
 # Checks for programs.
-: ${CFLAGS="-O2"}
+: ${CFLAGS=""}
 AC_PROG_CC([gcc clang])
 AM_PROG_CC_C_O
 AC_PROG_MAKE_SET
@@ -49,10 +51,9 @@ files with
 	])
 fi
 
-AC_CHECK_LIB([pcap],[pcap_create])
-
 have_ssl=no
 AC_SEARCH_LIBS([OPENSSL_init_ssl], [ssl], [have_ssl=yes])
+AC_SEARCH_LIBS(CRYPTO_new_ex_data, [crypto], [have_crypto=yes])
 
 if test "x${have_ssl}" = xyes; then
 	AC_CHECK_HEADERS([openssl/ssl.h], [], [have_ssl=no])
@@ -72,7 +73,45 @@ files with
 	])
 fi
 
-AC_CHECK_LIB([ssl], [OPENSSL_init_ssl])
+AC_ARG_ENABLE([optimization],
+	[  --disable-optimization  disable compiler optimizations],
+	[optimization=${enableval}], [optimization=yes])
+
+if test "x${optimization}" = xno; then
+	CFLAGS="$CFLAGS -O0"
+else
+	CFLAGS="$CFLAGS -O2"
+fi
+
+AC_ARG_ENABLE([debug],
+	[  --enable-debug	  enable debug info],
+	[debug=${enableval}], [debug=no])
+
+if test "x${debug}" = xyes; then
+	CFLAGS="$CFLAGS -g"
+fi
+
+AC_ARG_ENABLE([asan],
+	[  --enable-asan		  enable AddressSanitizer and other checks],
+	[asan=${enableval}], [asan=no])
+
+if test "x${asan}" = xyes; then
+	AS_CASE([$CC],
+	[*gcc*], [AC_CHECK_LIB(asan, _init)],
+	[*clang*], [have_clang=yes],
+        [have_clang=no])
+
+	if (test "x${ac_cv_lib_asan__init}" = xyes || test "x$have_clang" = xyes); then
+		CFLAGS="$CFLAGS \
+-fsanitize=address,undefined,leak \
+-Wformat \
+-Werror=format-security \
+-Werror=array-bounds"
+	else
+		AC_MSG_WARN("AddressSanitizer not supported")
+		asan=no
+	fi
+fi
 
 AC_CONFIG_FILES([Makefile
                  common/Makefile
@@ -80,4 +119,21 @@ AC_CONFIG_FILES([Makefile
                  null/Makefile
                  ssl/Makefile
                  base/Makefile])
+
 AC_OUTPUT
+
+echo
+echo "################################################"
+echo "SSLDump build setup"
+echo "	Host system:		$host_os"
+echo "	Host architecture:	$host_cpu"
+echo "	Compiler:		$CC"
+echo "	Installation prefix:    $prefix"
+echo "	CFLAGS:    		$CFLAGS"
+echo "	LDFLAGS:    		$LDFLAGS"
+echo "	LIBS:    		$LIBS"
+echo "	Optimizations enabled:  $optimization"
+echo "	Debug info enabled:	$debug"
+echo "	ASAN enabled:		$asan"
+echo "################################################"
+
