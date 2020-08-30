@@ -23,7 +23,6 @@ ssldump_CPPFLAGS = \
 	-I$(top_srcdir)/null\
 	-I$(top_srcdir)/ssl\
 	-I$(top_srcdir)/base\
-	-D_BSD_SOURCE=1\
 	-D_DEFAULT_SOURCE=1\
 	-DLINUX
 
