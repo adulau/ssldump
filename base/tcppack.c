@@ -44,7 +44,6 @@
  */
 
 
-static char *RCSSTRING="$Id: tcppack.c,v 1.11 2002/09/09 21:02:58 ekr Exp $";
 
 #include "network.h"
 #ifndef _WIN32

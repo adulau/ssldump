@@ -8,7 +8,6 @@
  */
 
 
-static char *RCSSTRING="$Id: r_bitfield.c,v 1.3 2001/12/24 06:06:26 ekr Exp $";
 
 #include <r_common.h>
 #include "r_bitfield.h"

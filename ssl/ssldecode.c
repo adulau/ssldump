@@ -57,7 +57,6 @@
 #include "ssldecode.h"
 #include "ssl_rec.h"
 #include "r_assoc.h"
-static char *RCSSTRING="$Id: ssldecode.c,v 1.9 2002/08/17 01:33:17 ekr Exp $";
 
 #define PRF(ssl,secret,usage,rnd1,rnd2,out) (ssl->version==SSLV3_VERSION)? \
         ssl3_prf(ssl,secret,usage,rnd1,rnd2,out): \

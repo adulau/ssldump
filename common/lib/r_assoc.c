@@ -54,7 +54,6 @@
    ekr@rtfm.com  Sun Jan 17 17:57:15 1999
  */
 
-static char *RCSSTRING="$Id: r_assoc.c,v 1.4 2001/12/24 06:06:26 ekr Exp $";
 
 #include <r_common.h>
 #include "r_assoc.h"

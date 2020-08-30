@@ -44,7 +44,6 @@
  */
 
 
-static char *RCSSTRING="$Id: null_analyze.c,v 1.6 2001/11/26 22:28:16 ekr Exp $";
 
 #include <ctype.h>
 #include "network.h"

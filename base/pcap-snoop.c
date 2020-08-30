@@ -47,7 +47,6 @@
  */
 
 
-static char *RCSSTRING="$Id: pcap-snoop.c,v 1.14 2002/09/09 21:02:58 ekr Exp $";
 
 
 #include <pcap.h>

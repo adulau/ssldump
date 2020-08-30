@@ -44,7 +44,6 @@
  */
 
 
-static char *RCSSTRING="$Id: common.c,v 1.2 2000/10/17 16:09:57 ekr Exp $";
 
 #include <r_common.h>
 

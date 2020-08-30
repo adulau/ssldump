@@ -8,7 +8,6 @@
  */
 
 
-static char *RCSSTRING="$Id: pthread.c,v 1.1.1.1 2000/10/09 00:45:39 ekr Exp $";
 
 #include <r_common.h>
 #include <r_thread.h>

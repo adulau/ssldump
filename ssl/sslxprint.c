@@ -44,7 +44,6 @@
  */
 
 
-static char *RCSSTRING="$Id: sslxprint.c,v 1.3 2000/11/03 06:38:06 ekr Exp $";
 
 #include "network.h"
 #include "ssl_h.h"
