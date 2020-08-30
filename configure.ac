@@ -8,7 +8,8 @@ AC_CONFIG_SRCDIR([base/pcap-snoop.c])
 AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
-AC_PROG_CC
+: ${CFLAGS="-O2"}
+AC_PROG_CC([gcc clang])
 AM_PROG_CC_C_O
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL
