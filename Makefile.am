@@ -8,6 +8,8 @@ ssldump_SOURCES = \
 	base/common.c\
 	ssl/ssl_analyze.c\
 	null/null_analyze.c\
+	common/lib/r_data.c\
+	common/lib/r_assoc.c\
 	common/lib/r_errors.c\
 	base/tcppack.c\
 	base/tcpconn.c\
@@ -15,7 +17,8 @@ ssldump_SOURCES = \
 	ssl/sslprint.c\
 	ssl/ssl.enums.c\
 	ssl/sslxprint.c\
-	ssl/ciphersuites.c
+	ssl/ciphersuites.c\
+	ssl/ssl_rec.c
 
 ssldump_CPPFLAGS = \
 	-I$(top_srcdir)\
@@ -24,5 +27,5 @@ ssldump_CPPFLAGS = \
 	-I$(top_srcdir)/ssl\
 	-I$(top_srcdir)/base\
 	-D_DEFAULT_SOURCE=1\
-	-DLINUX
-
+	-DLINUX\
+	-DOPENSSL
