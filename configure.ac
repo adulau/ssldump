@@ -13,11 +13,19 @@ AM_PROG_CC_C_O
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL
 
-
 # Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h memory.h netdb.h netinet/in.h stdlib.h string.h sys/param.h sys/socket.h sys/time.h unistd.h],,[AC_MSG_ERROR([Missing header.])])
 AC_HEADER_STDC
 AC_HEADER_TIME
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_CHECK_SIZEOF([unsigned short])
+AC_CHECK_SIZEOF([unsigned int])
+AC_CHECK_SIZEOF([unsigned long])
+AC_CHECK_SIZEOF([unsigned long long])
+
+# Checks for library functions.
+AC_CHECK_FUNCS([malloc realloc gethostbyaddr gettimeofday inet_ntoa isascii memmove memset strchr strdup strstr strtol])
 
 have_pcap=no
 AC_SEARCH_LIBS([pcap_create], [pcap], [have_pcap=yes])
@@ -64,15 +72,6 @@ files with
 fi
 
 AC_CHECK_LIB([ssl], [OPENSSL_init_ssl])
-
-# Checks for typedefs, structures, and compiler characteristics.
-AC_CHECK_SIZEOF([unsigned short])
-AC_CHECK_SIZEOF([unsigned int])
-AC_CHECK_SIZEOF([unsigned long])
-AC_CHECK_SIZEOF([unsigned long long])
-
-# Checks for library functions.
-AC_CHECK_FUNCS([malloc realloc gethostbyaddr gettimeofday inet_ntoa isascii memmove memset strchr strdup strstr strtol])
 
 AC_CONFIG_FILES([Makefile
                  common/Makefile
