@@ -55,7 +55,8 @@ Optional configuration features (aka ./configure options):
   --disable-optimization  disable compiler optimizations (change from -O2 to -O0)
   --enable-debug	  enable debug info (add "-g -DDEBUG" to CFLAGS)
   --enable-asan		  enable AddressSanitizer and other checks
-	add "-fsanitize=address,undefined,leak -Wformat -Werror=format-security -Werror=array-bounds" to CFLAGS
+	add "-fsanitize=address,undefined,leak -Wformat -Werror=format-security
+		-Werror=array-bounds" to CFLAGS
 	use libasan with GCC and embedded ASAN with Clang
 ```
 
