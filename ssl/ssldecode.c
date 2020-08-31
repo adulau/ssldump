@@ -489,7 +489,7 @@ static int ssl_create_session_lookup_key(ssl,id,idlen,keyp,keyl)
     *keyl=idlen;
     key+=idlen;
     
-    sprintf((char *)key,"%s:%d",ssl->server_name,ssl->server_port);
+    snprintf((char *)key,l,"%s:%d",ssl->server_name,ssl->server_port);
     *keyl+=strlen((char *)key);
 
     _status=0;
@@ -905,7 +905,7 @@ static int ssl_generate_keying_material(ssl,d)
     UCHAR _key_c[16],_key_s[16];
     int needed;
     int r,_status;
-    UCHAR *ptr,*c_wk,*s_wk,*c_mk,*s_mk,*c_iv,*s_iv;
+    UCHAR *ptr,*c_wk,*s_wk,*c_mk=NULL,*s_mk=NULL,*c_iv=NULL,*s_iv=NULL;
 
     if(!d->MS){
       if((r=r_data_alloc(&d->MS,48)))
