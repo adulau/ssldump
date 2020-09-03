@@ -240,7 +240,7 @@ static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
     	if (ssl_decode_switch(ssl,extension_decoder,ex,dir,seg,data) == R_NOT_FOUND) {
 	  decode_extension(ssl,dir,seg,data);
     	  P_(P_RH){
-    	    explain(ssl, "Extension type: %s not yet implemented in ssldump", ex);
+     	    explain(ssl, "Extension type: %u not yet implemented in ssldump\n", ex);
     	  }
     	  continue;
     	}
@@ -300,7 +300,7 @@ static int decode_HandshakeType_ServerHello(ssl,dir,seg,data)
     	if (ssl_decode_switch(ssl,extension_decoder,ex,dir,seg,data) == R_NOT_FOUND) {
 	  decode_extension(ssl,dir,seg,data);
     	  P_(P_RH){
-    	    explain(ssl, "Extension type: %s not yet implemented in ssldump", ex);
+    	    explain(ssl, "Extension type: %u not yet implemented in ssldump,\n", ex);
     	  }
     	  continue;
     	}
@@ -2538,7 +2538,7 @@ static int decode_extension_server_name(ssl,dir,seg,data)
 	if (ssl_decode_switch(ssl,server_name_type_decoder,t,dir,seg,data) == R_NOT_FOUND) {
 	  decode_server_name(ssl,dir,seg,data);
 	  P_(P_RH){
-	    explain(ssl, "Server Name type: %s not yet implemented in ssldump", t);
+	    explain(ssl, "Server Name type: %u not yet implemented in ssldump\n", t);
 	  }
 	  continue;
 	}
