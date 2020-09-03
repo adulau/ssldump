@@ -134,6 +134,12 @@ int network_process_packet(handler,timestamp,data,length)
     hlen=p.ip->ip_hl * 4;
     p.data += hlen;
     p.len = ntohs(p.ip->ip_len);
+
+    if(p.len > length) {
+        printf("Malformed packet, size from IP header is larger than size reported by libpcap, skipping ...\n");
+        return(0);
+    }
+
     if (p.len == 0) {
         DBG((0,"ip length reported as 0, presumed to be because of 'TCP segmentation offload' (TSO)\n"));
         p.len = p._len;
