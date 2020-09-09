@@ -2655,6 +2655,11 @@ decoder extension_decoder[] = {
 		"next_protocol_negotiation",
 		decode_extension
 	},
+	{
+		0xff01,
+		"renegotiation_info",
+		decode_extension
+	},
 
 {-1}
 };
