@@ -2,7 +2,9 @@
 
 ![C/C++ CI](https://github.com/adulau/ssldump/workflows/C/C++%20CI/badge.svg)
 
-- Current version of ssldump is v1.1 (released: 2019-12-28) - [ChangeLog](https://raw.githubusercontent.com/adulau/ssldump/master/ChangeLog)
+- Current version of ssldump is v1.2 (released: 2020-09-22) - [ChangeLog](https://raw.githubusercontent.com/adulau/ssldump/master/ChangeLog)
+
+# What about the original ssldump?
 
 This repository is composed of the original SSLDUMP 0.9b3 + a myriad of patches (from Debian and other distributions) + contributions via PR
 
