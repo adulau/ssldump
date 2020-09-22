@@ -50,6 +50,25 @@ make
 (optional) make install
 ```
 
+Optional configuration features (aka ./configure options):
+```
+  --disable-optimization  disable compiler optimizations (change from -O2 to -O0)
+  --enable-debug	  enable debug info (add "-g -DDEBUG" to CFLAGS)
+  --enable-asan		  enable AddressSanitizer and other checks
+	add "-fsanitize=address,undefined,leak -Wformat -Werror=format-security
+		-Werror=array-bounds" to CFLAGS
+	use libasan with GCC and embedded ASAN with Clang
+```
+
+Configuration examples:
+```
+- Use GCC with libasan, debug info and custom CFLAGS:
+	./configure CC=/usr/bin/gcc --enable-asan --enable-debug CFLAGS="-Wall"
+
+- Use Clang with ASAN and no optimizations (-O0)
+	./configure CC=/usr/bin/clang --enable-asan --disable-optimization
+```
+
 ## Contributing
 
 The contributing policy is simple. If you have a patch to propose, make a pull-request
