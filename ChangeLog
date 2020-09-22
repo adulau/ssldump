@@ -2,6 +2,87 @@ Changelog
 =========
 
 
+v1.2 (2020-09-22)
+-----------------
+
+Changes
+~~~~~~~
+- [cleanup] file cleanup (tab/ws mixed) [Alexandre Dulaunoy]
+- [doc] workflow badge added. [Alexandre Dulaunoy]
+- [workflow] config updated. [Alexandre Dulaunoy]
+- [workflow] pcap. [Alexandre Dulaunoy]
+- [workflow] add required packages. [Alexandre Dulaunoy]
+- [doc] clarification about ssldump repository + release v1.1.
+  [Alexandre Dulaunoy]
+- [doc] release v1.1 - ChangeLog updated. [Alexandre Dulaunoy]
+
+Other
+~~~~~
+- Merge pull request #34 from wllm-rbnt/build-sys. [Alexandre Dulaunoy]
+
+  Build system updates
+- Fix long line in README.md. [William Robinet]
+- Update README.md with ./configure examples. [William Robinet]
+- Update README.md with ./configure options. [William Robinet]
+- Clean debug functions, remove duplicates. [William Robinet]
+- Define DEBUG when using --enable-debug. [William Robinet]
+- Add optional features to ./configure (ASAN, debug, optimization)
+  [William Robinet]
+- Reenable OpenSSL code compilation. [William Robinet]
+- Update .gitignore, rearrange CI workflows variable definition.
+  [William Robinet]
+- Remove -g from default CFLAGS and check for Clang explicitly. [William
+  Robinet]
+- Remove deprecated define. [William Robinet]
+- Reorder checks in configure.ac. [William Robinet]
+- Prepare ASAN build. [William Robinet]
+- Force use of GCC in GCC CI. [William Robinet]
+- Add Clang CI. [William Robinet]
+- Merge pull request #35 from mattslot/master. [Alexandre Dulaunoy]
+
+  Add renegotiation_info extension
+- Add renegotiation_info extension. [Matt Slot]
+- Merge pull request #33 from wllm-rbnt/oob-reads. [Alexandre Dulaunoy]
+
+  Fix multiple segfaults on out-of-bounds read access
+- Fix multiple segfault by OOB read because of wrong format string
+  specifier. [William Robinet]
+- Fix segfault by OOB read on malformed packets (2) [William Robinet]
+- Fix segfault by OOB read on malformed packets. [William Robinet]
+- Merge pull request #31 from wllm-rbnt/autoconf2020. [Alexandre
+  Dulaunoy]
+
+  Autoconf2020
+- Fix deprecation warning from libcap 1.9.1. [William Robinet]
+- Make FreeBSD (12.1) happy. [William Robinet]
+- Update CI workflow. [William Robinet]
+- Apply Replace-direct-struct-access-patterns-with-OpenSSL-1.1-ge.patch
+  from Debian pkg. [William Robinet]
+- Update readme. [William Robinet]
+- Fix readme. [William Robinet]
+- Improve lib detection and .gitignore. [William Robinet]
+- Remove generated file. [William Robinet]
+- Add man page to Makefile.am. [William Robinet]
+- Fix warning about type of arguments of pcap_handler. [William Robinet]
+- Fix warning about signal() arguments type. [William Robinet]
+- Fix build warnings for missing prototypes. [William Robinet]
+- Add build deps to readme. [William Robinet]
+- Fix readme. [William Robinet]
+- Autoconf setup rewritten. [William Robinet]
+- Set theme jekyll-theme-minimal. [Alexandre Dulaunoy]
+- Merge pull request #27 from microolap-technologies/resumed_sessions.
+  [Alexandre Dulaunoy]
+
+  add support to decrypt resumed sessions
+- Add support to decrypt resumed sessions. [Aleksey Ryabkov]
+- First test workflow. [Alexandre Dulaunoy]
+- Merge pull request #25 from microolap-technologies/sni_2_srv_name.
+  [Alexandre Dulaunoy]
+
+  use sni in server_name
+- Use sni in server_name. [Aleksey Ryabkov]
+
+
 v1.1 (2019-12-28)
 -----------------
 
