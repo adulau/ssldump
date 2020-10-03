@@ -418,7 +418,7 @@ int ssl_print_enum(ssl,name,dtable,value)
       }
       dtable++;
     }
-
+    printf("\n");
     return(R_NOT_FOUND);
   }
 
