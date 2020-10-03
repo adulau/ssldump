@@ -1,8 +1,12 @@
 # ssldump - (de-facto repository gathering patches around the cyberspace)
 
-![C/C++ CI](https://github.com/adulau/ssldump/workflows/C/C++%20CI/badge.svg)
+![Clang CI](https://github.com/adulau/ssldump/workflows/Clang%20CI/badge.svg)
+![GCC CI](https://github.com/adulau/ssldump/workflows/GCC%20CI/badge.svg)
+
+# Release and tagging
 
 - Current version of ssldump is v1.2 (released: 2020-09-22) - [ChangeLog](https://raw.githubusercontent.com/adulau/ssldump/master/ChangeLog)
+- Previous version of ssldump is v1.1 (released: 2019-12-28) - [ChangeLog](https://raw.githubusercontent.com/adulau/ssldump/master/ChangeLog)
 
 # What about the original ssldump?
 
@@ -27,10 +31,6 @@ other too (but this is just a collateral damage).
 
 I used it for a relatively small project called Passive SSL. For more information, [Passive SSL Passive Detection and Reconnaissance Techniques, to Find, Track, and Attribute Vulnerable ”Devices”](https://www.first.org/resources/papers/conf2015/first_2015_-_leverett_-_dulaunoy_-_passive_detection_20150604.pdf).
 Additional back-end code available is in the [crl-monitor ](https://github.com/adulau/crl-monitor/tree/master/bin/x509) repository.
-
-# Release and tagging
-
-- Current version of ssldump is v1.1 (released: 2019-12-28) - [ChangeLog](https://raw.githubusercontent.com/adulau/ssldump/master/ChangeLog)
 
 # Build instructions
 
