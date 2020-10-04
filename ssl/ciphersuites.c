@@ -44,7 +44,6 @@
  */
 
 
-static char *RCSSTRING="$Id: ciphersuites.c,v 1.3 2002/08/17 01:33:17 ekr Exp $";
 
 #include <r_common.h>
 

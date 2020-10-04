@@ -44,7 +44,6 @@
  */
 
 
-static char *RCSSTRING="$Id: ssl_analyze.c,v 1.8 2002/01/21 18:46:13 ekr Exp $";
 
 #include "network.h"
 #include "debug.h"
@@ -467,7 +466,7 @@ static int data_ssl_analyzer(_obj,seg,direction)
   {
     int _status,r;
     r_queue *q;
-    segment *last,*q_next,*assembled;
+    segment *last,*q_next=NULL,*assembled;
     ssl_obj *ssl=(ssl_obj *)_obj;
     int offset=0;
     

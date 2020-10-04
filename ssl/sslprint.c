@@ -44,7 +44,6 @@
  */
 
 
-static char *RCSSTRING="$Id: sslprint.c,v 1.8 2002/08/17 01:33:17 ekr Exp $";
 
 #include <ctype.h>
 #include <stdarg.h>
@@ -418,7 +417,7 @@ int ssl_print_enum(ssl,name,dtable,value)
       }
       dtable++;
     }
-
+    printf("\n");
     return(R_NOT_FOUND);
   }
 
