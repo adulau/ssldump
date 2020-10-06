@@ -93,13 +93,13 @@ int process_v2_hello(ssl,seg)
   {
     int r;
     int rec_len;
-    int cs_len;
-    int sid_len;
-    int chall_len;
-    int ver;
+    UINT4 cs_len;
+    UINT4 sid_len;
+    UINT4 chall_len;
+    UINT4 ver;
     Data d;
     Data chall;
-    char random[32];
+    UCHAR random[32];
     
     if(seg->len==0)
       return(SSL_NO_DATA);
@@ -472,7 +472,7 @@ int combodump(ssl,name,data)
   char *name;
   Data *data;
   {
-    char *ptr=data->data;
+    UCHAR *ptr=data->data;
     int len=data->len;    
 
     if(name){

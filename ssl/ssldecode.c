@@ -490,7 +490,7 @@ static int ssl_create_session_lookup_key(ssl,id,idlen,keyp,keyl)
     key+=idlen;
     
     snprintf((char *)key,l,"%s:%d",ssl->server_name,ssl->server_port);
-    *keyl+=strlen(key);
+    *keyl+=strlen((char *)key);
 
     _status=0;
   abort:
@@ -885,10 +885,10 @@ static int ssl3_prf(ssl,secret,usage,r1,r2,out)
       
       MD5_Update(&md5,secret->data,secret->len);
       MD5_Update(&md5,buf,20);
-      MD5_Final(outbuf,&md5);
+      MD5_Final((unsigned char *)outbuf,&md5);
       tocpy=MIN(out->len-off,16);
       memcpy(out->data+off,outbuf,tocpy);
-      CRDUMP("MD5 out",outbuf,16);
+      CRDUMP("MD5 out",(UCHAR *)outbuf,16);
       
       MD5_Init(&md5);
     }
@@ -1084,7 +1084,7 @@ static int ssl_generate_session_hash(ssl,d)
 
 	EVP_DigestInit(dgictx,md);
 	EVP_DigestUpdate(dgictx,d->handshake_messages->data,d->handshake_messages->len);
-	EVP_DigestFinal(dgictx,d->session_hash->data,&d->session_hash->len);
+	EVP_DigestFinal(dgictx,d->session_hash->data,(unsigned int *) &d->session_hash->len);
 
 	break;
       case SSLV3_VERSION:
@@ -1092,7 +1092,7 @@ static int ssl_generate_session_hash(ssl,d)
       case TLSV11_VERSION:
 	EVP_DigestInit(dgictx,EVP_get_digestbyname("MD5"));
 	EVP_DigestUpdate(dgictx,d->handshake_messages->data,d->handshake_messages->len);
-	EVP_DigestFinal_ex(dgictx,d->session_hash->data,&d->session_hash->len);
+	EVP_DigestFinal_ex(dgictx,d->session_hash->data,(unsigned int *) &d->session_hash->len);
 
 	EVP_DigestInit(dgictx,EVP_get_digestbyname("SHA1"));
 	EVP_DigestUpdate(dgictx,d->handshake_messages->data,d->handshake_messages->len);

@@ -2521,8 +2521,8 @@ static int decode_extension_server_name(ssl,dir,seg,data)
   segment *seg;
   Data *data;
   {
-    UINT4 t;
-    int l,r,p;
+    UINT4 t,l;
+    int r,p;
 
     extern decoder server_name_type_decoder[];
 
@@ -2557,7 +2557,8 @@ static int decode_extension_encrypt_then_mac(ssl,dir,seg,data)
   segment *seg;
   Data *data;
   {
-    int l,r,*etm;
+    int r,*etm;
+    UINT4 l;
 
     etm=&ssl->extensions->encrypt_then_mac;
 
@@ -2574,7 +2575,8 @@ static int decode_extension_extended_master_secret(ssl,dir,seg,data)
   segment *seg;
   Data *data;
   {
-    int l,r,*ems;
+    int r,*ems;
+    UINT4 l;
 
     ems=&ssl->extensions->extended_master_secret;
 
@@ -2591,7 +2593,8 @@ static int decode_extension(ssl,dir,seg,data)
   segment *seg;
   Data *data;
   {
-    int l,r;
+    int r;
+    UINT4 l;
     SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
     data->len-=l;
     data->data+=l;
@@ -2670,7 +2673,8 @@ static int decode_server_name_type_host_name(ssl,dir,seg,data)
   segment *seg;
   Data *data;
   {
-    int l,r;
+    int r;
+    UINT4 l;
     SSL_DECODE_UINT16(ssl,"server name length",0,data,&l);
     printf(": %.*s",l,data->data);
 
@@ -2697,7 +2701,8 @@ static int decode_server_name(ssl,dir,seg,data)
   segment *seg;
   Data *data;
   {
-    int l,r;
+    int r;
+    UINT4 l;
     SSL_DECODE_UINT16(ssl,"server name length",0,data,&l);
     data->len-=l;
     data->data+=l;
