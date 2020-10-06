@@ -363,7 +363,7 @@ static int tls_check_mac(d,ct,ver,data,datalen,iv,ivlen,mac)
     UCHAR buf[128];
     
     md=EVP_get_digestbyname(digests[d->cs->dig-0x40]);
-    HMAC_Init(hm,d->mac_key->data,d->mac_key->len,md);
+    HMAC_Init_ex(hm,d->mac_key->data,d->mac_key->len,md,NULL);
 
     fmt_seq(d->seq,buf);
     d->seq++;

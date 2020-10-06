@@ -677,12 +677,12 @@ static int tls_P_hash(ssl,secret,seed,md,out)
     A_l=seed->len;
 
     while(left){
-      HMAC_Init(hm,secret->data,secret->len,md);
+      HMAC_Init_ex(hm,secret->data,secret->len,md,NULL);
       HMAC_Update(hm,A,A_l);
       HMAC_Final(hm,_A,&A_l);
       A=_A;
 
-      HMAC_Init(hm,secret->data,secret->len,md);
+      HMAC_Init_ex(hm,secret->data,secret->len,md,NULL);
       HMAC_Update(hm,A,A_l);
       HMAC_Update(hm,seed->data,seed->len);
       HMAC_Final(hm,tmp,&tmp_l);
@@ -1068,7 +1068,7 @@ static int ssl_generate_session_hash(ssl,d)
     int r,_status,dgi;
     unsigned int len;
     const EVP_MD *md;
-    HMAC_CTX *dgictx = HMAC_CTX_new();
+    EVP_MD_CTX *dgictx = EVP_MD_CTX_create();
 
     if((r=r_data_alloc(&d->session_hash,EVP_MAX_MD_SIZE)))
       ABORT(r);
