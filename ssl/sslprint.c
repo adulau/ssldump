@@ -75,6 +75,8 @@ int process_beginning_plaintext(ssl,seg,direction)
     if(d.data[0]==0x16)
       return(SSL_BAD_CONTENT_TYPE);
 
+    if (logger) logger->vtbl->data(ssl->logger_obj,d.data,d.len,direction);
+
     P_(P_AD){
       ssl_print_timestamp(ssl,&seg->p->ts);
       
@@ -269,6 +271,10 @@ int ssl_expand_record(ssl,q,direction,data,len)
       printf("\n");
     }
     else{
+      //try to save unencrypted data to logger
+      //we must save record with type "application_data" (this is unencrypted data)
+      if ((ct == 23) && (logger)) logger->vtbl->data(ssl->logger_obj,d.data,d.len,direction);
+
       if((r=ssl_decode_switch(ssl,ContentType_decoder,data[0],direction,q, &d))) {
         printf("  unknown record type: %d\n", ct);
         ERETURN(r);

@@ -75,6 +75,7 @@
 #ifdef ENABLE_RECORD
 #include "record_analyze.h"
 #endif
+#include "pcap_logger.h"
 
 #ifndef ETHERTYPE_8021Q
 # define ETHERTYPE_8021Q 0x8100
@@ -96,6 +97,8 @@ int conn_ttl = 100;  // TTL of inactive connections in connection pool
 struct timeval last_packet_seen_time = // Timestamp of the last packet of the
     (struct timeval) {0};              // last block of conn_freq packets seen
 
+logger_mod *logger=NULL;
+
 int err_exit(str,num)
   char *str;
   int num;
@@ -106,7 +109,7 @@ int err_exit(str,num)
 
 int usage()
   {
-    fprintf(stderr,"Usage: ssldump [-r dumpfile] [-i interface] [-l sslkeylogfile] \n");
+    fprintf(stderr,"Usage: ssldump [-r dumpfile] [-i interface] [-l sslkeylogfile] [-w outpcapfile]\n");
     fprintf(stderr,"               [-k keyfile] [-p password] [-vtaTnsAxVNde]\n");
     fprintf(stderr,"               [filter]\n");
     exit(0);
@@ -126,6 +129,7 @@ int print_version()
 void sig_handler(int sig)
   {
     fflush(stdout);
+    if (logger) logger->vtbl->deinit();
     exit(0);
   }
     
@@ -296,7 +300,7 @@ int main(argc,argv)
 
     signal(SIGINT,sig_handler);
     
-    while((c=getopt(argc,argv,"vr:F:f:S:yTt:ai:k:l:p:nsAxXhHVNdqem:P"))!=EOF){
+    while((c=getopt(argc,argv,"vr:F:f:S:yTt:ai:k:l:w:p:nsAxXhHVNdqem:P"))!=EOF){
       switch(c){
         case 'v':
           print_version();
@@ -332,6 +336,14 @@ int main(argc,argv)
         case 'l':
 	  SSL_keylogfile=strdup(optarg);
 	  break;
+        case 'w':
+	        logger=&pcap_mod;
+          if(logger->vtbl->init(optarg)!=0){
+	          fprintf(stderr,"Can not open/create out pcap %s\n",
+	          optarg);
+	          exit(1);
+	        }
+	        break;
         case 'p':
           SSL_password=strdup(optarg);
           break;
@@ -479,6 +491,10 @@ int main(argc,argv)
         free(SSL_keylogfile);
     if(SSL_password)
         free(SSL_password);
+    if (logger)
+    {
+        logger->vtbl->deinit();
+    }
 
     exit(0);
   }
