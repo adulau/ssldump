@@ -266,14 +266,14 @@ int ssl_expand_record(ssl,q,direction,data,len)
     }
 
     if(r){
-      if(r=ssl_print_enum(ssl,0,ContentType_decoder,ct)) {
+      if((r=ssl_print_enum(ssl,0,ContentType_decoder,ct))) {
         printf("  unknown record type: %d\n", ct);
         ERETURN(r);
       }
       printf("\n");
     }
     else{
-      if(r=ssl_decode_switch(ssl,ContentType_decoder,data[0],direction,q, &d)) {
+      if((r=ssl_decode_switch(ssl,ContentType_decoder,data[0],direction,q, &d))) {
         printf("  unknown record type: %d\n", ct);
         ERETURN(r);
       }
@@ -332,7 +332,7 @@ int ssl_decode_opaque_array(ssl,name,size,p,data,x)
     sprintf(n,"%s (length)",name?name:"<unknown>");
     if(size<0){
       size*=-1;
-      if(r=ssl_decode_uintX(ssl,n,BYTES_NEEDED(size),P_DC,data,&len))
+      if((r=ssl_decode_uintX(ssl,n,BYTES_NEEDED(size),P_DC,data,&len)))
         ERETURN(r);
     }
     else{
@@ -388,11 +388,11 @@ int ssl_decode_enum(ssl,name,size,dtable,p,data,x)
 
     if(!x) x=&_x;
     
-    if(r=ssl_decode_uintX(ssl,name,size,0,data,x))
+    if((r=ssl_decode_uintX(ssl,name,size,0,data,x)))
       ERETURN(r);
 
     P_(p){
-      if(r=ssl_print_enum(ssl,name,dtable,*x))
+      if((r=ssl_print_enum(ssl,name,dtable,*x)))
         ERETURN(r);
     }
 
@@ -620,12 +620,12 @@ int ssl_print_timestamp(ssl,ts)
       explain(ssl,"%d%c%4.4d ",ts->tv_sec,'.',ts->tv_usec/100);
     }
     else{
-      if(r=timestamp_diff(ts,&ssl->time_start,&dt))
+      if((r=timestamp_diff(ts,&ssl->time_start,&dt)))
         ERETURN(r);
       explain(ssl,"%d%c%4.4d ",dt.tv_sec,'.',dt.tv_usec/100);
     }
     
-    if(r=timestamp_diff(ts,&ssl->time_last,&dt)){
+    if((r=timestamp_diff(ts,&ssl->time_last,&dt))){
       ERETURN(r);
     }
     explain(ssl,"(%d%c%4.4d)  ",dt.tv_sec,'.',dt.tv_usec/100);
@@ -664,7 +664,7 @@ int ssl_print_cipher_suite(ssl,version,p,val)
     int r;
     
     P_(p){
-      if(r=ssl_lookup_enum(ssl,cipher_suite_decoder,val,&str)){
+      if((r=ssl_lookup_enum(ssl,cipher_suite_decoder,val,&str))){
         explain(ssl,"Unknown value 0x%x",val);
         return(0);
       }

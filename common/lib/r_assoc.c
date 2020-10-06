@@ -173,7 +173,7 @@ static int copy_assoc_chain(newp,old)
       ptr->copy=old->copy;
 	
       if(old->copy){
-	if(r=old->copy(&ptr->data,old->data))
+	if((r=old->copy(&ptr->data,old->data)))
 	  ABORT(r);
       }
       else
@@ -224,7 +224,7 @@ int r_assoc_fetch(assoc,key,len,datap)
     r_assoc_el *bucket;
     int r;
 
-    if(r=r_assoc_fetch_bucket(assoc,key,len,&bucket)){
+    if((r=r_assoc_fetch_bucket(assoc,key,len,&bucket))){
       if(r!=R_NOT_FOUND)
 	ERETURN(r);
       return(r);
@@ -246,7 +246,7 @@ int r_assoc_insert(assoc,key,len,data,copy,destroy,how)
     r_assoc_el *bucket,*new_bucket=0;
     int r,_status;
     
-    if(r=r_assoc_fetch_bucket(assoc,key,len,&bucket)){
+    if((r=r_assoc_fetch_bucket(assoc,key,len,&bucket))){
       /*Note that we compute the hash value twice*/
       UINT4 hash_value;
 
@@ -304,7 +304,7 @@ int r_assoc_copy(newp,old)
     if(!(new->chains=(r_assoc_el **)calloc(sizeof(r_assoc_el),old->size)))
       ABORT(R_NO_MEMORY);
     for(i=0;i<new->size;i++){
-      if(r=copy_assoc_chain(new->chains+i,old->chains[i]))
+      if((r=copy_assoc_chain(new->chains+i,old->chains[i])))
 	ABORT(R_NO_MEMORY);
     }
     *newp=new;

@@ -225,7 +225,7 @@ int copy_tcp_segment_queue(out,in)
 	ABORT(R_NO_MEMORY);
       if(!base) base=*out;
 
-      if(r=packet_copy(in->p,&(*out)->p))
+      if((r=packet_copy(in->p,&(*out)->p)))
 	ABORT(r);
       out=&(*out)->next;  /* Move the pointer we're assigning to */
     }

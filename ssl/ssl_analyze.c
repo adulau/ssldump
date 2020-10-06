@@ -187,7 +187,7 @@ static int parse_ssl_flags(str)
     
     y=str;
     
-    while(x=strtok(y,",")){
+    while((x=strtok(y,","))){
       y=0;
       
       if(*x=='!'){
@@ -218,7 +218,7 @@ static int create_ssl_ctx(handle,ctxp)
     ssl_decode_ctx *ctx=0;
     int r,_status;
     
-    if(r=ssl_decode_ctx_create(&ctx,SSL_keyfile,SSL_password,SSL_keylogfile))
+    if((r=ssl_decode_ctx_create(&ctx,SSL_keyfile,SSL_password,SSL_keylogfile)))
       ABORT(r);
 
     *ctxp=(proto_ctx *)ctx;
@@ -247,9 +247,9 @@ static int create_ssl_analyzer(handle,ctx,conn,objp,i_addr,i_port,r_addr,r_port,
     obj->ssl_ctx=(ssl_decode_ctx *)ctx;
     obj->conn=conn;
     
-    if(r=create_r_queue(&obj->r2i_queue))
+    if((r=create_r_queue(&obj->r2i_queue)))
       ABORT(r);
-    if(r=create_r_queue(&obj->i2r_queue))
+    if((r=create_r_queue(&obj->i2r_queue)))
       ABORT(r);
 
     lookuphostname(i_addr,&obj->client_name);
@@ -263,7 +263,7 @@ static int create_ssl_analyzer(handle,ctx,conn,objp,i_addr,i_port,r_addr,r_port,
     memcpy(&obj->time_start,base_time,sizeof(struct timeval));
     memcpy(&obj->time_last,base_time,sizeof(struct timeval));    
 
-    if(r=ssl_decoder_create(&obj->decoder,obj->ssl_ctx))
+    if((r=ssl_decoder_create(&obj->decoder,obj->ssl_ctx)))
       ABORT(r);
 
     if (!(obj->extensions=malloc(sizeof(ssl_extensions))))
@@ -354,7 +354,7 @@ static int read_ssl_record(obj,q,seg,offset,lastp,offsetp)
 	if (SSL_HEADER_SIZE<q->len)
 	  ABORT(-1);
 	q->read_left=SSL_HEADER_SIZE-q->len;
-	if(r=read_data(q,seg,offset,&last,&offset))
+	if((r=read_data(q,seg,offset,&last,&offset)))
 	  ABORT(r);
         
         q->state=SSL_READ_HEADER;
@@ -386,7 +386,7 @@ static int read_ssl_record(obj,q,seg,offset,lastp,offsetp)
 	q->read_left=rec_len;
 	
       case SSL_READ_HEADER:
-	if(r=read_data(q,last,offset,&last,&offset))
+	if((r=read_data(q,last,offset,&last,&offset)))
 	  ABORT(r);
 	break;
       default:
@@ -436,7 +436,7 @@ static int read_data(q,seg,offset,lastp,offsetp)
     };
     
     if(q->read_left){
-      if(r=copy_tcp_segment_queue(&q->q,seg))
+      if((r=copy_tcp_segment_queue(&q->q,seg)))
 	ABORT(r);
       return(SSL_NO_DATA);
     }
@@ -513,7 +513,7 @@ static int data_ssl_analyzer(_obj,seg,direction)
 
       ssl->direction=direction;
       
-      if(r=print_ssl_record(ssl,direction,assembled,q->data,q->len))
+      if((r=print_ssl_record(ssl,direction,assembled,q->data,q->len)))
 	ABORT(r);
       
       /*Now reset things, so we can read another record*/
@@ -576,7 +576,7 @@ static int print_ssl_record(obj,direction,q,data,len)
   {
     int r;
     
-    if(r=print_ssl_header(obj,direction,q,data,len))
+    if((r=print_ssl_header(obj,direction,q,data,len)))
       ERETURN(r);
     
     ssl_expand_record(obj,q,direction,data,len);
