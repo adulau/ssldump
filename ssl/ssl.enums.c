@@ -433,7 +433,7 @@ static int decode_HandshakeType_CertificateVerify(ssl,dir,seg,data)
   int r;
   printf("\n");
   ssl_update_handshake_messages(ssl,data);
-  SSL_DECODE_OPAQUE_ARRAY(ssl,"Signature",-(1<<15-1),P_HL,data,0);
+  SSL_DECODE_OPAQUE_ARRAY(ssl,"Signature",-((1<<15)-1),P_HL,data,0);
   return(0);
 
   }
@@ -455,7 +455,7 @@ static int decode_HandshakeType_ClientKeyExchange(ssl,dir,seg,data)
 
 	case KEX_RSA:
 	   if(ssl->version > 768) {
-	           SSL_DECODE_OPAQUE_ARRAY(ssl,"EncryptedPreMasterSecret",-(1<<15-1),
+	           SSL_DECODE_OPAQUE_ARRAY(ssl,"EncryptedPreMasterSecret",-((1<<15)-1),
 	             P_ND,data,&pms);
 
 	        }
