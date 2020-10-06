@@ -139,6 +139,7 @@ AC_CONFIG_FILES([Makefile
                  common/lib/Makefile
                  null/Makefile
                  ssl/Makefile
+                 pcap/Makefile
                  base/Makefile])
 
 AC_OUTPUT
