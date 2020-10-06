@@ -141,7 +141,7 @@ int ssl_decode_ctx_create(dp,keyfile,pass,keylogfile)
   {
 #ifdef OPENSSL    
     ssl_decode_ctx *d=0;
-    int r,_status;
+    int _status;
     
     SSL_library_init();
     OpenSSL_add_all_algorithms();
@@ -477,7 +477,7 @@ static int ssl_create_session_lookup_key(ssl,id,idlen,keyp,keyl)
   {
     UCHAR *key=0;
     UINT4 l;
-    int r,_status;
+    int _status;
 
     l=idlen+strlen(ssl->server_name)+idlen+15; /* HOST + PORT + id */
     
@@ -550,7 +550,6 @@ int ssl_save_session(ssl,d)
   {
 #ifdef OPENSSL    
     UCHAR *lookup_key=0;
-    void *msv;
     Data *msd=0;
     int lookup_key_len;
     int r,_status;
@@ -960,7 +959,6 @@ static int ssl_generate_keying_material(ssl,d)
     
     if(ssl->cs->export){
       Data iv_c,iv_s;
-      Data c_iv_d,s_iv_d;
       Data key_c,key_s;
       Data k;
 
@@ -1114,7 +1112,7 @@ static int ssl_generate_session_hash(ssl,d)
 static int ssl_read_key_log_file(d)
   ssl_decoder *d;
   {
-    int r,_status,dgi,n,i;
+    int r,_status,n,i;
     unsigned int t;
     size_t l=0;
     char *line,*label_data;
