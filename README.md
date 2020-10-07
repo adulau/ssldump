@@ -71,7 +71,12 @@ Configuration examples:
 	./configure CC=/usr/bin/clang --enable-asan --disable-optimization
 ```
 
-## Contributing
+# Notes
+
+The "save to pcap" (-w) option by @ryabkov, is heavily based on the work of
+@droe on https://github.com/droe/sslsplit .
+
+# Contributing
 
 The contributing policy is simple. If you have a patch to propose, make a pull-request
 via the interface. If the patch works for me, it's merged.
