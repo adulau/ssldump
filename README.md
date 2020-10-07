@@ -36,7 +36,7 @@ Additional back-end code available is in the [crl-monitor ](https://github.com/a
 
 On Debian & Ubuntu:
 ```
-apt install build-essential autoconf libssl-dev libpcap-dev
+apt install build-essential autoconf libssl-dev libpcap-dev libnet1-dev
 ./autogen.sh
 ./configure --prefix=/usr/local
 make
@@ -45,7 +45,7 @@ make
 
 On Fedora, Centos & RHEL:
 ```
-dnf install autoconf automake gcc make openssl-devel libpcap-devel
+dnf install autoconf automake gcc make openssl-devel libpcap-devel libnet1-dev
 ./autogen.sh
 ./configure --prefix=/usr/local
 make
