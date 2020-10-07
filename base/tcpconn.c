@@ -70,13 +70,8 @@ static int zero_conn(conn)
     return(0);
   }
 
-int tcp_find_conn(connp,directionp,saddr,sport,daddr,dport)
-  tcp_conn **connp;
-  int *directionp;
-  struct in_addr *saddr;
-  u_short sport;
-  struct in_addr *daddr;
-  u_short dport;
+int tcp_find_conn(tcp_conn **connp, int *directionp,struct in_addr *saddr,
+	u_short sport, struct in_addr *daddr, u_short dport)
   {
     conn_struct *conn;
 
@@ -106,12 +101,8 @@ int tcp_find_conn(connp,directionp,saddr,sport,daddr,dport)
     return(R_NOT_FOUND);
   }
 
-int tcp_create_conn(connp,i_addr,i_port,r_addr,r_port)
-  tcp_conn **connp;
-  struct in_addr *i_addr;
-  u_short i_port;
-  struct in_addr *r_addr;
-  u_short r_port;
+int tcp_create_conn(tcp_conn **connp,struct in_addr *i_addr,
+	u_short i_port, struct in_addr *r_addr, u_short r_port)
   {
     conn_struct *conn=0;
 
@@ -189,8 +180,7 @@ int clean_old_conn() {
 }
 
 int destroy_all_conn() {
-    conn_struct *conn;
-    int i = 0,r;
+    int i = 0;
     while(first_conn) {
         i++;
         tcp_destroy_conn(&first_conn->conn);
@@ -225,7 +215,7 @@ int copy_tcp_segment_queue(out,in)
 	ABORT(R_NO_MEMORY);
       if(!base) base=*out;
 
-      if(r=packet_copy(in->p,&(*out)->p))
+      if((r=packet_copy(in->p,&(*out)->p)))
 	ABORT(r);
       out=&(*out)->next;  /* Move the pointer we're assigning to */
     }

@@ -244,7 +244,7 @@ void pcap_cb(ptr,hdr,data)
     if(packet_cnt == conn_freq) {
         packet_cnt = 0;
         memcpy(&last_packet_seen_time,&hdr->ts,sizeof(struct timeval));
-        if(cleaned_conn = clean_old_conn())
+        if((cleaned_conn = clean_old_conn()))
             printf("%d inactive connection(s) cleaned from connection pool\n", cleaned_conn);
     } else {
         packet_cnt++;
@@ -453,7 +453,7 @@ int main(argc,argv)
     if(NET_print_flags & NET_PRINT_TYPESET)
       printf("\n.nf\n.ps -2\n");
     
-    if(r=network_handler_create(mod,&n))
+    if((r=network_handler_create(mod,&n)))
       err_exit("Couldn't create network handler",r);
 
     pcap_loop(p,-1,pcap_cb,(u_char *)n);

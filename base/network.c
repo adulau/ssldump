@@ -78,7 +78,7 @@ int network_handler_create(mod,handlerp)
     if(!(handler=(n_handler *)malloc(sizeof(n_handler))))
       ABORT(R_NO_MEMORY);
     if(mod->vtbl->create_ctx){
-      if(r=mod->vtbl->create_ctx(mod->handle,&handler->ctx))
+      if((r=mod->vtbl->create_ctx(mod->handle,&handler->ctx)))
 	ABORT(r);
     }
     handler->mod=mod;
@@ -147,7 +147,7 @@ int network_process_packet(handler,timestamp,data,length)
     
     switch(p.ip->ip_p){
       case IPPROTO_TCP:
-	if(r=process_tcp_packet(handler->mod,handler->ctx,&p))
+	if((r=process_tcp_packet(handler->mod,handler->ctx,&p)))
 	  ERETURN(r);
 	break;
     }

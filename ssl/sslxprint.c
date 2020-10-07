@@ -81,7 +81,7 @@ int sslx_print_certificate(ssl,data,pf)
         
       d=data->data;
 	
-      if(!(x=d2i_X509(0,&d,data->len))){
+      if(!(x=d2i_X509(0,(const unsigned char **) &d,data->len))){
         explain(ssl,"Bad certificate");
         ABORT(R_BAD_DATA);
       }
@@ -114,7 +114,7 @@ int sslx_print_certificate(ssl,data,pf)
 
           ex=X509_get_ext(x,i);
           obj=X509_EXTENSION_get_object(ex);
-          i2t_ASN1_OBJECT(buf,sizeof(buf),obj);
+          i2t_ASN1_OBJECT((char *)buf,sizeof(buf),obj);
             
           explain(ssl,"Extension: %s\n",buf);
           j=X509_EXTENSION_get_critical(ex);
@@ -173,10 +173,10 @@ int sslx_print_dn(ssl,data,pf)
     P_(pf){
 #ifdef OPENSSL      
       P_(P_ASN){
-	if(!(n=d2i_X509_NAME(0,&d,data->len)))
+	if(!(n=d2i_X509_NAME(0,(const unsigned char **) &d,data->len)))
 	  ABORT(R_BAD_DATA);
-	X509_NAME_oneline(n,buf,BUFSIZE);
-	sslx__print_dn(ssl,buf);
+	X509_NAME_oneline(n,(char *)buf,BUFSIZE);
+	sslx__print_dn(ssl,(char *)buf);
       }
       else{
 #endif        
@@ -203,7 +203,7 @@ static int sslx__print_dn(ssl,x)
     if(*x=='/') x++;
     
     while (x){
-      if(slash=strchr(x,'/')){
+      if((slash=strchr(x,'/'))){
 	*slash=0;
       }
 

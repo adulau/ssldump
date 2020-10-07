@@ -59,17 +59,9 @@ static int create_null_analyzer PROTO_LIST((void *handle,
   struct in_addr *i_addr,u_short i_port,
   struct in_addr *r_addr,u_short r_port, struct timeval *base_time));
 
-static int create_null_analyzer(handle,ctx,conn,objp,i_addr,i_port,r_addr,r_port,
-  base_time)
-  void *handle;
-  proto_ctx *ctx;
-  tcp_conn *conn;
-  proto_obj **objp;
-  struct in_addr *i_addr;
-  u_short i_port;
-  struct in_addr *r_addr;
-  u_short r_port;
-  struct timeval *base_time;
+static int create_null_analyzer(void *handle, proto_ctx *ctx, tcp_conn *conn,
+  proto_obj **objp, struct in_addr *i_addr, u_short i_port, struct in_addr *r_addr,
+  u_short r_port, struct timeval *base_time)
   {
     null_analyzer *obj=0;
     static int ctr;

@@ -77,7 +77,7 @@ typedef struct ssl_obj_ {
      int r_state;
      int i_state;
      int version;
-     int cipher_suite;
+     UINT4 cipher_suite;
 
      char *client_name;
      int client_port;

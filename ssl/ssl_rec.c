@@ -127,14 +127,14 @@ int ssl_create_rec_decoder(dp,cs,mk,sk,iv)
 
     dec->cs=cs;
 
-    if(r=r_data_alloc(&dec->mac_key,cs->dig_len))
+    if((r=r_data_alloc(&dec->mac_key,cs->dig_len)))
       ABORT(r);
 
-    if(r=r_data_alloc(&dec->implicit_iv,cs->block))
+    if((r=r_data_alloc(&dec->implicit_iv,cs->block)))
       ABORT(r);
     memcpy(dec->implicit_iv->data,iv,cs->block);
 
-    if(r=r_data_create(&dec->write_key,sk,cs->eff_bits/8))
+    if((r=r_data_create(&dec->write_key,sk,cs->eff_bits/8)))
       ABORT(r);
 
     /*
@@ -203,7 +203,7 @@ int ssl_decode_rec_data(ssl,d,ct,version,in,inl,out,outl)
 #ifdef OPENSSL
     int pad;
     int r,encpadl,x;
-    UCHAR *mac,*iv,aead_tag[13],aead_nonce[12];
+    UCHAR *mac,aead_tag[13],aead_nonce[12];
     
     CRDUMP("Ciphertext",in,inl);
     if(IS_AEAD_CIPHER(d->cs)){
@@ -273,12 +273,12 @@ int ssl_decode_rec_data(ssl,d,ct,version,in,inl,out,outl)
               ERETURN(SSL_BAD_MAC);
           }
 
-	  if(r=tls_check_mac(d,ct,version,in+blk,encpadl,in,blk,mac))
+	  if((r=tls_check_mac(d,ct,version,in+blk,encpadl,in,blk,mac)))
 	    ERETURN(r);
 
       }
       else
-	if(r=tls_check_mac(d,ct,version,in,encpadl,NULL,0,mac))
+	if((r=tls_check_mac(d,ct,version,in,encpadl,NULL,0,mac)))
 	  ERETURN(r);
 
     }
@@ -302,7 +302,7 @@ int ssl_decode_rec_data(ssl,d,ct,version,in,inl,out,outl)
 
       /* Now check the MAC */
       if(ssl->version==0x300){
-	if(r=ssl3_check_mac(d,ct,version,out,*outl,mac))
+	if((r=ssl3_check_mac(d,ct,version,out,*outl,mac)))
 	  ERETURN(r);
       }
       else{
@@ -319,7 +319,7 @@ int ssl_decode_rec_data(ssl,d,ct,version,in,inl,out,outl)
 	    ERETURN(SSL_BAD_MAC);
           }
 	}
-	if(r=tls_check_mac(d,ct,version,out,*outl,NULL,0,mac))
+	if((r=tls_check_mac(d,ct,version,out,*outl,NULL,0,mac)))
 	  ERETURN(r);
       }
     }
@@ -363,7 +363,7 @@ static int tls_check_mac(d,ct,ver,data,datalen,iv,ivlen,mac)
     UCHAR buf[128];
     
     md=EVP_get_digestbyname(digests[d->cs->dig-0x40]);
-    HMAC_Init(hm,d->mac_key->data,d->mac_key->len,md);
+    HMAC_Init_ex(hm,d->mac_key->data,d->mac_key->len,md,NULL);
 
     fmt_seq(d->seq,buf);
     d->seq++;
