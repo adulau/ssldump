@@ -2633,16 +2633,86 @@ decoder extension_decoder[] = {
 		"status_request",
 		decode_extension
 	},
+        {
+                6,
+                "user_mapping",
+                decode_extension
+        },
+        {
+                7,
+                "client_authz",
+                decode_extension
+        },
+        {
+                8,
+                "server_authz",
+                decode_extension
+        },
+        {
+                9,
+                "cert_type",
+                decode_extension
+        },
+        {
+                10,
+                "supported_groups",
+                decode_extension
+        },
+        {
+                11,
+                "ec_point_formats",
+                decode_extension
+        },
+        {
+                12,
+                "srp",
+                decode_extension
+        },
 	{
 		13,
 		"signature_algorithms",
 		decode_extension
 	},
+        {
+                14,
+                "use_srtp",
+                decode_extension
+        },
+        {
+                15,
+                "heartbeat",
+                decode_extension
+        },
 	{
 		16,
 		"application_layer_protocol_negotiation",
 		decode_extension
 	},
+        {
+                17,
+                "status_request_v2",
+                decode_extension
+        },
+        {
+                18,
+                "signed_certificate_timestamp",
+                decode_extension
+        },
+        {
+                19,
+                "client_certificate_type",
+                decode_extension
+        },
+        {
+                20,
+                "server_certificate_type",
+                decode_extension
+        },
+        {
+                21,
+                "padding",
+                decode_extension
+        },
 	{
 		22,
 		"encrypt_then_mac",
@@ -2653,6 +2723,156 @@ decoder extension_decoder[] = {
 		"extended_master_secret",
 		decode_extension_extended_master_secret
 	},
+        {
+                24,
+                "token_binding",
+                decode_extension
+        },
+        {
+                25,
+                "cached_info",
+                decode_extension
+        },
+        {
+                26,
+                "tls_lts",
+                decode_extension
+        },
+        {
+                27,
+                "compress_certificate",
+                decode_extension
+        },
+        {
+                28,
+                "record_size_limit",
+                decode_extension
+        },
+        {
+                29,
+                "pwd_protect",
+                decode_extension
+        },
+        {
+                30,
+                "pwd_clear",
+                decode_extension
+        },
+        {
+                31,
+                "password_salt",
+                decode_extension
+        },
+        {
+                32,
+                "ticket_pinning",
+                decode_extension
+        },
+        {
+                33,
+                "tls_cert_with_extern_psk",
+                decode_extension
+        },
+        {
+                34,
+                "delegated_credentials",
+                decode_extension
+        },
+        {
+                35,
+                "session_ticket",
+                decode_extension
+        },
+        {
+                36,
+                "TLMSP",
+                decode_extension
+        },
+        {
+                37,
+                "TLMSP_proxying",
+                decode_extension
+        },
+        {
+                38,
+                "TLMSP_delegate",
+                decode_extension
+        },
+        {
+                39,
+                "supported_ekt_ciphers",
+                decode_extension
+        },
+        {
+                41,
+                "pre_shared_key",
+                decode_extension
+        },
+        {
+                42,
+                "early_data",
+                decode_extension
+        },
+        {
+                43,
+                "supported_versions",
+                decode_extension
+        },
+        {
+                44,
+                "cookie",
+                decode_extension
+        },
+        {
+                45,
+                "psk_key_exchange_modes",
+                decode_extension
+        },
+        {
+                47,
+                "certificate_authorities",
+                decode_extension
+        },
+        {
+                48,
+                "oid_filters",
+                decode_extension
+        },
+        {
+                49,
+                "post_handshake_auth",
+                decode_extension
+        },
+        {
+                50,
+                "signature_algorithms_cert",
+                decode_extension
+        },
+        {
+                51,
+                "key_share",
+                decode_extension
+        },
+        {
+                52,
+                "transparency_info",
+                decode_extension
+        },
+        {
+                53,
+                "connection_id",
+                decode_extension
+        },
+        {
+                55,
+                "external_id_hash",
+                decode_extension
+        },
+        {
+                56,
+                "external_session_id",
+                decode_extension
+        },
 	{
 		13172,
 		"next_protocol_negotiation",
