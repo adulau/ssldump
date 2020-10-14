@@ -32,3 +32,5 @@ ssl/.deps/
 ssl/.dirstamp
 ssl/Makefile.in
 stamp-h1
+pcap/.deps/
+pcap/.dirstamp

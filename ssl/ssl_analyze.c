@@ -265,6 +265,10 @@ static int create_ssl_analyzer(void *handle, proto_ctx *ctx, tcp_conn *conn,
     *objp=(proto_obj *)obj;
 
     _status=0;
+  
+    //check logger...
+    if (logger) _status=logger->vtbl->create(&obj->logger_obj,i_addr,i_port,r_addr,r_port,base_time);
+
   abort:
     if(_status){
       destroy_ssl_analyzer((proto_obj **)&obj);
@@ -282,6 +286,9 @@ static int destroy_ssl_analyzer(objp)
 
     obj=(ssl_obj *)*objp;
     DBG((0,"Destroying SSL analyzer"));
+
+    //check logger...
+    if (logger) logger->vtbl->destroy(&obj->logger_obj);
 
     free_r_queue(obj->i2r_queue);
     free_r_queue(obj->r2i_queue);
@@ -594,6 +601,9 @@ int close_ssl_analyzer(_obj,p,dir)
       what="RST";
     else
       what="FIN";
+
+   //check logger...
+    if (logger) logger->vtbl->close(ssl->logger_obj,NULL,0,dir);
 
     explain(ssl,"%d    ",ssl->conn->conn_number);
     ssl_print_timestamp(ssl,&p->ts);

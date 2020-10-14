@@ -82,5 +82,27 @@ int create_proto_handler PROTO_LIST((proto_mod *mod,proto_ctx *ctx,
   tcp_conn *conn,struct timeval *first_packet));
 int destroy_proto_handler PROTO_LIST((proto_handler **handlerp));
 
+
+//add logger
+struct logger_mod_vtbl_ {
+     int (*init) PROTO_LIST((void *data));
+     //deinit must be async signal safe(!!!)
+     int (*deinit) PROTO_LIST(());
+     int (*create) PROTO_LIST((proto_obj **objp, struct in_addr *i_addr,u_short i_port,
+                                       struct in_addr *r_addr,u_short r_port,struct timeval *time_base));
+     int (*destroy) PROTO_LIST((proto_obj **objp));
+     int (*data) PROTO_LIST((proto_obj *obj,unsigned char *data,unsigned int len,int direction));
+     int (*close) PROTO_LIST((proto_obj *obj,unsigned char *data,unsigned int len,int direction));
+};
+
+struct logger_mod_ {
+     char *name;
+     struct logger_mod_vtbl_ *vtbl;
+};
+
+typedef struct logger_mod_ logger_mod;
+
+extern logger_mod *logger; 
+
 #endif
 

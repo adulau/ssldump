@@ -36,7 +36,7 @@ Additional back-end code available is in the [crl-monitor ](https://github.com/a
 
 On Debian & Ubuntu:
 ```
-apt install build-essential autoconf libssl-dev libpcap-dev
+apt install build-essential autoconf libssl-dev libpcap-dev libnet1-dev
 ./autogen.sh
 ./configure --prefix=/usr/local
 make
@@ -45,7 +45,7 @@ make
 
 On Fedora, Centos & RHEL:
 ```
-dnf install autoconf automake gcc make openssl-devel libpcap-devel
+dnf install autoconf automake gcc make openssl-devel libpcap-devel libnet1-dev
 ./autogen.sh
 ./configure --prefix=/usr/local
 make
@@ -71,7 +71,12 @@ Configuration examples:
 	./configure CC=/usr/bin/clang --enable-asan --disable-optimization
 ```
 
-## Contributing
+# Notes
+
+The "save to pcap" (-w) option by @ryabkov, is heavily based on the work of
+@droe on https://github.com/droe/sslsplit .
+
+# Contributing
 
 The contributing policy is simple. If you have a patch to propose, make a pull-request
 via the interface. If the patch works for me, it's merged.

@@ -73,6 +73,27 @@ files with
 	])
 fi
 
+have_libnet=no
+AC_SEARCH_LIBS([libnet_init], [net], [have_libnet=yes])
+
+if test "x${have_libnet}" = xyes; then
+	AC_CHECK_HEADERS([libnet.h], [], [have_libnet=no])
+fi
+
+if test "x${have_libnet}" = xno; then
+	AC_MSG_ERROR([
+---------------------------------------
+Unable to find libnet on this system
+Check 'config.log' for more information
+
+On Debian and Ubuntu systems you can
+install the required library and header
+files with
+  apt install libnet1-dev
+---------------------------------------
+	])
+fi
+
 AC_ARG_ENABLE([optimization],
 	[  --disable-optimization  disable compiler optimizations],
 	[optimization=${enableval}], [optimization=yes])
@@ -118,6 +139,7 @@ AC_CONFIG_FILES([Makefile
                  common/lib/Makefile
                  null/Makefile
                  ssl/Makefile
+                 pcap/Makefile
                  base/Makefile])
 
 AC_OUTPUT

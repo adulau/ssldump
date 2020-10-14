@@ -85,6 +85,10 @@ ssldump \- dump SSL traffic on a network
 .B \-r
 .I dumpfile
 ]
+[
+.B \-w
+.I outputpcap
+]
 .br
 .ti +8
 [
@@ -242,6 +246,9 @@ Print the handshake type.
 .I H
 Print handshake type and highlights.
 .RE
+.TP
+.BI \-w " outputpcap"
+Use \fIoutputpcap\fP as the destination for decrypted packets.
 .TP
 \fIexpression\fP
 .RS
