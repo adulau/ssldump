@@ -45,7 +45,7 @@ make
 
 On Fedora, Centos & RHEL:
 ```
-dnf install autoconf automake gcc make openssl-devel libpcap-devel libnet1-dev
+dnf install autoconf automake gcc make openssl-devel libpcap-devel libnet-devel
 ./autogen.sh
 ./configure --prefix=/usr/local
 make
