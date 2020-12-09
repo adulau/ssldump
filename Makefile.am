@@ -1,4 +1,4 @@
-bin_PROGRAMS = ssldump
+sbin_PROGRAMS = ssldump
 man_MANS = ssldump.1
 
 ssldump_SOURCES = \
