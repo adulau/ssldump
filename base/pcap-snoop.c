@@ -126,10 +126,15 @@ int print_version()
     exit(0);
   }
 
+pcap_t *p;
 void sig_handler(int sig)
   {
     fflush(stdout);
-    if (logger) logger->vtbl->deinit();
+    if (logger)
+	logger->vtbl->deinit();
+    printf("Cleaning %d remaining connection(s) from connection pool\n", destroy_all_conn());
+    if(p)
+	pcap_close(p);
     exit(0);
   }
     
@@ -276,7 +281,6 @@ int main(argc,argv)
   int argc;
   char **argv;
   {
-    pcap_t *p;
     int r;
     n_handler *n;
 #ifdef _WIN32
