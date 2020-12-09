@@ -129,10 +129,15 @@ int print_version()
 pcap_t *p;
 void sig_handler(int sig)
   {
+    int freed_conn = 0;
     fflush(stdout);
     if (logger)
 	logger->vtbl->deinit();
-    printf("Cleaning %d remaining connection(s) from connection pool\n", destroy_all_conn());
+
+    freed_conn = destroy_all_conn();
+    if(freed_conn)
+        printf("Cleaned %d remaining connection(s) from connection pool\n", freed_conn);
+
     if(p)
 	pcap_close(p);
     exit(0);
@@ -299,6 +304,7 @@ int main(argc,argv)
     int c;
     module_def *m=0;
     int no_promiscuous=0;
+    int freed_conn=0;
     
     char errbuf[PCAP_ERRBUF_SIZE];
 
@@ -477,7 +483,9 @@ int main(argc,argv)
     if(NET_print_flags & NET_PRINT_TYPESET)
       printf("\n.ps\n.fi\n");
 
-    printf("Cleaning %d remaining connection(s) from connection pool\n", destroy_all_conn());
+    freed_conn = destroy_all_conn();
+    if(freed_conn)
+        printf("Cleaned %d remaining connection(s) from connection pool\n", freed_conn);
 
     pcap_close(p);
 
