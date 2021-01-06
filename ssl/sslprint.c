@@ -691,12 +691,12 @@ int ssl_print_timestamp(ssl,ts)
     struct timeval dt;
     int r;
 
-    char ts_str[17];
+    char ts_str[40];
     struct json_object *jobj;
     jobj = ssl->cur_json_st;
 
     if(jobj) {
-      snprintf(ts_str,17, "%ld%c%4.4ld",ts->tv_sec,'.',ts->tv_usec/100);
+      snprintf(ts_str,40, "%ld%c%4.4ld",ts->tv_sec,'.',ts->tv_usec/100);
       json_object *j_ts_str = json_object_new_string(ts_str);
       json_object_object_add(jobj, "timestamp", j_ts_str);
     }
@@ -730,7 +730,7 @@ int ssl_print_record_num(ssl)
     jobj = ssl->cur_json_st;
 
     ssl->record_count++;
-    if(!(SSL_print_flags & SSL_PRINT_JSON))
+    if(!(SSL_print_flags & SSL_PRINT_JSON)) {
       if(SSL_print_flags & SSL_PRINT_NROFF){
         printf("\\fI%d %d\\fR %s",
           ssl->conn->conn_number,
@@ -740,7 +740,7 @@ int ssl_print_record_num(ssl)
         printf("%d %d %s",ssl->conn->conn_number,
           ssl->record_count,ssl->record_count<10?" ":"");
       }
-
+    }
     json_object_object_add(jobj, "connection_number", json_object_new_int(ssl->conn->conn_number));
     json_object_object_add(jobj, "record_count", json_object_new_int(ssl->record_count));
 
