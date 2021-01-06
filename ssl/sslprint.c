@@ -691,12 +691,12 @@ int ssl_print_timestamp(ssl,ts)
     struct timeval dt;
     int r;
 
-    char ts_str[16];
+    char ts_str[17];
     struct json_object *jobj;
     jobj = ssl->cur_json_st;
 
     if(jobj) {
-      snprintf(ts_str,16, "%d%c%4.4d",ts->tv_sec,'.',ts->tv_usec/100);
+      snprintf(ts_str,17, "%ld%c%4.4ld",ts->tv_sec,'.',ts->tv_usec/100);
       json_object *j_ts_str = json_object_new_string(ts_str);
       json_object_object_add(jobj, "timestamp", j_ts_str);
     }
