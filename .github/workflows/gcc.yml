@@ -19,6 +19,6 @@ jobs:
     - name: autogen
       run: ./autogen.sh
     - name: configure
-      run: ./configure CC=/usr/bin/gcc
+      run: ./configure CC=/usr/bin/gcc LDFLAGS="-ljson-c"
     - name: make
       run: make
