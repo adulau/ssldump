@@ -130,15 +130,16 @@ int process_tcp_packet(handler,ctx,p)
 	conn->i2r.ack=ntohl(p->tcp->th_ack)+1;
         lookuphostname(&conn->i_addr,&sn);
         lookuphostname(&conn->r_addr,&dn);
-        if(NET_print_flags & NET_PRINT_TYPESET)
-          printf("\\fC");
-        printf("New TCP connection #%d: %s(%d) <-> %s(%d)\n",
-          conn->conn_number,
-          sn,conn->i_port,
-          dn,conn->r_port);
-        if(NET_print_flags & NET_PRINT_TYPESET)
-          printf("\\fR");
-        
+        if(!(NET_print_flags & NET_PRINT_JSON)) {
+          if(NET_print_flags & NET_PRINT_TYPESET)
+            printf("\\fC");
+          printf("New TCP connection #%d: %s(%d) <-> %s(%d)\n",
+            conn->conn_number,
+            sn,conn->i_port,
+            dn,conn->r_port);
+          if(NET_print_flags & NET_PRINT_TYPESET)
+            printf("\\fR");
+        }
 	conn->state=TCP_STATE_ESTABLISHED;
         free(sn);
         free(dn);
@@ -240,7 +241,8 @@ static int process_data_segment(conn,handler,p,stream,direction)
     l=p->len - p->tcp->th_off * 4;
 
     if(l < 0) {
-	printf("Malformed packet, computed TCP segment size is negative, skipping ...\n");
+	if(!(NET_print_flags & NET_PRINT_JSON))
+		printf("Malformed packet, computed TCP segment size is negative, skipping ...\n");
 	return(0);
     }
 
@@ -400,32 +402,33 @@ static int print_tcp_packet(p)
     lookuphostname(&p->ip->ip_src,&src);
     lookuphostname(&p->ip->ip_dst,&dst);
     
-    printf("TCP: %s(%d) -> %s(%d) ",
-      src,
-      ntohs(p->tcp->th_sport),
-      dst,
-      ntohs(p->tcp->th_dport));
+    if(!(NET_print_flags & NET_PRINT_JSON)) {
+      printf("TCP: %s(%d) -> %s(%d) ",
+        src,
+        ntohs(p->tcp->th_sport),
+        dst,
+        ntohs(p->tcp->th_dport));
 
-    printf("Seq %u.(%d) ",
-      ntohl(p->tcp->th_seq),
-      p->len - p->tcp->th_off *4);
+      printf("Seq %u.(%d) ",
+        ntohl(p->tcp->th_seq),
+        p->len - p->tcp->th_off *4);
 
-    if(p->tcp->th_flags & TH_ACK)
-      printf("ACK %u ",ntohl(p->tcp->th_ack));
+      if(p->tcp->th_flags & TH_ACK)
+        printf("ACK %u ",ntohl(p->tcp->th_ack));
 
-    if(p->tcp->th_flags & TH_FIN)
-      printf("FIN ");
-    if(p->tcp->th_flags & TH_SYN)
-      printf("SYN ");
-    if(p->tcp->th_flags & TH_RST)
-      printf("RST ");
-    if(p->tcp->th_flags & TH_PUSH)
-      printf("PUSH ");
-    if(p->tcp->th_flags & TH_URG)
-      printf("URG ");
+      if(p->tcp->th_flags & TH_FIN)
+        printf("FIN ");
+      if(p->tcp->th_flags & TH_SYN)
+        printf("SYN ");
+      if(p->tcp->th_flags & TH_RST)
+        printf("RST ");
+      if(p->tcp->th_flags & TH_PUSH)
+        printf("PUSH ");
+      if(p->tcp->th_flags & TH_URG)
+        printf("URG ");
 
-    printf("\n");
-
+      printf("\n");
+    }
     free(src);
     free(dst);
     return(0);

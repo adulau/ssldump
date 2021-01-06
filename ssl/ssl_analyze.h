@@ -62,6 +62,7 @@ extern proto_mod ssl_mod;
 #define P_TSA (1<<12)
 #define P_QT  (1<<13)
 #define P_HO  (1<<14)
+#define P_JS  (1<<15)
 
 #define SSL_PRINT_TIMESTAMP       (1)     /*Timestamp records*/
 #define SSL_PRINT_HEXDUMP         (1<<2)  /*Print the whole record in hex*/
@@ -77,6 +78,7 @@ extern proto_mod ssl_mod;
 #define SSL_PRINT_TIMESTAMP_ABSOLUTE  (P_TSA)
 #define SSL_PRINT_QUIET               (P_QT)
 #define SSL_PRINT_HEX_ONLY            (P_HO)
+#define SSL_PRINT_JSON            (P_JS)
 #define SSL_PRINT_ALL      0xfffffff
 
 extern UINT4 SSL_print_flags;
