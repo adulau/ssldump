@@ -301,7 +301,9 @@ static int destroy_ssl_analyzer(objp)
     free_r_queue(obj->r2i_queue);
     ssl_decoder_destroy(&obj->decoder);
     free(obj->client_name);
+    free(obj->client_ip);
     free(obj->server_name);
+    free(obj->server_ip);
     free(obj->extensions);
     free(*objp);
     *objp=0;

@@ -96,6 +96,7 @@ int sslx_print_certificate(ssl,data,pf)
 
       EVP_EncodeBlock((unsigned char *)b64_cert, d, data->len);
       json_object_object_add(cert_obj, "cert_der", json_object_new_string(b64_cert));
+      free(b64_cert);
 
       if(!(x=d2i_X509(0,(const unsigned char **) &d,data->len))){
         explain(ssl,"Bad certificate");
@@ -122,7 +123,7 @@ int sslx_print_certificate(ssl,data,pf)
       INIT_DATA(data_tmp,a->data,a->length);
       exstr(ssl, serial_str, &data_tmp);
       json_object_object_add(cert_obj, "cert_serial", json_object_new_string(serial_str));
-
+      free(serial_str);
       sslx__print_serial(ssl,a);
 
       ext=X509_get_ext_count(x);
