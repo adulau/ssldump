@@ -135,8 +135,9 @@ int network_process_packet(handler,timestamp,data,length)
     p.len = ntohs(p.ip->ip_len);
 
     if(p.len > length) {
+      if(!(NET_print_flags & NET_PRINT_JSON))
         printf("Malformed packet, size from IP header is larger than size reported by libpcap, skipping ...\n");
-        return(0);
+      return(0);
     }
 
     if (p.len == 0) {

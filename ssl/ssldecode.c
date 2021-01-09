@@ -316,7 +316,7 @@ int ssl_process_server_session_id(ssl,d,msg,len)
   abort:
     if(!restored){
       /* Copy over the session ID */
-      r_data_zfree(d->session_id);
+      r_data_destroy(&d->session_id);
       r_data_create(&d->session_id,msg,len);
     }
     return(_status);

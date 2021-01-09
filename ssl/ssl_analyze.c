@@ -44,7 +44,8 @@
  */
 
 
-
+#include <json-c/json.h>
+#include <arpa/inet.h>
 #include "network.h"
 #include "debug.h"
 #include "sslprint.h"
@@ -246,8 +247,14 @@ static int create_ssl_analyzer(void *handle, proto_ctx *ctx, tcp_conn *conn,
       ABORT(r);
 
     lookuphostname(i_addr,&obj->client_name);
+    if(!(obj->client_ip=(char *)calloc(1,INET_ADDRSTRLEN)))
+      ABORT(R_NO_MEMORY);
+    inet_ntop(AF_INET, i_addr, obj->client_ip, INET_ADDRSTRLEN);
     obj->client_port=i_port;
-    lookuphostname(r_addr,&obj->server_name);    
+    lookuphostname(r_addr,&obj->server_name);
+    if(!(obj->server_ip=(char *)calloc(1,INET_ADDRSTRLEN)))
+      ABORT(R_NO_MEMORY);
+    inet_ntop(AF_INET, r_addr, obj->server_ip, INET_ADDRSTRLEN);
     obj->server_port=r_port;
     
     obj->i_state=SSL_ST_SENT_NOTHING;
@@ -294,7 +301,9 @@ static int destroy_ssl_analyzer(objp)
     free_r_queue(obj->r2i_queue);
     ssl_decoder_destroy(&obj->decoder);
     free(obj->client_name);
+    free(obj->client_ip);
     free(obj->server_name);
+    free(obj->server_ip);
     free(obj->extensions);
     free(*objp);
     *objp=0;
@@ -573,7 +582,9 @@ static int print_ssl_record(obj,direction,q,data,len)
   int len;
   {
     int r;
-    
+
+    obj->cur_json_st = json_object_new_object();
+
     if((r=print_ssl_header(obj,direction,q,data,len)))
       ERETURN(r);
     
@@ -583,8 +594,13 @@ static int print_ssl_record(obj,direction,q,data,len)
 
       INIT_DATA(d,data,len);
       exdump(obj,"Packet data",&d);
-      printf("\n\n");
+      LF;LF;
     }
+
+    if(SSL_print_flags & SSL_PRINT_JSON)
+      printf("%s\n", json_object_to_json_string(obj->cur_json_st));
+    json_object_put(obj->cur_json_st);
+    obj->cur_json_st = NULL;
     
     return(0);
   }
@@ -609,8 +625,7 @@ int close_ssl_analyzer(_obj,p,dir)
     ssl_print_timestamp(ssl,&p->ts);
     ssl_print_direction_indicator(ssl,dir);
     explain(ssl,"  TCP %s",what);
-    printf("\n");
-    
+    LF;
     return(0);
   }
 

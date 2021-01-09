@@ -44,7 +44,7 @@
  */
 
 
-
+#include <json-c/json.h>
 #include <ctype.h>
 #include <stdarg.h>
 #include "network.h"
@@ -83,7 +83,7 @@ int process_beginning_plaintext(ssl,seg,direction)
       ssl_print_direction_indicator(ssl,direction);
       
       print_data(ssl,&d);
-      printf("\n");
+      LF;
     }
       
     return(0);
@@ -140,7 +140,7 @@ int process_v2_hello(ssl,seg)
     P_(P_HL) {
       explain(ssl,"Version %d.%d ",(ver>>8)&0xff,
       ver&0xff);
-        printf("\n");
+        LF;
     }
     SSL_DECODE_UINT16(ssl,"cipher_spec_length",P_DC,&d,&cs_len);
     SSL_DECODE_UINT16(ssl,"session_id_length",P_DC,&d,&sid_len);
@@ -191,7 +191,7 @@ int process_v2_hello(ssl,seg)
 
       INIT_DATA(d,seg->data,seg->len);
       exdump(ssl,"Packet data",&d);
-      printf("\n\n");
+      LF;LF;
     }
     
     INDENT_POP;
@@ -235,6 +235,11 @@ int ssl_expand_record(ssl,q,direction,data,len)
     Data d;
     UINT4 ct,vermaj,vermin,length;
     int version;
+    char verstr[4];
+    char enumstr[20];
+    struct json_object *jobj;
+    jobj = ssl->cur_json_st;
+
     d.data=data;
     d.len=len;
 
@@ -251,9 +256,11 @@ int ssl_expand_record(ssl,q,direction,data,len)
    
     P_(P_RH){
        explain(ssl," V%d.%d(%d)",vermaj,vermin,length);
+       json_object_object_add(jobj, "record_len", json_object_new_int(length));
+       snprintf(verstr,4,"%d.%d",vermaj,vermin);
+       json_object_object_add(jobj, "record_ver", json_object_new_string(verstr));
     }
 
-      
     version=vermaj*256+vermin;
     
     r=ssl_decode_record(ssl,ssl->decoder,direction,ct,version,&d);
@@ -264,11 +271,16 @@ int ssl_expand_record(ssl,q,direction,data,len)
     }
 
     if(r){
-      if((r=ssl_print_enum(ssl,0,ContentType_decoder,ct))) {
-        printf("  unknown record type: %d\n", ct);
-        ERETURN(r);
-      }
-      printf("\n");
+      if(!(SSL_print_flags & SSL_PRINT_JSON))
+        if((r=ssl_print_enum(ssl,0,ContentType_decoder,ct))) {
+          printf("  unknown record type: %d\n", ct);
+          ERETURN(r);
+        }
+      ssl_get_enum_str(ssl,enumstr,ContentType_decoder,ct);
+      json_object_object_add(jobj, "msg_type", json_object_new_string(enumstr));
+
+      if(!(SSL_print_flags & SSL_PRINT_JSON))
+        LF;
     }
     else{
       //try to save unencrypted data to logger
@@ -276,7 +288,8 @@ int ssl_expand_record(ssl,q,direction,data,len)
       if ((ct == 23) && (logger)) logger->vtbl->data(ssl->logger_obj,d.data,d.len,direction);
 
       if((r=ssl_decode_switch(ssl,ContentType_decoder,data[0],direction,q, &d))) {
-        printf("  unknown record type: %d\n", ct);
+        if(!(SSL_print_flags & SSL_PRINT_JSON))
+          printf("  unknown record type: %d\n", ct);
         ERETURN(r);
       }
     }
@@ -394,8 +407,9 @@ int ssl_decode_enum(ssl,name,size,dtable,p,data,x)
       ERETURN(r);
 
     P_(p){
-      if((r=ssl_print_enum(ssl,name,dtable,*x)))
-        ERETURN(r);
+      if(!(SSL_print_flags & SSL_PRINT_JSON))
+        if((r=ssl_print_enum(ssl,name,dtable,*x)))
+          ERETURN(r);
     }
 
     return(0);
@@ -407,6 +421,7 @@ int ssl_print_enum(ssl,name,dtable,value)
   decoder *dtable;
   UINT4 value;
   {
+
     if(name) explain(ssl,"%s ",name);    
     INDENT;
     
@@ -419,26 +434,43 @@ int ssl_print_enum(ssl,name,dtable,value)
       }
       dtable++;
     }
-    printf("\n");
+    LF;
+    return(R_NOT_FOUND);
+  }
+
+int ssl_get_enum_str(ssl,outstr,dtable,value)
+  ssl_obj *ssl;
+  char *outstr;
+  decoder *dtable;
+  UINT4 value;
+  {
+    while(dtable && dtable->type!=-1){
+      if(dtable->type == value){
+	strncpy(outstr, dtable->name, 20);
+	return(0);
+      }
+      dtable++;
+    }
     return(R_NOT_FOUND);
   }
 
 int explain(ssl_obj *ssl,char *format,...)
   {
     va_list ap;
+    if(!(SSL_print_flags & SSL_PRINT_JSON)) {
+      va_start(ap,format);
 
-    va_start(ap,format);
+      P_(P_NR){
+        if(ssl->record_encryption==REC_DECRYPTED_CIPHERTEXT)
+          printf("\\f(CI");
+        else
+          printf("\\fC");
+      }
+      INDENT;
 
-    P_(P_NR){
-      if(ssl->record_encryption==REC_DECRYPTED_CIPHERTEXT)
-        printf("\\f(CI");
-      else
-        printf("\\fC");
+      vprintf(format,ap);
+      va_end(ap);
     }
-    INDENT;
-
-    vprintf(format,ap);
-    va_end(ap);
     return(0);
   }
 
@@ -448,31 +480,52 @@ int exdump(ssl,name,data)
   Data *data;
   {
     int i;
-
-    if(name){
-      explain(ssl,"%s[%d]=\n",name,data->len);
-      INDENT_INCR;
-    }
-    P_(P_NR){
-      printf("\\f(CB");
-    }
-    for(i=0;i<data->len;i++){
-      
-      if(!i) INDENT;
-      
-      if((data->len>8) && i && !(i%16)){
-        printf("\n"); INDENT; 
+    if(!(SSL_print_flags & SSL_PRINT_JSON)) {
+      if(name){
+        explain(ssl,"%s[%d]=\n",name,data->len);
+        INDENT_INCR;
       }
-      printf("%.2x ",data->data[i]&255);
+      P_(P_NR){
+        printf("\\f(CB");
+      }
+      for(i=0;i<data->len;i++){
+
+        if(!i) INDENT;
+
+        if((data->len>8) && i && !(i%16)){
+          LF; INDENT;
+        }
+        printf("%.2x ",data->data[i]&255);
+      }
+      P_(P_NR){
+          printf("\\fR");
+      }
+      if(name) INDENT_POP;
+      LF;
     }
-    P_(P_NR){
-        printf("\\fR");
-    }
-    if(name) INDENT_POP;
-    printf("\n");
     return(0);
   }
-      
+
+int exstr(ssl,outstr,data)
+  ssl_obj *ssl;
+  char *outstr;
+  Data *data;
+  {
+    int i;
+
+    char *ptr = outstr;
+    for(i=0;i<data->len;i++){
+      sprintf(ptr, "%.2x",data->data[i]&255);
+      ptr+=2;
+      if(i<data->len - 1) {
+	sprintf(ptr, ":");
+        ++ptr;
+      }
+    }
+
+    return(0);
+  }
+
 int combodump(ssl,name,data)
   ssl_obj *ssl;
   char *name;
@@ -518,7 +571,7 @@ int combodump(ssl,name,data)
         else
           printf(".");
       }
-      printf("\n");
+      LF;
         
       len-=bytes;
       ptr+=bytes;
@@ -536,7 +589,7 @@ int print_data(ssl,d)
   {
     int i,bit8=0;
 
-    printf("\n");    
+    LF;
     for(i=0;i<d->len;i++){
       if(d->data[i] == 0 || (!isprint(d->data[i]) && !strchr("\r\n\t",d->data[i]))){
 	bit8=1;
@@ -590,6 +643,7 @@ int ssl_print_direction_indicator(ssl,dir)
   ssl_obj *ssl;
   int dir;
   {
+    struct json_object *jobj;
 #if 0    
     if(dir==DIR_I2R){
       explain(ssl,"%s(%d) > %s>%d",
@@ -600,11 +654,30 @@ int ssl_print_direction_indicator(ssl,dir)
         ssl->client_name,ssl->client_port,ssl->server_name,ssl->server_port);
     }
 #else
+
+    jobj = ssl->cur_json_st;
+
     if(dir==DIR_I2R){
       explain(ssl,"C>S");
+      if(jobj) {
+        json_object_object_add(jobj, "src_name", json_object_new_string(ssl->client_name));
+        json_object_object_add(jobj, "src_ip", json_object_new_string(ssl->client_ip));
+        json_object_object_add(jobj, "src_port", json_object_new_int(ssl->client_port));
+        json_object_object_add(jobj, "dst_name", json_object_new_string(ssl->server_name));
+        json_object_object_add(jobj, "dst_ip", json_object_new_string(ssl->server_ip));
+        json_object_object_add(jobj, "dst_port", json_object_new_int(ssl->server_port));
+      }
     }
     else{
       explain(ssl,"S>C");
+      if(jobj) {
+        json_object_object_add(jobj, "src_name", json_object_new_string(ssl->server_name));
+        json_object_object_add(jobj, "src_ip", json_object_new_string(ssl->server_ip));
+        json_object_object_add(jobj, "src_port", json_object_new_int(ssl->server_port));
+        json_object_object_add(jobj, "dst_name", json_object_new_string(ssl->client_name));
+        json_object_object_add(jobj, "dst_ip", json_object_new_string(ssl->client_ip));
+        json_object_object_add(jobj, "dst_port", json_object_new_int(ssl->client_port));
+      }
     }
 #endif
     
@@ -617,23 +690,35 @@ int ssl_print_timestamp(ssl,ts)
   {
     struct timeval dt;
     int r;
-    
+
+    char ts_str[40];
+    struct json_object *jobj;
+    jobj = ssl->cur_json_st;
+
+    if(jobj) {
+      snprintf(ts_str,40, "%ld%c%4.4ld",ts->tv_sec,'.',ts->tv_usec/100);
+      json_object *j_ts_str = json_object_new_string(ts_str);
+      json_object_object_add(jobj, "timestamp", j_ts_str);
+    }
     if(SSL_print_flags & SSL_PRINT_TIMESTAMP_ABSOLUTE) {
-      explain(ssl,"%d%c%4.4d ",ts->tv_sec,'.',ts->tv_usec/100);
+      if(!(SSL_print_flags & SSL_PRINT_JSON))
+        explain(ssl,"%d%c%4.4d ",ts->tv_sec,'.',ts->tv_usec/100);
     }
     else{
       if((r=timestamp_diff(ts,&ssl->time_start,&dt)))
         ERETURN(r);
-      explain(ssl,"%d%c%4.4d ",dt.tv_sec,'.',dt.tv_usec/100);
+      if(!(SSL_print_flags & SSL_PRINT_JSON))
+        explain(ssl,"%d%c%4.4d ",dt.tv_sec,'.',dt.tv_usec/100);
     }
     
     if((r=timestamp_diff(ts,&ssl->time_last,&dt))){
       ERETURN(r);
     }
-    explain(ssl,"(%d%c%4.4d)  ",dt.tv_sec,'.',dt.tv_usec/100);
+    if(!(SSL_print_flags & SSL_PRINT_JSON))
+      explain(ssl,"(%d%c%4.4d)  ",dt.tv_sec,'.',dt.tv_usec/100);
 
     memcpy(&ssl->time_last,ts,sizeof(struct timeval));                
-    
+
     return(0);
   }
 
@@ -641,16 +726,23 @@ int ssl_print_timestamp(ssl,ts)
 int ssl_print_record_num(ssl)
   ssl_obj *ssl;
   {
+    struct json_object *jobj;
+    jobj = ssl->cur_json_st;
+
     ssl->record_count++;
-    if(SSL_print_flags & SSL_PRINT_NROFF){
-      printf("\\fI%d %d\\fR %s",
-        ssl->conn->conn_number,
-        ssl->record_count,ssl->record_count<10?" ":"");
+    if(!(SSL_print_flags & SSL_PRINT_JSON)) {
+      if(SSL_print_flags & SSL_PRINT_NROFF){
+        printf("\\fI%d %d\\fR %s",
+          ssl->conn->conn_number,
+          ssl->record_count,ssl->record_count<10?" ":"");
+      }
+      else{
+        printf("%d %d %s",ssl->conn->conn_number,
+          ssl->record_count,ssl->record_count<10?" ":"");
+      }
     }
-    else{
-      printf("%d %d %s",ssl->conn->conn_number,
-        ssl->record_count,ssl->record_count<10?" ":"");
-    }
+    json_object_object_add(jobj, "connection_number", json_object_new_int(ssl->conn->conn_number));
+    json_object_object_add(jobj, "record_count", json_object_new_int(ssl->record_count));
 
     return(0);
   }

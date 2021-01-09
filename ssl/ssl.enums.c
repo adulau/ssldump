@@ -1,3 +1,4 @@
+#include <json-c/json.h>
 #include "network.h"
 #include "ssl_h.h"
 #include "sslprint.h"
@@ -15,6 +16,10 @@ static int decode_ContentType_ChangeCipherSpec(ssl,dir,seg,data)
   Data *data;
   {
 
+    struct json_object *jobj;
+
+    jobj = ssl->cur_json_st;
+    json_object_object_add(jobj, "msg_type", json_object_new_string("ChangeCipherSpec"));
 
     ssl_process_change_cipher_spec(ssl,ssl->decoder,dir);
 
@@ -25,7 +30,7 @@ static int decode_ContentType_ChangeCipherSpec(ssl,dir,seg,data)
       ssl->r_state=SSL_ST_SENT_CHANGE_CIPHER_SPEC;
     }
 
-    printf("\n");
+    LF;
     return(0);
 
   }
@@ -37,9 +42,10 @@ static int decode_ContentType_Alert(ssl,dir,seg,data)
   {
 
    int r;
+   struct json_object *jobj;
 
    if(ssl->record_encryption==REC_CIPHERTEXT){
-     printf("\n");
+     LF;
      return(0);
    }
 
@@ -49,17 +55,20 @@ static int decode_ContentType_Alert(ssl,dir,seg,data)
 	ERETURN(R_EOD);
    }
 
+   jobj = ssl->cur_json_st;
+   json_object_object_add(jobj, "msg_type", json_object_new_string("Alert"));
+
    P_(P_HL){
-      printf("\n");
+      LF;
       SSL_DECODE_ENUM(ssl,"level",1,AlertLevel_decoder,P_HL,data,0);
-      printf("\n");
+      LF;
       SSL_DECODE_ENUM(ssl,"value",1,AlertDescription_decoder,P_HL,data,0);
-      printf("\n");
+      LF;
    }
    else {
          SSL_DECODE_ENUM(ssl,0,1,AlertLevel_decoder,SSL_PRINT_ALL,data,0);
          SSL_DECODE_ENUM(ssl,0,1,AlertDescription_decoder,SSL_PRINT_ALL,data,0);
-	 printf("\n");
+	 LF;
    }
    return(0);
 
@@ -77,9 +86,10 @@ static int decode_ContentType_Handshake(ssl,dir,seg,data)
     UINT4 t,l;
     int rs=0;
     Data d;
+    struct json_object *jobj;
 
     if(ssl->record_encryption==REC_CIPHERTEXT){
-      printf("\n");
+      LF;
       return(0);
     }
 
@@ -93,13 +103,16 @@ static int decode_ContentType_Handshake(ssl,dir,seg,data)
         ERETURN(R_EOD);
       }
 
+      jobj = ssl->cur_json_st;
+      json_object_object_add(jobj, "msg_type", json_object_new_string("Handshake"));
+
       d.data=data->data;
       d.len=l;
       data->len-=l;
       data->data+=l;
       P_(P_HL){
 	if(!rs){
-	  printf("\n");
+	  LF;
 	  rs=1;
 	}
       }
@@ -118,6 +131,9 @@ static int decode_ContentType_application_data(ssl,dir,seg,data)
 
     int r;
     Data d;
+    struct json_object *jobj;
+    jobj = ssl->cur_json_st;
+    json_object_object_add(jobj, "msg_type", json_object_new_string("application data"));
 
     SSL_DECODE_OPAQUE_ARRAY(ssl,"data",data->len,0,data,&d);
 
@@ -125,7 +141,7 @@ static int decode_ContentType_application_data(ssl,dir,seg,data)
 	    print_data(ssl,&d);
     }
     else {
-	printf("\n");
+	LF;
     }
     return(0);
 
@@ -160,9 +176,12 @@ static int decode_HandshakeType_HelloRequest(ssl,dir,seg,data)
   segment *seg;
   Data *data;
   {
+    struct json_object *jobj;
+    jobj = ssl->cur_json_st;
+    json_object_object_add(jobj, "handshake_type", json_object_new_string("HelloRequest"));
 
 
-  printf("\n");
+  LF;
   return(0);
 
   }
@@ -173,6 +192,9 @@ static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
   Data *data;
   {
 
+    struct json_object *jobj;
+    jobj = ssl->cur_json_st;
+    json_object_object_add(jobj, "handshake_type", json_object_new_string("ClientHello"));
 
     UINT4 vj,vn,cs,cslen,complen,comp,odd,exlen,ex;
     Data session_id,random;
@@ -182,14 +204,14 @@ static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
     extern decoder compression_method_decoder[];
     extern decoder extension_decoder[];
 
-    printf("\n");
+    LF;
     ssl_update_handshake_messages(ssl,data);
     SSL_DECODE_UINT8(ssl,0,0,data,&vj);
     SSL_DECODE_UINT8(ssl,0,0,data,&vn);
 
     P_(P_HL) {explain(ssl,"Version %d.%d ",vj,vn);
-        printf("\n");
-   }
+        LF;
+    }
 
     SSL_DECODE_OPAQUE_ARRAY(ssl,"random",32,P_ND,data,&random);
     ssl_set_client_random(ssl->decoder,random.data,random.len);
@@ -219,7 +241,7 @@ static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
 	      ssl_decode_enum(ssl,0,2,cipher_suite_decoder,
 	        0,data,&cs);
 	      ssl_print_cipher_suite(ssl,(vj<<8)|vn,P_HL,cs);
-	      printf("\n");
+	      LF;
 	    }
     }
 
@@ -228,7 +250,7 @@ static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
       explain(ssl,"compression methods\n");
       for(;complen;complen--){
         SSL_DECODE_ENUM(ssl,0,1,compression_method_decoder,P_HL,data,&comp);
-        printf("\n");
+        LF;
       }
     }
 
@@ -244,7 +266,7 @@ static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
     	  }
     	  continue;
     	}
-    	printf("\n");
+        LF;
       }
     }
     return(0);
@@ -263,14 +285,18 @@ static int decode_HandshakeType_ServerHello(ssl,dir,seg,data)
 
     extern decoder extension_decoder[];
 
-    printf("\n");
+    struct json_object *jobj;
+    jobj = ssl->cur_json_st;
+    json_object_object_add(jobj, "handshake_type", json_object_new_string("ServerHello"));
+
+    LF;
     ssl_update_handshake_messages(ssl,data);
     SSL_DECODE_UINT8(ssl,0,0,data,&vj);
     SSL_DECODE_UINT8(ssl,0,0,data,&vn);
 
     ssl->version=vj*256+vn;
     P_(P_HL) {explain(ssl,"Version %d.%d ",vj,vn);
-        printf("\n");
+        LF;
    }
 
 
@@ -288,9 +314,9 @@ static int decode_HandshakeType_ServerHello(ssl,dir,seg,data)
     ssl_process_server_session_id(ssl,ssl->decoder,session_id.data,
       session_id.len);
 
-    P_(P_HL) printf("\n");
+    P_(P_HL) LF;
     SSL_DECODE_ENUM(ssl,"compressionMethod",1,compression_method_decoder,P_HL,data,0);
-    P_(P_HL) printf("\n");
+    P_(P_HL) LF;
 
     SSL_DECODE_UINT16(ssl,"extensions len",0,data,&exlen);
     if (exlen) {
@@ -304,7 +330,7 @@ static int decode_HandshakeType_ServerHello(ssl,dir,seg,data)
     	  }
     	  continue;
     	}
-    	printf("\n");
+        LF;
       }
     }
 
@@ -323,9 +349,15 @@ static int decode_HandshakeType_Certificate(ssl,dir,seg,data)
     Data cert;
     int r;
 
-    printf("\n");
+    struct json_object *jobj;
+    jobj = ssl->cur_json_st;
+    json_object_object_add(jobj, "handshake_type", json_object_new_string("Certificate"));
+
+    LF;
     ssl_update_handshake_messages(ssl,data);
     SSL_DECODE_UINT24(ssl,"certificates len",0,data,&len);
+
+    json_object_object_add(jobj, "cert_chain", json_object_new_array());
 
     while(len){
       SSL_DECODE_OPAQUE_ARRAY(ssl,"certificate",-((1<<23)-1),
@@ -347,7 +379,11 @@ static int decode_HandshakeType_ServerKeyExchange(ssl,dir,seg,data)
 
    int r;
 
-    printf("\n");
+    struct json_object *jobj;
+    jobj = ssl->cur_json_st;
+    json_object_object_add(jobj, "handshake_type", json_object_new_string("ServerKeyExchange"));
+
+    LF;
     ssl_update_handshake_messages(ssl,data);
    if(ssl->cs){
      P_(P_ND){
@@ -385,14 +421,18 @@ static int decode_HandshakeType_CertificateRequest(ssl,dir,seg,data)
     Data ca;
     int r;
 
-    printf("\n");
+    struct json_object *jobj;
+    jobj = ssl->cur_json_st;
+    json_object_object_add(jobj, "handshake_type", json_object_new_string("CertificateRequest"));
+
+    LF;
     ssl_update_handshake_messages(ssl,data);
     SSL_DECODE_UINT8(ssl,"certificate_types len",0,data,&len);
     for(;len;len--){
       SSL_DECODE_ENUM(ssl,"certificate_types",1,
         client_certificate_type_decoder, P_HL,data,0);
       P_(P_HL){
-	printf("\n");
+	LF;
       }
     };
 
@@ -416,8 +456,11 @@ static int decode_HandshakeType_ServerHelloDone(ssl,dir,seg,data)
   Data *data;
   {
 
+    struct json_object *jobj;
+    jobj = ssl->cur_json_st;
+    json_object_object_add(jobj, "handshake_type", json_object_new_string("ServerHelloDone"));
 
-  printf("\n");
+  LF;
   ssl_update_handshake_messages(ssl,data);
   return(0);
 
@@ -431,7 +474,12 @@ static int decode_HandshakeType_CertificateVerify(ssl,dir,seg,data)
 
 
   int r;
-  printf("\n");
+
+    struct json_object *jobj;
+    jobj = ssl->cur_json_st;
+    json_object_object_add(jobj, "handshake_type", json_object_new_string("CertificateVerify"));
+
+  LF;
   ssl_update_handshake_messages(ssl,data);
   SSL_DECODE_OPAQUE_ARRAY(ssl,"Signature",-((1<<15)-1),P_HL,data,0);
   return(0);
@@ -448,7 +496,11 @@ static int decode_HandshakeType_ClientKeyExchange(ssl,dir,seg,data)
    int r;
    Data pms;
 
-    printf("\n");
+    struct json_object *jobj;
+    jobj = ssl->cur_json_st;
+    json_object_object_add(jobj, "handshake_type", json_object_new_string("ClientKeyExchange"));
+
+    LF;
     ssl_update_handshake_messages(ssl,data);
    if(ssl->cs){
      switch(ssl->cs->kex){
@@ -486,7 +538,11 @@ static int decode_HandshakeType_Finished(ssl,dir,seg,data)
 
    int r;
 
-    printf("\n");
+    struct json_object *jobj;
+    jobj = ssl->cur_json_st;
+    json_object_object_add(jobj, "handshake_type", json_object_new_string("Finished"));
+
+    LF;
    switch(ssl->version){
      case 0x300:
        SSL_DECODE_OPAQUE_ARRAY(ssl,"md5_hash",16,P_ND,data,0);
@@ -496,7 +552,7 @@ static int decode_HandshakeType_Finished(ssl,dir,seg,data)
      case 0x301:
        SSL_DECODE_OPAQUE_ARRAY(ssl,"verify_data",12,P_ND,data,0);
 	P_(P_ND)
-	  printf("\n");
+	  LF;
        break;
    }
 
@@ -2124,6 +2180,9 @@ static int decode_AlertLevel_warning(ssl,dir,seg,data)
   segment *seg;
   Data *data;
   {
+    struct json_object *jobj;
+    jobj = ssl->cur_json_st;
+    json_object_object_add(jobj, "alert_level", json_object_new_string("warning"));
 	return(0);
   }
 static int decode_AlertLevel_fatal(ssl,dir,seg,data)
@@ -2132,6 +2191,9 @@ static int decode_AlertLevel_fatal(ssl,dir,seg,data)
   segment *seg;
   Data *data;
   {
+    struct json_object *jobj;
+    jobj = ssl->cur_json_st;
+    json_object_object_add(jobj, "alert_level", json_object_new_string("fatal"));
 	return(0);
   }
 decoder AlertLevel_decoder[]={
@@ -2530,7 +2592,7 @@ static int decode_extension_server_name(ssl,dir,seg,data)
 
     if(dir==DIR_I2R){
       SSL_DECODE_UINT16(ssl,"server name list length",0,data,&l);
-      printf("\n");
+      LF;
       while(l) {
 	p=data->len;
 	SSL_DECODE_UINT8(ssl, "server name type", 0, data, &t);
@@ -2896,7 +2958,8 @@ static int decode_server_name_type_host_name(ssl,dir,seg,data)
     int r;
     UINT4 l;
     SSL_DECODE_UINT16(ssl,"server name length",0,data,&l);
-    printf(": %.*s",l,data->data);
+    if(!(NET_print_flags & NET_PRINT_JSON))
+	printf(": %.*s",l,data->data);
 
     /* Possibly use data->data to set/modify ssl->server_name */
 	if (l!=0)

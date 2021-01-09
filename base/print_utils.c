@@ -74,13 +74,13 @@ int exdump(name,data)
     for(i=0;i<data->len;i++){
       if(!i && (data->len>8)) INDENT;
       if((data->len>8) && i && !(i%12)){
-        printf("\n"); INDENT; 
+        LF;INDENT;
       }
       printf("%.2x ",data->data[i]&255);
     }
     if(name) INDENT_POP;
     if(data->len>8 && i%12)
-      printf("\n");
+      LF;
     return(0);
   }
       

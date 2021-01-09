@@ -65,6 +65,8 @@ int ssl_lookup_enum PROTO_LIST((ssl_obj *ssl,decoder *dtable,
   UINT4 val,char **ptr));
 int ssl_print_enum PROTO_LIST((ssl_obj *obj,char *name,
   decoder *decode,UINT4 value));
+int ssl_get_enum_str PROTO_LIST((ssl_obj *obj,char *outstr,
+  decoder *decode,UINT4 value));
 int print_data PROTO_LIST((ssl_obj *ssl,Data *d));
 int process_v2_hello PROTO_LIST((ssl_obj *ssl,segment *seg));
 int process_beginning_plaintext PROTO_LIST((ssl_obj *ssl,
@@ -77,6 +79,7 @@ int ssl_print_cipher_suite PROTO_LIST((ssl_obj *ssl,int version,int p,
 
 int explain PROTO_LIST((ssl_obj *ssl,char *format,...));
 int exdump PROTO_LIST((ssl_obj *ssl,char *name,Data *data));
+int exstr PROTO_LIST((ssl_obj *ssl,char *name,Data *data));
 
 
 #define SSL_DECODE_UINT8(a,n,b,c,d) if((r=ssl_decode_uintX(a,n,1,b,c,d))) ERETURN(r)
@@ -87,13 +90,13 @@ int exdump PROTO_LIST((ssl_obj *ssl,char *name,Data *data));
 #define SSL_DECODE_ENUM(a,b,c,d,e,f,g) if((r=ssl_decode_enum(a,b,c,d,e,f,g))) ERETURN(r)
 #define P_(p)              if((p==SSL_PRINT_ALL) || (p & SSL_print_flags))
 
-#define INDENT  do {int i; for(i=0;i<(ssl->indent_depth + ssl->indent_name_len);i++)  printf("%s",SSL_print_flags & SSL_PRINT_NROFF?" ":" ");} while(0)
+#define INDENT if(!(NET_print_flags & NET_PRINT_JSON)) do {int i; for(i=0;i<(ssl->indent_depth + ssl->indent_name_len);i++)  printf("%s",SSL_print_flags & SSL_PRINT_NROFF?" ":" ");} while(0)
 #define INDENT_INCR ssl->indent_depth+=2
 #define INDENT_POP ssl->indent_depth-=2
 #define INDENT_NAME(x) ssl->indent_name_len += strlen(x)
 #define INDENT_NAME_POP ssl->indent_name_len=0
 #define LINE_LEFT (80-(ssl->indent_name_len + ssl->indent_depth)
-#define LF printf("\n")
+#define LF if(!(NET_print_flags & NET_PRINT_JSON)) printf("\n")
   
 #endif
 

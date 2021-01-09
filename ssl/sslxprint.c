@@ -44,7 +44,7 @@
  */
 
 
-
+#include <json-c/json.h>
 #include "network.h"
 #include "ssl_h.h"
 #include "sslprint.h"
@@ -78,9 +78,26 @@ int sslx_print_certificate(ssl,data,pf)
     P_(P_ASN){
       char buf[BUFSIZE];
       int ext;
-        
+      char *b64_cert;
+
+      char *serial_str = NULL;
+      Data data_tmp;
+
+      struct json_object *jobj;
+      jobj = ssl->cur_json_st;
+
+      struct json_object *cert_obj;
+      cert_obj = json_object_new_object();
+
       d=data->data;
-	
+
+      if(!(b64_cert=(char *)calloc(1,sizeof(char) * ((((data->len) + 3 - 1)/3) * 4 + 1))))
+        ABORT(R_NO_MEMORY);
+
+      EVP_EncodeBlock((unsigned char *)b64_cert, d, data->len);
+      json_object_object_add(cert_obj, "cert_der", json_object_new_string(b64_cert));
+      free(b64_cert);
+
       if(!(x=d2i_X509(0,(const unsigned char **) &d,data->len))){
         explain(ssl,"Bad certificate");
         ABORT(R_BAD_DATA);
@@ -89,16 +106,24 @@ int sslx_print_certificate(ssl,data,pf)
         BUFSIZE);
       explain(ssl,"Subject\n");
       INDENT_INCR;
+      json_object_object_add(cert_obj, "cert_subject", json_object_new_string(buf));
       sslx__print_dn(ssl,buf);
       INDENT_POP;
       X509_NAME_oneline(X509_get_issuer_name(x),buf,
         BUFSIZE);
       explain(ssl,"Issuer\n");
       INDENT_INCR;
+      json_object_object_add(cert_obj, "cert_issuer", json_object_new_string(buf));
       sslx__print_dn(ssl,buf);
       INDENT_POP;
       a=X509_get_serialNumber(x);
       explain(ssl,"Serial ");
+      if(!(serial_str=(char *)calloc(1,sizeof(char) * (a->length * 3))))
+        ABORT(R_NO_MEMORY);
+      INIT_DATA(data_tmp,a->data,a->length);
+      exstr(ssl, serial_str, &data_tmp);
+      json_object_object_add(cert_obj, "cert_serial", json_object_new_string(serial_str));
+      free(serial_str);
       sslx__print_serial(ssl,a);
 
       ext=X509_get_ext_count(x);
@@ -147,6 +172,10 @@ int sslx_print_certificate(ssl,data,pf)
         }
 #ifdef OPENSSL        
       }
+
+	struct json_object *certs_array;
+	json_object_object_get_ex(jobj, "cert_chain", &certs_array);
+	json_object_array_add(certs_array,cert_obj);
     }
 #endif
 

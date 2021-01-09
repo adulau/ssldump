@@ -47,8 +47,8 @@
 #ifndef _ssldecode_h
 #define _ssldecode_h
 
-#define CRDUMP(a,b,c) P_(P_CR) {Data d; d.data=b; d.len=c; exdump(ssl,a,&d); printf("\n");}
-#define CRDUMPD(a,b) P_(P_CR) {exdump(ssl,a,b);printf("\n");}
+#define CRDUMP(a,b,c) P_(P_CR) {Data d; d.data=b; d.len=c; exdump(ssl,a,&d); LF;}
+#define CRDUMPD(a,b) P_(P_CR) {exdump(ssl,a,b);LF;}
 
 int ssl_decode_ctx_create PROTO_LIST((ssl_decode_ctx **ctx,
   char *keyfile,char *password,char *keylogfile));

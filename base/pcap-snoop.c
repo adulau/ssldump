@@ -126,10 +126,20 @@ int print_version()
     exit(0);
   }
 
+pcap_t *p;
 void sig_handler(int sig)
   {
+    int freed_conn = 0;
     fflush(stdout);
-    if (logger) logger->vtbl->deinit();
+    if (logger)
+	logger->vtbl->deinit();
+
+    freed_conn = destroy_all_conn();
+    if(freed_conn && !(NET_print_flags & NET_PRINT_JSON))
+        printf("Cleaned %d remaining connection(s) from connection pool\n", freed_conn);
+
+    if(p)
+	pcap_close(p);
     exit(0);
   }
     
@@ -248,7 +258,7 @@ void pcap_cb(ptr,hdr,data)
     if(packet_cnt == conn_freq) {
         packet_cnt = 0;
         memcpy(&last_packet_seen_time,&hdr->ts,sizeof(struct timeval));
-        if((cleaned_conn = clean_old_conn()))
+        if((cleaned_conn = clean_old_conn()) && !(NET_print_flags & NET_PRINT_JSON))
             printf("%d inactive connection(s) cleaned from connection pool\n", cleaned_conn);
     } else {
         packet_cnt++;
@@ -276,7 +286,6 @@ int main(argc,argv)
   int argc;
   char **argv;
   {
-    pcap_t *p;
     int r;
     n_handler *n;
 #ifdef _WIN32
@@ -295,12 +304,13 @@ int main(argc,argv)
     int c;
     module_def *m=0;
     int no_promiscuous=0;
+    int freed_conn=0;
     
     char errbuf[PCAP_ERRBUF_SIZE];
 
     signal(SIGINT,sig_handler);
     
-    while((c=getopt(argc,argv,"vr:F:f:S:yTt:ai:k:l:w:p:nsAxXhHVNdqem:P"))!=EOF){
+    while((c=getopt(argc,argv,"vr:F:f:S:jyTt:ai:k:l:w:p:nsAxXhHVNdqem:P"))!=EOF){
       switch(c){
         case 'v':
           print_version();
@@ -317,6 +327,10 @@ int main(argc,argv)
           NET_print_flags|=NET_PRINT_TYPESET;
           /*Kludge*/
           SSL_print_flags |= SSL_PRINT_NROFF;
+          break;
+        case 'j':
+          NET_print_flags |= NET_PRINT_JSON;
+          SSL_print_flags |= SSL_PRINT_JSON;
           break;
 	case 'a':
 	  NET_print_flags |= NET_PRINT_ACKS;
@@ -461,19 +475,23 @@ int main(argc,argv)
     }
 
     pcap_if_type=pcap_datalink(p);
-    
-    if(NET_print_flags & NET_PRINT_TYPESET)
-      printf("\n.nf\n.ps -2\n");
+
+    if(!(NET_print_flags & NET_PRINT_JSON))
+      if(NET_print_flags & NET_PRINT_TYPESET)
+        printf("\n.nf\n.ps -2\n");
     
     if((r=network_handler_create(mod,&n)))
       err_exit("Couldn't create network handler",r);
 
     pcap_loop(p,-1,pcap_cb,(u_char *)n);
 
-    if(NET_print_flags & NET_PRINT_TYPESET)
-      printf("\n.ps\n.fi\n");
+    if(!(NET_print_flags & NET_PRINT_JSON))
+      if(NET_print_flags & NET_PRINT_TYPESET)
+        printf("\n.ps\n.fi\n");
 
-    printf("Cleaning %d remaining connection(s) from connection pool\n", destroy_all_conn());
+    freed_conn = destroy_all_conn();
+    if(freed_conn && !(NET_print_flags & NET_PRINT_JSON))
+        printf("Cleaned %d remaining connection(s) from connection pool\n", freed_conn);
 
     pcap_close(p);
 

@@ -61,8 +61,7 @@ ssldump \- dump SSL traffic on a network
 .na
 .B ssldump
 [
-.B \-vTshVq
-.B \-aAdeHnNqTxXvy
+.B \-aAdeFHjnNPqtTvxXy
 ] [
 .B \-i
 .I interface
@@ -110,14 +109,14 @@ form to stdout. If provided with the appropriate keying material,
 it will also decrypt the connections and display the application
 data traffic. 
 .LP
-ssldump has been tested on FreeBSD, Linux, Solaris, and HP/UX.  Since
+\fIssldump\fP has been tested on FreeBSD, Linux, Solaris, and HP/UX.  Since
 it's based on PCAP, it should work on most platforms. However, unlike
-tcpdump, ssldump needs to be able to see both sides of the data
+tcpdump, \fIssldump\fP needs to be able to see both sides of the data
 transmission so you may have trouble using it with network taps such
 as SunOS nit that don't permit you to see transmitted data.
 .B Under SunOS with nit or bpf:
 To run
-.I tcpdump
+.I ssldump
 you must have read access to
 .I /dev/nit
 or
@@ -135,46 +134,65 @@ You must be root or it must be installed setuid to root.
 Once the super-user has enabled promiscuous-mode operation using
 .IR pfconfig (8),
 any user may run
-.BR ssldump
+.I ssldump
 .B Under BSD:
 You must have read access to
 .IR /dev/bpf* .
 .SH OPTIONS
 .TP
 .B \-a
-Print bare TCP ACKs (useful for observing Nagle behavior)
+Print bare TCP ACKs (useful for observing Nagle behavior).
 .TP
 .B \-A
-Print all record fields (by default ssldump chooses
-the most interesting fields)
+Print all record fields (by default \fIssldump\fP chooses
+the most interesting fields).
 .TP
 .B \-d
 Display the application data traffic. This usually means
-decrypting it, but when -d is used ssldump will also decode
+decrypting it, but when -d is used \fIssldump\fP will also decode
 application data traffic \fIbefore\fP the SSL session initiates.
 This allows you to see HTTPS CONNECT behavior as well as
-SMTP STARTTLS. As a side effect, since ssldump can't tell
+SMTP STARTTLS. As a side effect, since \fIssldump\fP can't tell
 whether plaintext is traffic before the initiation of an
 SSL connection or just a regular TCP connection, this allows
-you to use ssldump to sniff any TCP connection. 
-ssldump will automatically detect ASCII data and display it
+you to use \fIssldump\fP to sniff any TCP connection.
+\fIssldump\fP will automatically detect ASCII data and display it
 directly to the screen. non-ASCII data is displayed as hex
 dumps. See also -X.
 .TP
 .B \-e
-Print absolute timestamps instead of relative timestamps
+Print absolute timestamps instead of relative timestamps.
+.TP
+.B \-F
+Specify the number of packets after which a connection pool cleaning is performed (in packets, default: 100).
 .TP
 .B \-H
 Print the full SSL packet header.
 .TP
-.B \-n 
-Don't try to resolve host names from IP addresses
+.BI \-i " interface"
+Use \fIinterface\fP as the network interface on which to sniff SSL/TLS
+traffic.
+.TP
+.B \-j
+Switch output format to JSON. Only stdout is affected by this toggle.
+.TP
+.BI \-k " keyfile"
+Use \fIkeyfile\fP as the location of the SSL keyfile (OpenSSL format)
+Previous versions of \fIssldump\fP automatically looked in ./server.pem.
+Now you must specify your keyfile every time.
+.TP
+.BI \-l " sslkeylogfile"
+Use \fIsslkeylogfile\fP as the location of the SSLKEYLOGFILE
+(https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS/Key_Log_Format).
+.TP
+.B \-n
+Don't try to resolve host names from IP addresses.
 .TP
 .B \-N
-Attempt to parse ASN.1 when it appears, such as in 
+Attempt to parse ASN.1 when it appears, such as in
 certificates and DNs.
 .TP
-.B \-p
+.BI \-p " password"
 Use \fIpassword\fP as the SSL keyfile password.
 .TP
 .B \-P
@@ -183,55 +201,13 @@ Don't put the interface into promiscuous mode.
 .B \-q
 Don't decode any record fields beyond a single summary line. (quiet mode).
 .TP
-.B \-T
-Print the TCP headers.
-.TP
-.B \-v
-Display version and copyright information.
-.TP
-.B \-t
-Specify the TTL for inactive connections referenced in the connection pool (in seconds, default: 100).
-.TP
-.B \-F
-Specify the number of packets after which a connection pool cleaning is performed (in packets, default: 100).
-.TP
-.B \-x
-Print each record in hex, as well as decoding it.
-.TP
-.B \-X
-When the -d option is used, binary data is automatically printed
-in two columns with a hex dump on the left and the printable characters
-on the right. -X suppresses the display of the printable characters,
-thus making it easier to cut and paste the hex data into some other
-program.
-.TP
-.B \-y
-Decorate the output for processing with nroff/troff. Not very
-useful for the average user.
-.TP
-.BI \-i " interface"
-Use \fIinterface\fP as the network interface on which to sniff SSL/TLS
-traffic.
-.TP
-.BI \-k " keyfile"
-Use \fIkeyfile\fP as the location of the SSL keyfile (OpenSSL format)
-Previous versions of ssldump automatically looked in ./server.pem.
-Now you must specify your keyfile every time.
-.TP
-.BI \-l " sslkeylogfile"
-Use \fIsslkeylogfile\fP as the location of the SSLKEYLOGFILE
-(https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS/Key_Log_Format)
-.TP
-.BI \-p " password"
-Use \fIpassword\fP as the SSL keyfile password.
-.TP
 .BI \-r " file"
 Read data from \fIfile\fP instead of from the network.
 The old -f option still works but is deprecated and will
 probably be removed with the next version.
 .TP
 .BI \-S " [ " crypto " | " d " | " ht " | " H " ]"
-Specify SSL flags to ssldump.  These flags include:
+Specify SSL flags to \fIssldump\fP.  These flags include:
 .RS
 .TP
 .I crypto
@@ -247,17 +223,40 @@ Print the handshake type.
 Print handshake type and highlights.
 .RE
 .TP
+.B \-t
+Specify the TTL for inactive connections referenced in the connection pool (in seconds, default: 100).
+.TP
+.B \-T
+Print the TCP headers.
+.TP
+.B \-v
+Display version and copyright information.
+.TP
 .BI \-w " outputpcap"
 Use \fIoutputpcap\fP as the destination for decrypted packets.
 .TP
+.B \-x
+Print each record in hex, as well as decoding it.
+.TP
+.B \-X
+When the -d option is used, binary data is automatically printed
+in two columns with a hex dump on the left and the printable characters
+on the right. -X suppresses the display of the printable characters,
+thus making it easier to cut and paste the hex data into some other
+program.
+.TP
+.B \-y
+Decorate the output for processing with nroff/troff. Not very
+useful for the average user.
+.TP
 \fIexpression\fP
 .RS
-Selects what packets ssldump will examine. Technically speaking,
-ssldump supports the full expression syntax from PCAP and tcpdump.
+Selects what packets \fIssldump\fP will examine. Technically speaking,
+\fIssldump\fP supports the full expression syntax from PCAP and tcpdump.
 In fact, the description here is cribbed from the tcpdump man
-page. However, since ssldump needs to examine full TCP streams,
+page. However, since \fIssldump\fP needs to examine full TCP streams,
 most of the tcpdump expressions will select traffic mixes
-that ssldump will simply ignore. Only the expressions which
+that \fIssldump\fP will simply ignore. Only the expressions which
 don't result in incomplete TCP streams are listed here. 
 .LP
 The \fIexpression\fP consists of one or more
@@ -431,29 +430,36 @@ which should not be confused with
 .fi
 .in -.5i
 .LP
-Expression arguments can be passed to ssldump as either a single argument
+Expression arguments can be passed to \fIssldump\fP as either a single argument
 or as multiple arguments, whichever is more convenient.
 Generally, if the expression contains Shell metacharacters, it is
 easier to pass it as a single, quoted argument.
 Multiple arguments are concatenated with spaces before being parsed.
 .SH EXAMPLES
 .LP
-To listen to traffic on interface \fIle0\fP port \fI443\fP
+To listen to traffic on interface \fIle0\fP port \fI443\fP:
 .RS
 .nf
 \fBssldump -i le0 port 443\fP
 .fi
 .RE
 .LP
-To listen to traffic to the server \fIromeo\fP on port \fI443\fP.
+To listen to traffic to the server \fIromeo\fP on port \fI443\fP:
 .RS
 .nf
-\fBssldump -i le0 port 443 and host romeo\fP
+\fBssldump -i le0 port 443 and host romeo\fP:
+.fi
+.RE
+.LP
+To switch output format to JSON:
+.RS
+.nf
+\fBssldump -ANH -j -i le0 port 443 and host romeo\fP
 .fi
 .RE
 .LP
 To decrypt traffic to host \fIromeo\fR 
-\fIserver.pem\fR and the password \fIfoobar\fR
+\fIserver.pem\fR and the password \fIfoobar\fR:
 .RS
 .nf
 \fBssldump -Ad -k ~/server.pem -p foobar -i le0 host romeo
@@ -463,7 +469,7 @@ To decrypt traffic to host \fIromeo\fR
 .LP
 All output is printed to standard out.
 .LP
-ssldump prints an indication of every new TCP connection using a line
+\fIssldump\fP prints an indication of every new TCP connection using a line
 like the following
 .nf
 .LP
@@ -493,16 +499,16 @@ the time since the previous record. Both are in seconds.
 The next field in the record line is the direction that the record
 was going. \fIC>S\fR indicates records transmitted from client to
 server and \fIS>C\fR indicates records transmitted from server to client.
-ssldump assumes that the host to transmit the first SYN
+\fIssldump\fP assumes that the host to transmit the first SYN
 is the SSL client (this is nearly always correct).
 .LP
 The next field is the record type, one of \fIHandshake\fR, \fIIAlert\fR,
-\fIChangeCipherSpec\fR, or \fIapplication_data\fR. Finally, ssldump
+\fIChangeCipherSpec\fR, or \fIapplication_data\fR. Finally, \fIssldump\fP
 may print record-specific data on the rest of the line. For \fIHandshake\fR
 records, it prints the handshake message. Thus, this record is
 a \fICertificate\fR message.
 .LP
-ssldump chooses certain record types for further decoding. These
+\fIssldump\fP chooses certain record types for further decoding. These
 are the ones that have proven to be most useful for debugging:
 .LP
 .nf
@@ -525,16 +531,16 @@ flags.
 .LP
 .SH DECRYPTION
 .LP
-ssldump can decrypt traffic between two hosts if the following two
+\fIssldump\fP can decrypt traffic between two hosts if the following two
 conditions are met:
 .RS
 .nf
-1. ssldump has the keys.
+1. \fIssldump\fP has the keys.
 2. Static RSA was used.
 .fi
 .RE
 In any other case, once encryption starts,
-ssldump will only be able to determine the
+\fIssldump\fP will only be able to determine the
 record type. Consider the following section of a trace.
 .LP
 .nf
@@ -553,7 +559,7 @@ record type. Consider the following section of a trace.
 Note that the \fIClientKeyExchange\fR message type is printed
 but the rest of the \fIHandshake\fR messages do not have
 types. These are the \fIFinished\fR messages, but because they
-are encrypted ssldump only knows that they are of type \fIHandshake\fR.
+are encrypted \fIssldump\fP only knows that they are of type \fIHandshake\fR.
 Similarly, had the \fIAlert\fR in record 14 happened during the handshake,
 it's type and level would have been printed. However, since it
 is encrypted we can only tell that it is an alert.
@@ -569,9 +575,9 @@ implemented. In practice, this turns out not to be much of a problem.
 Support is provided for only for Ethernet and loopback interfaces
 because that's all that I have. If you have another kind of network
 you will need to modify pcap_cb in base/pcap-snoop.c. If you have
-direct experience with ssldump on other networks, please send me patches.
+direct experience with \fIssldump\fP on other networks, please send me patches.
 .LP
-ssldump doesn't implement session caching and therefore can't decrypt
+\fIssldump\fP doesn't implement session caching and therefore can't decrypt
 resumed sessions.
 .LP
 .SH SEE ALSO
@@ -580,4 +586,4 @@ resumed sessions.
 .LP
 .SH AUTHOR
 .LP
-ssldump was written by Eric Rescorla <ekr@rtfm.com>.
+\fIssldump\fP was written by Eric Rescorla <ekr@rtfm.com>.

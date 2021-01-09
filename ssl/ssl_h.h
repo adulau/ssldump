@@ -81,8 +81,10 @@ typedef struct ssl_obj_ {
      UINT4 cipher_suite;
 
      char *client_name;
+     char *client_ip;
      int client_port;
      char *server_name;
+     char *server_ip;
      int server_port;
 
      struct SSL_CipherSuite_ *cs;
@@ -106,6 +108,7 @@ typedef struct ssl_obj_ {
      int record_count;
      int indent_depth;
      int indent_name_len;
+     struct json_object *cur_json_st;
 } ssl_obj;
 
 typedef struct decoder_ {

@@ -94,6 +94,27 @@ files with
 	])
 fi
 
+have_libjson_c=no
+AC_SEARCH_LIBS([json_object_new_object], [json-c], [have_libjson_c=yes])
+
+if test "x${have_libjson_c}" = xyes; then
+	AC_CHECK_HEADERS([json-c/json.h], [], [have_libjson_c=no])
+fi
+
+if test "x${have_libjson_c}" = xno; then
+	AC_MSG_ERROR([
+---------------------------------------
+Unable to find libjson-c on this system
+Check 'config.log' for more information
+
+On Debian and Ubuntu systems you can
+install the required library and header
+files with
+  apt install libjson-c-dev
+---------------------------------------
+	])
+fi
+
 AC_ARG_ENABLE([optimization],
 	[  --disable-optimization  disable compiler optimizations],
 	[optimization=${enableval}], [optimization=yes])
