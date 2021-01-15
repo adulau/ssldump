@@ -127,6 +127,9 @@ int print_version()
   }
 
 pcap_t *p;
+proto_mod *mod=&ssl_mod;
+n_handler *n;
+char *interface_name=0;
 void sig_handler(int sig)
   {
     int freed_conn = 0;
@@ -140,6 +143,9 @@ void sig_handler(int sig)
 
     if(p)
 	pcap_close(p);
+    if(interface_name)
+	free(interface_name);
+
     exit(0);
   }
     
@@ -287,7 +293,6 @@ int main(argc,argv)
   char **argv;
   {
     int r;
-    n_handler *n;
 #ifdef _WIN32
     __declspec(dllimport) char *optarg;
     __declspec(dllimport) int optind;
@@ -296,10 +301,8 @@ int main(argc,argv)
     extern int optind;
 #endif
     pcap_if_t *interfaces;
-    char *interface_name=0;
     char *file=0;
     char *filter=0;
-    proto_mod *mod=&ssl_mod;
     bpf_u_int32 localnet,netmask;
     int c;
     module_def *m=0;
