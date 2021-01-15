@@ -121,6 +121,9 @@ int r_assoc_destroy(assocp)
     for(i=0;i<assoc->size;i++)
       destroy_assoc_chain(assoc->chains[i]);
 
+    free(assoc->chains);
+    free(assoc);
+
     return(0);
   }
 
