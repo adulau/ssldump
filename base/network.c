@@ -86,17 +86,22 @@ int network_handler_create(mod,handlerp)
     _status=0;
   abort:
     if(_status){
-      network_handler_destroy(&handler);
+      network_handler_destroy(mod, &handler);
     }
     return(_status);
   }
 
-int network_handler_destroy(handlerp)
+int network_handler_destroy(mod,handlerp)
+  proto_mod *mod;
   n_handler **handlerp;
   {
+    n_handler *handler=0;
     if(!handlerp || !*handlerp)
       return(0);
 
+    handler = *handlerp;
+
+    mod->vtbl->destroy_ctx(mod->handle,&handler->ctx);
     free(*handlerp);
     *handlerp=0;
     return(0);

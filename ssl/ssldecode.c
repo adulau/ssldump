@@ -191,6 +191,25 @@ int ssl_decode_ctx_create(dp,keyfile,pass,keylogfile)
 #endif
   }
 
+int ssl_decode_ctx_destroy(dp)
+  ssl_decode_ctx **dp;
+  {
+#ifdef OPENSSL
+    ssl_decode_ctx *d = *dp;
+    if(d->ssl_key_log_file) {
+      fclose(d->ssl_key_log_file);
+    }
+
+    r_assoc *x = d->session_cache;
+    r_assoc_destroy(&d->session_cache);
+
+    SSL_CTX_free(d->ssl_ctx);
+    SSL_free(d->ssl);
+    free(d);
+#endif
+    return(0);
+  }
+
 int ssl_decoder_create(dp,ctx)
   ssl_decoder **dp;
   ssl_decode_ctx *ctx;

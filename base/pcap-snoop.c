@@ -141,6 +141,8 @@ void sig_handler(int sig)
     if(freed_conn && !(NET_print_flags & NET_PRINT_JSON))
         printf("Cleaned %d remaining connection(s) from connection pool\n", freed_conn);
 
+    network_handler_destroy(mod, &n);
+
     if(p)
 	pcap_close(p);
     if(interface_name)
@@ -496,6 +498,7 @@ int main(argc,argv)
     if(freed_conn && !(NET_print_flags & NET_PRINT_JSON))
         printf("Cleaned %d remaining connection(s) from connection pool\n", freed_conn);
 
+    network_handler_destroy(mod, &n);
     pcap_close(p);
 
     free(n);

@@ -61,6 +61,7 @@ static int create_ssl_analyzer PROTO_LIST((void *handle,
   proto_ctx *ctx,tcp_conn *conn,proto_obj **objp,
   struct in_addr *i_addr,u_short i_port,
   struct in_addr *r_addr,u_short r_port, struct timeval *base_time));
+static int destroy_ssl_ctx PROTO_LIST((void *handle,proto_ctx **ctxp));
 static int destroy_ssl_analyzer PROTO_LIST((proto_obj **objp));
 static int read_ssl_record PROTO_LIST((ssl_obj *obj,r_queue *q,segment *seg,
   int offset,segment **lastp,int *offsetp));
@@ -226,6 +227,15 @@ static int create_ssl_ctx(handle,ctxp)
     _status=0;
   abort:
     return(_status);
+  }
+
+static int destroy_ssl_ctx(handle,ctxp)
+  void *handle;
+  proto_ctx **ctxp;
+  {
+        ssl_decode_ctx *ctx=0;
+        ctx=(ssl_decode_ctx *) *ctxp;
+	ssl_decode_ctx_destroy(&ctx);
   }
 
 static int create_ssl_analyzer(void *handle, proto_ctx *ctx, tcp_conn *conn,
@@ -635,6 +645,7 @@ static struct proto_mod_vtbl_ ssl_vtbl ={
      parse_ssl_flag,
      create_ssl_ctx,
      create_ssl_analyzer,
+     destroy_ssl_ctx,
      destroy_ssl_analyzer,
      data_ssl_analyzer,
      close_ssl_analyzer,
