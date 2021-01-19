@@ -236,6 +236,7 @@ static int destroy_ssl_ctx(handle,ctxp)
         ssl_decode_ctx *ctx=0;
         ctx=(ssl_decode_ctx *) *ctxp;
 	ssl_decode_ctx_destroy(&ctx);
+	return 0;
   }
 
 static int create_ssl_analyzer(void *handle, proto_ctx *ctx, tcp_conn *conn,
