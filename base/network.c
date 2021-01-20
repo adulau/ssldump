@@ -126,6 +126,12 @@ int network_process_packet(handler,timestamp,data,length)
     p.len=length;
     p.ip=(struct ip *)data;
 
+    if(p.len < 20) {
+      if(!(NET_print_flags & NET_PRINT_JSON))
+        printf("Malformed packet, packet too small to contain IP header, skipping ...\n");
+      return(0);
+    }
+
     /*Handle, or rather mishandle, fragmentation*/
     off=ntohs(p.ip->ip_off);
     
