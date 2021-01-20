@@ -291,7 +291,10 @@ int ssl_expand_record(ssl,q,direction,data,len)
           printf("  unknown record type: %d\n", ct);
           ERETURN(r);
         }
-      ssl_get_enum_str(ssl,enumstr,ContentType_decoder,ct);
+      if((r=ssl_get_enum_str(ssl,enumstr,ContentType_decoder,ct))) {
+         strncpy(enumstr, "Unknown", 20);
+      }
+
       json_object_object_add(jobj, "msg_type", json_object_new_string(enumstr));
 
       if(!(SSL_print_flags & SSL_PRINT_JSON))
