@@ -2969,6 +2969,7 @@ static int decode_server_name_type_host_name(ssl,dir,seg,data)
 		if (server_name != NULL)
 		{
 			if (ssl->server_name) free(ssl->server_name);
+			if (l > data->len) l = data->len;
 			memcpy(server_name,data->data,l);
 			ssl->server_name = server_name;
 		}
