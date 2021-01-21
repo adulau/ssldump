@@ -62,6 +62,7 @@ struct proto_mod_vtbl_ {
        proto_obj **objp,
        struct in_addr *i_addr,u_short i_port,
        struct in_addr *r_addr,u_short r_port,struct timeval *time_base));
+     int (*destroy_ctx) PROTO_LIST((void *handle,proto_ctx **ctxp));
      int (*destroy) PROTO_LIST((proto_obj **objp));
      int (*data) PROTO_LIST((proto_obj *obj,segment *data,int direction));
      int (*close) PROTO_LIST((proto_obj *obj,packet *p,int direction));

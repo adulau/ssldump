@@ -241,8 +241,7 @@ static int process_data_segment(conn,handler,p,stream,direction)
     l=p->len - p->tcp->th_off * 4;
 
     if(l < 0) {
-	if(!(NET_print_flags & NET_PRINT_JSON))
-		printf("Malformed packet, computed TCP segment size is negative, skipping ...\n");
+	fprintf(stderr,"Malformed packet, computed TCP segment size is negative, skipping ...\n");
 	return(0);
     }
 
