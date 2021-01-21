@@ -176,6 +176,12 @@ void pcap_cb(ptr,hdr,data)
         len-=4;
         break;
       case DLT_EN10MB:
+        if(len < sizeof(struct ether_header)) {
+          if(!(NET_print_flags & NET_PRINT_JSON))
+            printf("Frame size too small to contain Ethernet header, skipping ...\n");
+          return;
+        }
+
         type=ntohs(e_hdr->ether_type);
 
         data+=sizeof(struct ether_header);
