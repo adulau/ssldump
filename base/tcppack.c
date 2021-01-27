@@ -80,7 +80,10 @@ int process_tcp_packet(handler,ctx,p)
     int direction;
     stream_data *stream;
     tcp_conn *conn;
-    
+
+    if(p->len < 20)
+      ABORT(1);
+
     p->tcp=(struct tcphdr *)p->data;
 
     print_tcp_packet(p);
