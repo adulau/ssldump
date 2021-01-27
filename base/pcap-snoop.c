@@ -104,6 +104,7 @@ int err_exit(str,num)
   int num;
   {
     fprintf(stderr,"ERROR: %s\n",str);
+    sig_handler(SIGQUIT);
     exit(num);
   }
 
@@ -130,6 +131,8 @@ pcap_t *p;
 proto_mod *mod=&ssl_mod;
 n_handler *n;
 char *interface_name=0;
+char *file=0;
+char *filter=0;
 void sig_handler(int sig)
   {
     int freed_conn = 0;
@@ -147,8 +150,12 @@ void sig_handler(int sig)
 	pcap_close(p);
     if(interface_name)
 	free(interface_name);
+    if(filter)
+        free(filter);
+    if(file)
+        free(file);
 
-    exit(0);
+    exit(sig);
   }
     
 void pcap_cb(ptr,hdr,data)
@@ -309,8 +316,6 @@ int main(argc,argv)
     extern int optind;
 #endif
     pcap_if_t *interfaces;
-    char *file=0;
-    char *filter=0;
     bpf_u_int32 localnet,netmask;
     int c;
     module_def *m=0;
