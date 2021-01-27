@@ -298,9 +298,11 @@ int ssl_set_client_session_id(d,msg,len)
 #ifdef OPENSSL    
     int r;
 
-    if(len>0)
+    if(len>0) {
+        r_data_destroy(&d->session_id);
         if((r=r_data_create(&d->session_id,msg,len)))
             ERETURN(r);
+    }
 #endif
     return(0);
   }
