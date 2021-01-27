@@ -73,6 +73,7 @@ int sslx_print_certificate(ssl,data,pf)
 #endif    
     UCHAR *d;
     int _status;
+    struct json_object *cert_obj;
     
 #ifdef OPENSSL        
     P_(P_ASN){
@@ -86,7 +87,6 @@ int sslx_print_certificate(ssl,data,pf)
       struct json_object *jobj;
       jobj = ssl->cur_json_st;
 
-      struct json_object *cert_obj;
       cert_obj = json_object_new_object();
 
       d=data->data;
@@ -183,7 +183,8 @@ int sslx_print_certificate(ssl,data,pf)
   abort:
 #ifdef OPENSSL    
     if(x) X509_free(x);
-#endif    
+#endif
+    if(cert_obj) json_object_put(cert_obj);
     return(_status);
   }  
 
