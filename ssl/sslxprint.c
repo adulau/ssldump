@@ -184,7 +184,7 @@ int sslx_print_certificate(ssl,data,pf)
 #ifdef OPENSSL    
     if(x) X509_free(x);
 #endif
-    if(cert_obj) json_object_put(cert_obj);
+    if(_status && cert_obj) json_object_put(cert_obj);
     return(_status);
   }  
 
