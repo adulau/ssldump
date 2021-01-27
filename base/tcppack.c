@@ -365,7 +365,8 @@ static int process_data_segment(conn,handler,p,stream,direction)
           else
 	    conn->state=TCP_STATE_CLOSED;
         }
-        
+
+	free_tcp_segment_queue(stream->oo_queue);
         stream->oo_queue=seg->next;
         seg->next=0;
         stream->seq=seg->s_seq + seg->len;
