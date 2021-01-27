@@ -124,7 +124,7 @@ int process_v2_hello(ssl,seg)
       ABORT(SSL_BAD_CONTENT_TYPE);
     d.len--;
 
-    SSL_DECODE_UINT16(ssl,"Version number",P_DC,&d,&ver);
+    SSL_DECODE_UINT16_ABORT(ssl,"Version number",P_DC,&d,&ver);
     /* We can't handle real v2 clients*/
     if(ver<=2){
       explain(ssl,"Version 2 Client.\n");
@@ -146,9 +146,9 @@ int process_v2_hello(ssl,seg)
       ver&0xff);
         LF;
     }
-    SSL_DECODE_UINT16(ssl,"cipher_spec_length",P_DC,&d,&cs_len);
-    SSL_DECODE_UINT16(ssl,"session_id_length",P_DC,&d,&sid_len);
-    SSL_DECODE_UINT16(ssl,"challenge_length",P_DC,&d,&chall_len);
+    SSL_DECODE_UINT16_ABORT(ssl,"cipher_spec_length",P_DC,&d,&cs_len);
+    SSL_DECODE_UINT16_ABORT(ssl,"session_id_length",P_DC,&d,&sid_len);
+    SSL_DECODE_UINT16_ABORT(ssl,"challenge_length",P_DC,&d,&chall_len);
 
     if(cs_len%3){
       fprintf(stderr,"Bad cipher spec length %d\n",cs_len);
@@ -161,7 +161,7 @@ int process_v2_hello(ssl,seg)
     for(;cs_len;cs_len-=3){
       UINT4 val;
 
-      SSL_DECODE_UINT24(ssl,0,0,&d,&val);
+      SSL_DECODE_UINT24_ABORT(ssl,0,0,&d,&val);
       ssl_print_cipher_suite(ssl,ver,P_HL,val);
       P_(P_HL){
         explain(ssl,"\n");
@@ -178,7 +178,7 @@ int process_v2_hello(ssl,seg)
       ABORT(SSL_BAD_DATA);
     }
       
-    SSL_DECODE_OPAQUE_ARRAY(ssl,0,chall_len,
+    SSL_DECODE_OPAQUE_ARRAY_ABORT(ssl,0,chall_len,
       0,&d,&chall);
     P_(P_DC){
       exdump(ssl,"Challenge",&chall);
