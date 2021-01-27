@@ -282,7 +282,8 @@ int ssl_set_server_random(d,msg,len)
   {
 #ifdef OPENSSL    
     int r;
-    
+
+    r_data_destroy(&d->server_random);
     if((r=r_data_create(&d->server_random,msg,len)))
       ERETURN(r);
 #endif    
