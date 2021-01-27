@@ -86,17 +86,22 @@ int network_handler_create(mod,handlerp)
     _status=0;
   abort:
     if(_status){
-      network_handler_destroy(&handler);
+      network_handler_destroy(mod, &handler);
     }
     return(_status);
   }
 
-int network_handler_destroy(handlerp)
+int network_handler_destroy(mod,handlerp)
+  proto_mod *mod;
   n_handler **handlerp;
   {
+    n_handler *handler=0;
     if(!handlerp || !*handlerp)
       return(0);
 
+    handler = *handlerp;
+
+    mod->vtbl->destroy_ctx(mod->handle,&handler->ctx);
     free(*handlerp);
     *handlerp=0;
     return(0);
@@ -120,6 +125,12 @@ int network_process_packet(handler,timestamp,data,length)
     p.data=data;
     p.len=length;
     p.ip=(struct ip *)data;
+
+    if(p.len < 20) {
+      if(!(NET_print_flags & NET_PRINT_JSON))
+        printf("Malformed packet, packet too small to contain IP header, skipping ...\n");
+      return(0);
+    }
 
     /*Handle, or rather mishandle, fragmentation*/
     off=ntohs(p.ip->ip_off);

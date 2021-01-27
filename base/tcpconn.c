@@ -170,7 +170,8 @@ int clean_old_conn() {
     while(conn) {
         tcpconn = &conn->conn;
         conn=conn->next;
-        timestamp_diff(&last_packet_seen_time, &tcpconn->last_seen_time, &dt);
+        if(timestamp_diff(&last_packet_seen_time, &tcpconn->last_seen_time, &dt))
+            continue;
         if(dt.tv_sec > conn_ttl) {
             i++;
             tcp_destroy_conn(tcpconn);

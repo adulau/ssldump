@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([ssldump], [1.1])
+AC_INIT([ssldump], [1.3])
 AM_INIT_AUTOMAKE([subdir-objects])
 AC_CONFIG_SRCDIR([base/pcap-snoop.c])
 AC_CONFIG_HEADERS([config.h])

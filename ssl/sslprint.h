@@ -88,6 +88,12 @@ int exstr PROTO_LIST((ssl_obj *ssl,char *name,Data *data));
 #define SSL_DECODE_UINT32(a,n,b,c,d) if((r=ssl_decode_uintX(a,n,4,b,c,d))) ERETURN(r)
 #define SSL_DECODE_OPAQUE_ARRAY(a,n,b,c,d,e) if((r=ssl_decode_opaque_array(a,n,b,c,d,e))) ERETURN(r)
 #define SSL_DECODE_ENUM(a,b,c,d,e,f,g) if((r=ssl_decode_enum(a,b,c,d,e,f,g))) ERETURN(r)
+#define SSL_DECODE_UINT8_ABORT(a,n,b,c,d) if((r=ssl_decode_uintX(a,n,1,b,c,d))) ABORT(r)
+#define SSL_DECODE_UINT16_ABORT(a,n,b,c,d) if((r=ssl_decode_uintX(a,n,2,b,c,d))) ABORT(r)
+#define SSL_DECODE_UINT24_ABORT(a,n,b,c,d) if((r=ssl_decode_uintX(a,n,3,b,c,d))) ABORT(r)
+#define SSL_DECODE_UINT32_ABORT(a,n,b,c,d) if((r=ssl_decode_uintX(a,n,4,b,c,d))) ABORT(r)
+#define SSL_DECODE_OPAQUE_ARRAY_ABORT(a,n,b,c,d,e) if((r=ssl_decode_opaque_array(a,n,b,c,d,e))) ABORT(r)
+#define SSL_DECODE_ENUM_ABORT(a,b,c,d,e,f,g) if((r=ssl_decode_enum(a,b,c,d,e,f,g))) ABORT(r)
 #define P_(p)              if((p==SSL_PRINT_ALL) || (p & SSL_print_flags))
 
 #define INDENT if(!(NET_print_flags & NET_PRINT_JSON)) do {int i; for(i=0;i<(ssl->indent_depth + ssl->indent_name_len);i++)  printf("%s",SSL_print_flags & SSL_PRINT_NROFF?" ":" ");} while(0)

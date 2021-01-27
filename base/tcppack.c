@@ -80,7 +80,10 @@ int process_tcp_packet(handler,ctx,p)
     int direction;
     stream_data *stream;
     tcp_conn *conn;
-    
+
+    if(p->len < 20)
+      ABORT(1);
+
     p->tcp=(struct tcphdr *)p->data;
 
     print_tcp_packet(p);
@@ -241,8 +244,7 @@ static int process_data_segment(conn,handler,p,stream,direction)
     l=p->len - p->tcp->th_off * 4;
 
     if(l < 0) {
-	if(!(NET_print_flags & NET_PRINT_JSON))
-		printf("Malformed packet, computed TCP segment size is negative, skipping ...\n");
+	fprintf(stderr,"Malformed packet, computed TCP segment size is negative, skipping ...\n");
 	return(0);
     }
 
@@ -363,7 +365,8 @@ static int process_data_segment(conn,handler,p,stream,direction)
           else
 	    conn->state=TCP_STATE_CLOSED;
         }
-        
+
+	free_tcp_segment_queue(stream->oo_queue);
         stream->oo_queue=seg->next;
         seg->next=0;
         stream->seq=seg->s_seq + seg->len;

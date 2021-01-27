@@ -95,6 +95,7 @@ int process_v2_hello(ssl,seg)
   {
     int r;
     int rec_len;
+    int _status;
     UINT4 cs_len;
     UINT4 sid_len;
     UINT4 chall_len;
@@ -104,36 +105,39 @@ int process_v2_hello(ssl,seg)
     UCHAR random[32];
     
     if(seg->len==0)
-      return(SSL_NO_DATA);
-    
+      ABORT(SSL_NO_DATA);
+
     d.data=seg->data;
     d.len=seg->len;
 
     /* First check the message length. */
     if(d.len<4)
-      return(SSL_BAD_CONTENT_TYPE);
+      ABORT(SSL_BAD_CONTENT_TYPE);
     rec_len=((d.data[0] & 0x7f)<<8) | (d.data[1]);
     d.data+=2; d.len-=2;
 
     if(d.len!=rec_len) /* Whatever this is it isn't valid SSLv2*/
-      return(SSL_BAD_CONTENT_TYPE);
+      ABORT(SSL_BAD_CONTENT_TYPE);
     
     /* If msg_type==1 then we've got a v2 message (or trash)*/
     if(*d.data++!=1)
-      return(SSL_BAD_CONTENT_TYPE);
+      ABORT(SSL_BAD_CONTENT_TYPE);
     d.len--;
 
-    SSL_DECODE_UINT16(ssl,"Version number",P_DC,&d,&ver);
+    SSL_DECODE_UINT16_ABORT(ssl,"Version number",P_DC,&d,&ver);
     /* We can't handle real v2 clients*/
     if(ver<=2){
       explain(ssl,"Version 2 Client.\n");
-      return(SSL_BAD_DATA);
+      ABORT(SSL_BAD_DATA);
     }
 
+    ssl->cur_json_st = json_object_new_object();
     ssl_print_record_num(ssl);
     ssl_print_timestamp(ssl,&seg->p->ts);
     ssl_print_direction_indicator(ssl,DIR_I2R);
     explain(ssl," SSLv2 compatible client hello\n");
+    json_object_object_add(ssl->cur_json_st, "msg_type", json_object_new_string("Handshake"));
+    json_object_object_add(ssl->cur_json_st, "handshake_type", json_object_new_string("ClientHello_v2_compat"));
     
     INDENT_INCR;
 
@@ -142,13 +146,13 @@ int process_v2_hello(ssl,seg)
       ver&0xff);
         LF;
     }
-    SSL_DECODE_UINT16(ssl,"cipher_spec_length",P_DC,&d,&cs_len);
-    SSL_DECODE_UINT16(ssl,"session_id_length",P_DC,&d,&sid_len);
-    SSL_DECODE_UINT16(ssl,"challenge_length",P_DC,&d,&chall_len);
+    SSL_DECODE_UINT16_ABORT(ssl,"cipher_spec_length",P_DC,&d,&cs_len);
+    SSL_DECODE_UINT16_ABORT(ssl,"session_id_length",P_DC,&d,&sid_len);
+    SSL_DECODE_UINT16_ABORT(ssl,"challenge_length",P_DC,&d,&chall_len);
 
     if(cs_len%3){
       fprintf(stderr,"Bad cipher spec length %d\n",cs_len);
-      return(SSL_BAD_DATA);
+      ABORT(SSL_BAD_DATA);
     }
     P_(P_HL){
       explain(ssl,"cipher suites\n");
@@ -157,7 +161,7 @@ int process_v2_hello(ssl,seg)
     for(;cs_len;cs_len-=3){
       UINT4 val;
 
-      SSL_DECODE_UINT24(ssl,0,0,&d,&val);
+      SSL_DECODE_UINT24_ABORT(ssl,0,0,&d,&val);
       ssl_print_cipher_suite(ssl,ver,P_HL,val);
       P_(P_HL){
         explain(ssl,"\n");
@@ -166,15 +170,15 @@ int process_v2_hello(ssl,seg)
     
     if(sid_len!=0){
       fprintf(stderr,"Session ID field should be zero length\n");
-      return(SSL_BAD_DATA);
+      ABORT(SSL_BAD_DATA);
     }
     
     if(chall_len<16 || chall_len>32){
       fprintf(stderr,"Invalid challenge length %d\n",chall_len);
-      return(SSL_BAD_DATA);
+      ABORT(SSL_BAD_DATA);
     }
       
-    SSL_DECODE_OPAQUE_ARRAY(ssl,0,chall_len,
+    SSL_DECODE_OPAQUE_ARRAY_ABORT(ssl,0,chall_len,
       0,&d,&chall);
     P_(P_DC){
       exdump(ssl,"Challenge",&chall);
@@ -195,7 +199,18 @@ int process_v2_hello(ssl,seg)
     }
     
     INDENT_POP;
-    return(0);
+
+    _status=0;
+
+    abort:
+      if(ssl->cur_json_st) {
+        if(SSL_print_flags & SSL_PRINT_JSON)
+          printf("%s\n", json_object_to_json_string(ssl->cur_json_st));
+        json_object_put(ssl->cur_json_st);
+        ssl->cur_json_st = NULL;
+      }
+
+    return(_status);
   }
 
 int ssl_decode_switch(ssl,dtable,value,dir,seg,data)
@@ -276,7 +291,10 @@ int ssl_expand_record(ssl,q,direction,data,len)
           printf("  unknown record type: %d\n", ct);
           ERETURN(r);
         }
-      ssl_get_enum_str(ssl,enumstr,ContentType_decoder,ct);
+      if((r=ssl_get_enum_str(ssl,enumstr,ContentType_decoder,ct))) {
+         strncpy(enumstr, "Unknown", 20);
+      }
+
       json_object_object_add(jobj, "msg_type", json_object_new_string(enumstr));
 
       if(!(SSL_print_flags & SSL_PRINT_JSON))

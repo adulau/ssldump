@@ -191,6 +191,25 @@ int ssl_decode_ctx_create(dp,keyfile,pass,keylogfile)
 #endif
   }
 
+int ssl_decode_ctx_destroy(dp)
+  ssl_decode_ctx **dp;
+  {
+#ifdef OPENSSL
+    ssl_decode_ctx *d = *dp;
+    if(d->ssl_key_log_file) {
+      fclose(d->ssl_key_log_file);
+    }
+
+    r_assoc *x = d->session_cache;
+    r_assoc_destroy(&d->session_cache);
+
+    SSL_CTX_free(d->ssl_ctx);
+    SSL_free(d->ssl);
+    free(d);
+#endif
+    return(0);
+  }
+
 int ssl_decoder_create(dp,ctx)
   ssl_decoder **dp;
   ssl_decode_ctx *ctx;
@@ -249,6 +268,7 @@ int ssl_set_client_random(d,msg,len)
 #ifdef OPENSSL    
     int r;
     
+    r_data_destroy(&d->client_random);
     if((r=r_data_create(&d->client_random,msg,len)))
       ERETURN(r);
 #endif
@@ -262,7 +282,8 @@ int ssl_set_server_random(d,msg,len)
   {
 #ifdef OPENSSL    
     int r;
-    
+
+    r_data_destroy(&d->server_random);
     if((r=r_data_create(&d->server_random,msg,len)))
       ERETURN(r);
 #endif    
@@ -277,9 +298,11 @@ int ssl_set_client_session_id(d,msg,len)
 #ifdef OPENSSL    
     int r;
 
-    if(len>0)
+    if(len>0) {
+        r_data_destroy(&d->session_id);
         if((r=r_data_create(&d->session_id,msg,len)))
             ERETURN(r);
+    }
 #endif
     return(0);
   }

@@ -75,7 +75,7 @@ typedef struct packet_ packet;
 
 int network_handler_create PROTO_LIST((proto_mod *mod,
   n_handler **handlerp));
-int network_handler_destroy PROTO_LIST((n_handler **handlerp));
+int network_handler_destroy PROTO_LIST((proto_mod *mod,n_handler **handlerp));
 int network_process_packet PROTO_LIST((n_handler *handler,
   struct timeval *timestamp,UCHAR *data,int length));
 int packet_copy PROTO_LIST((packet *in,packet **out));

@@ -104,6 +104,7 @@ int err_exit(str,num)
   int num;
   {
     fprintf(stderr,"ERROR: %s\n",str);
+    sig_handler(SIGQUIT);
     exit(num);
   }
 
@@ -127,6 +128,11 @@ int print_version()
   }
 
 pcap_t *p;
+proto_mod *mod=&ssl_mod;
+n_handler *n;
+char *interface_name=0;
+char *file=0;
+char *filter=0;
 void sig_handler(int sig)
   {
     int freed_conn = 0;
@@ -138,9 +144,18 @@ void sig_handler(int sig)
     if(freed_conn && !(NET_print_flags & NET_PRINT_JSON))
         printf("Cleaned %d remaining connection(s) from connection pool\n", freed_conn);
 
+    network_handler_destroy(mod, &n);
+
     if(p)
 	pcap_close(p);
-    exit(0);
+    if(interface_name)
+	free(interface_name);
+    if(filter)
+        free(filter);
+    if(file)
+        free(file);
+
+    exit(sig);
   }
     
 void pcap_cb(ptr,hdr,data)
@@ -168,6 +183,12 @@ void pcap_cb(ptr,hdr,data)
         len-=4;
         break;
       case DLT_EN10MB:
+        if(len < sizeof(struct ether_header)) {
+          if(!(NET_print_flags & NET_PRINT_JSON))
+            printf("Frame size too small to contain Ethernet header, skipping ...\n");
+          return;
+        }
+
         type=ntohs(e_hdr->ether_type);
 
         data+=sizeof(struct ether_header);
@@ -287,7 +308,6 @@ int main(argc,argv)
   char **argv;
   {
     int r;
-    n_handler *n;
 #ifdef _WIN32
     __declspec(dllimport) char *optarg;
     __declspec(dllimport) int optind;
@@ -296,10 +316,6 @@ int main(argc,argv)
     extern int optind;
 #endif
     pcap_if_t *interfaces;
-    char *interface_name=0;
-    char *file=0;
-    char *filter=0;
-    proto_mod *mod=&ssl_mod;
     bpf_u_int32 localnet,netmask;
     int c;
     module_def *m=0;
@@ -493,6 +509,7 @@ int main(argc,argv)
     if(freed_conn && !(NET_print_flags & NET_PRINT_JSON))
         printf("Cleaned %d remaining connection(s) from connection pool\n", freed_conn);
 
+    network_handler_destroy(mod, &n);
     pcap_close(p);
 
     free(n);

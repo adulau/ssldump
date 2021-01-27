@@ -238,8 +238,9 @@ static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
         }
 
 	    for(;cslen;cslen-=2){
-	      ssl_decode_enum(ssl,0,2,cipher_suite_decoder,
-	        0,data,&cs);
+	      if(ssl_decode_enum(ssl,0,2,cipher_suite_decoder,
+	        0,data,&cs))
+                return(1);
 	      ssl_print_cipher_suite(ssl,(vj<<8)|vn,P_HL,cs);
 	      LF;
 	    }
@@ -2969,6 +2970,7 @@ static int decode_server_name_type_host_name(ssl,dir,seg,data)
 		if (server_name != NULL)
 		{
 			if (ssl->server_name) free(ssl->server_name);
+			if (l > data->len) l = data->len;
 			memcpy(server_name,data->data,l);
 			ssl->server_name = server_name;
 		}
