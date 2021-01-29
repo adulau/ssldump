@@ -119,6 +119,8 @@ int usage()
 int print_version()
   {
     printf(PACKAGE_STRING "\n");
+    printf("Maintained by a bunch of volunteers, see https://github.com/adulau/ssldump/blob/master/CREDITS\n");
+    printf("Copyright (C) 2015-2021 the aforementioned volunteers\n");
     printf("Copyright (C) 1998-2001 RTFM, Inc.\n");
     printf("All rights reserved.\n");
 #ifdef OPENSSL    
