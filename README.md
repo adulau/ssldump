@@ -17,9 +17,10 @@ connections on the chosen network interface and attempts to interpret
 them as SSLv3/TLS traffic. When it identifies SSLv3/TLS traffic, it
 decodes the records and displays them in a textual form to stdout. If
 provided with the appropriate keying material, it will also decrypt
-the connections and display the application data traffic.
+the connections and display the application data traffic. It also
+includes a JSON output option.
 
-[original and (old) README](README)
+[original and (old/outdated) README](README)
 
 # Why do you maintain this repository?
 
