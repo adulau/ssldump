@@ -5,8 +5,8 @@
 
 # Release and tagging
 
-- Current version of ssldump is v1.2 (released: 2020-09-22) - [ChangeLog](https://raw.githubusercontent.com/adulau/ssldump/master/ChangeLog)
-- Previous version of ssldump is v1.1 (released: 2019-12-28) - [ChangeLog](https://raw.githubusercontent.com/adulau/ssldump/master/ChangeLog)
+- Current version of ssldump is v1.3 (released: 2021-02-02) - [ChangeLog](https://raw.githubusercontent.com/adulau/ssldump/master/ChangeLog)
+- Previous version of ssldump is v1.2 (released: 2020-09-22) - [ChangeLog](https://raw.githubusercontent.com/adulau/ssldump/master/ChangeLog)
 
 # What about the original ssldump?
 
