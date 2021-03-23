@@ -12,16 +12,17 @@ RUN useradd -ms /bin/bash ssldump
 RUN passwd -d ssldump
 RUN printf 'ssldump ALL=(ALL) ALL\n' | tee -a /etc/sudoers
 
+USER ssldump
+
 RUN cd /home/ssldump && \
 	git clone https://github.com/adulau/ssldump.git build
 
 RUN cd /home/ssldump/build && \
 	./autogen.sh && \
-	./configure CC=/usr/bin/clang && \
+	./configure CC=/usr/bin/clang CFLAGS="-D_FORTIFY_SOURCE=2 -fstack-protector-strong -Wformat -Werror=format-security -g" && \
 	make && \
 	sudo make install
 
-USER ssldump
 WORKDIR "/home/ssldump"
 
 CMD ["/bin/bash"]

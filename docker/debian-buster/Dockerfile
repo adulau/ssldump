@@ -12,6 +12,8 @@ RUN useradd -ms /bin/bash ssldump
 RUN passwd -d ssldump
 RUN printf 'ssldump ALL=(ALL) ALL\n' | tee -a /etc/sudoers
 
+USER ssldump
+
 RUN cd /home/ssldump && \
 	git clone https://github.com/adulau/ssldump.git build
 
@@ -21,7 +23,6 @@ RUN cd /home/ssldump/build && \
 	make && \
 	sudo make install
 
-USER ssldump
 WORKDIR "/home/ssldump"
 
 CMD ["/bin/bash"]
