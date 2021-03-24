@@ -1,4 +1,5 @@
 #include <json-c/json.h>
+#include <openssl/md5.h>
 #include "network.h"
 #include "ssl_h.h"
 #include "sslprint.h"
@@ -191,7 +192,6 @@ static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
   segment *seg;
   Data *data;
   {
-
     struct json_object *jobj;
     jobj = ssl->cur_json_st;
     json_object_object_add(jobj, "handshake_type", json_object_new_string("ClientHello"));
@@ -199,6 +199,16 @@ static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
     UINT4 vj,vn,cs,cslen,complen,comp,odd,exlen,ex;
     Data session_id,random;
     int r;
+    char *ja3_fp = NULL;
+    char *ja3_str = NULL;
+    char *ja3_ver_str = NULL;
+    char *ja3_cs_str = NULL;
+    char *ja3_ex_str = NULL;
+    char *ja3_ec_str = NULL;
+    char *ja3_ecp_str = NULL;
+
+    ssl->cur_ja3_ec_str = NULL;
+    ssl->cur_ja3_ecp_str = NULL;
 
     extern decoder cipher_suite_decoder[];
     extern decoder compression_method_decoder[];
@@ -208,6 +218,9 @@ static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
     ssl_update_handshake_messages(ssl,data);
     SSL_DECODE_UINT8(ssl,0,0,data,&vj);
     SSL_DECODE_UINT8(ssl,0,0,data,&vn);
+
+    ja3_ver_str = calloc(7,sizeof(char));
+    snprintf(ja3_ver_str, 7, "%u", ((vj & 0xff) << 8) | (vn & 0xff));
 
     P_(P_HL) {explain(ssl,"Version %d.%d ",vj,vn);
         LF;
@@ -242,8 +255,16 @@ static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
 	        0,data,&cs))
                 return(1);
 	      ssl_print_cipher_suite(ssl,(vj<<8)|vn,P_HL,cs);
+              if(!ja3_cs_str)
+                  ja3_cs_str = calloc(7, 1);
+              else
+                  ja3_cs_str = realloc(ja3_cs_str, strlen(ja3_cs_str) + 7);
+
+	      snprintf(ja3_cs_str + strlen(ja3_cs_str), 7, "%u-", cs);
 	      LF;
 	    }
+	    if(ja3_cs_str && ja3_cs_str[strlen(ja3_cs_str) - 1] == '-')
+		ja3_cs_str[strlen(ja3_cs_str) - 1] = '\0';
     }
 
     SSL_DECODE_UINT8(ssl,"compressionMethod len",0,data,&complen);
@@ -260,6 +281,13 @@ static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
       explain(ssl , "extensions\n");
       while(data->len) {
     	SSL_DECODE_UINT16(ssl, "extension type", 0, data, &ex);
+        if(!ja3_ex_str)
+            ja3_ex_str = calloc(7, 1);
+        else
+            ja3_ex_str = realloc(ja3_ex_str, strlen(ja3_ex_str) + 7);
+
+	snprintf(ja3_ex_str + strlen(ja3_ex_str), 7, "%u-", ex);
+
     	if (ssl_decode_switch(ssl,extension_decoder,ex,dir,seg,data) == R_NOT_FOUND) {
 	  decode_extension(ssl,dir,seg,data);
     	  P_(P_RH){
@@ -269,7 +297,75 @@ static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
     	}
         LF;
       }
+      if(ja3_ex_str && ja3_ex_str[strlen(ja3_ex_str) - 1] == '-')
+          ja3_ex_str[strlen(ja3_ex_str) - 1] = '\0';
     }
+
+    ja3_ec_str = ssl->cur_ja3_ec_str;
+    ja3_ecp_str = ssl->cur_ja3_ecp_str;
+
+    if(!ja3_ver_str) {
+	ja3_ver_str = calloc(1, 1);
+	*ja3_ver_str = '\0';
+    }
+
+    if(!ja3_cs_str) {
+	ja3_cs_str = calloc(1, 1);
+	*ja3_cs_str = '\0';
+    }
+
+    if(!ja3_ex_str) {
+	ja3_ex_str = calloc(1, 1);
+	*ja3_ex_str = '\0';
+    }
+
+    if(!ja3_ec_str) {
+	ja3_ec_str = calloc(1, 1);
+	*ja3_ec_str = '\0';
+    }
+
+    if(!ja3_ecp_str) {
+	ja3_ecp_str = calloc(1, 1);
+	*ja3_ecp_str = '\0';
+    }
+
+    int ja3_str_len =
+	strlen(ja3_ver_str) + 1
+	+ strlen(ja3_cs_str) + 1
+	+ strlen(ja3_ex_str) + 1
+	+ strlen(ja3_ec_str) + 1
+	+ strlen(ja3_ecp_str) + 1;
+    ja3_str = calloc(ja3_str_len, 1);
+    snprintf(ja3_str, ja3_str_len, "%s,%s,%s,%s,%s",
+	ja3_ver_str, ja3_cs_str, ja3_ex_str, ja3_ec_str, ja3_ecp_str);
+
+    MD5_CTX md5;
+    UCHAR tmp[16];
+
+    MD5_Init(&md5);
+    MD5_Update(&md5, ja3_str, ja3_str_len);
+    MD5_Final(tmp,&md5);
+
+    ja3_fp = calloc(33,1);
+    *ja3_fp = '\0';
+    for(int i=0; i<16; i++) {
+	snprintf(ja3_fp + strlen(ja3_fp), 3, "%02x", tmp[i]);
+    }
+
+    json_object_object_add(jobj, "ja3_str", json_object_new_string(ja3_str));
+    json_object_object_add(jobj, "ja3_fp", json_object_new_string(ja3_fp));
+
+    explain(ssl, "ja3 string: %s\n", ja3_str);
+    explain(ssl, "ja3 fingerprint: %s\n", ja3_fp);
+
+    free(ja3_fp);
+    free(ja3_str);
+    free(ja3_ver_str);
+    free(ja3_cs_str);
+    free(ja3_ex_str);
+    free(ja3_ec_str);
+    free(ja3_ecp_str);
+
     return(0);
 
   }
@@ -283,6 +379,12 @@ static int decode_HandshakeType_ServerHello(ssl,dir,seg,data)
     int r;
     Data rnd,session_id;
     UINT4 vj,vn,exlen,ex;
+    char *ja3s_fp = NULL;
+    char *ja3s_str = NULL;
+    char *ja3s_ver_str = NULL;
+    char *ja3s_c_str = NULL;
+    char *ja3s_ex_str = NULL;
+
 
     extern decoder extension_decoder[];
 
@@ -294,6 +396,9 @@ static int decode_HandshakeType_ServerHello(ssl,dir,seg,data)
     ssl_update_handshake_messages(ssl,data);
     SSL_DECODE_UINT8(ssl,0,0,data,&vj);
     SSL_DECODE_UINT8(ssl,0,0,data,&vn);
+
+    ja3s_ver_str = calloc(7,sizeof(char));
+    snprintf(ja3s_ver_str, 7, "%u", ((vj & 0xff) << 8) | (vn & 0xff));
 
     ssl->version=vj*256+vn;
     P_(P_HL) {explain(ssl,"Version %d.%d ",vj,vn);
@@ -312,6 +417,9 @@ static int decode_HandshakeType_ServerHello(ssl,dir,seg,data)
     }
     ssl_find_cipher(ssl->cipher_suite,&ssl->cs);
 
+    ja3s_c_str = calloc(6, 1);
+    snprintf(ja3s_c_str, 6, "%u", ssl->cipher_suite);
+
     ssl_process_server_session_id(ssl,ssl->decoder,session_id.data,
       session_id.len);
 
@@ -324,6 +432,13 @@ static int decode_HandshakeType_ServerHello(ssl,dir,seg,data)
       explain(ssl , "extensions\n");
       while(data->len) {
     	SSL_DECODE_UINT16(ssl, "extension type", 0, data, &ex);
+        if(!ja3s_ex_str)
+            ja3s_ex_str = calloc(7, 1);
+        else
+            ja3s_ex_str = realloc(ja3s_ex_str, strlen(ja3s_ex_str) + 7);
+
+	snprintf(ja3s_ex_str + strlen(ja3s_ex_str), 7, "%u-", ex);
+
     	if (ssl_decode_switch(ssl,extension_decoder,ex,dir,seg,data) == R_NOT_FOUND) {
 	  decode_extension(ssl,dir,seg,data);
     	  P_(P_RH){
@@ -333,7 +448,57 @@ static int decode_HandshakeType_ServerHello(ssl,dir,seg,data)
     	}
         LF;
       }
+      if(ja3s_ex_str && ja3s_ex_str[strlen(ja3s_ex_str) - 1] == '-')
+          ja3s_ex_str[strlen(ja3s_ex_str) - 1] = '\0';
     }
+
+    if(!ja3s_ver_str) {
+	ja3s_ver_str = calloc(1, 1);
+	*ja3s_ver_str = '\0';
+    }
+
+    if(!ja3s_c_str) {
+	ja3s_c_str = calloc(1, 1);
+	*ja3s_c_str = '\0';
+    }
+
+    if(!ja3s_ex_str) {
+	ja3s_ex_str = calloc(1, 1);
+	*ja3s_ex_str = '\0';
+    }
+
+    int ja3s_str_len =
+	strlen(ja3s_ver_str) + 1
+	+ strlen(ja3s_c_str) + 1
+	+ strlen(ja3s_ex_str) + 1;
+    ja3s_str = calloc(ja3s_str_len, 1);
+    snprintf(ja3s_str, ja3s_str_len, "%s,%s,%s",
+	ja3s_ver_str, ja3s_c_str, ja3s_ex_str);
+
+    MD5_CTX md5;
+    UCHAR tmp[16];
+
+    MD5_Init(&md5);
+    MD5_Update(&md5, ja3s_str, ja3s_str_len);
+    MD5_Final(tmp,&md5);
+
+    ja3s_fp = calloc(33,1);
+    *ja3s_fp = '\0';
+    for(int i=0; i<16; i++) {
+	snprintf(ja3s_fp + strlen(ja3s_fp), 3, "%02x", tmp[i]);
+    }
+
+    json_object_object_add(jobj, "ja3s_str", json_object_new_string(ja3s_str));
+    json_object_object_add(jobj, "ja3s_fp", json_object_new_string(ja3s_fp));
+
+    explain(ssl, "ja3s string: %s\n", ja3s_str);
+    explain(ssl, "ja3s fingerprint: %s\n", ja3s_fp);
+
+    free(ja3s_fp);
+    free(ja3s_str);
+    free(ja3s_ver_str);
+    free(ja3s_c_str);
+    free(ja3s_ex_str);
 
     return(0);
 
@@ -2664,6 +2829,78 @@ static int decode_extension(ssl,dir,seg,data)
     return(0);
   }
 
+// Extension #10 supported_groups (renamed from "elliptic_curves")
+static int decode_extension_supported_groups(ssl,dir,seg,data)
+  ssl_obj *ssl;
+  int dir;
+  segment *seg;
+  Data *data;
+  {
+    int r,p;
+    UINT4 l,g;
+    char *ja3_ec_str = NULL;
+    SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
+
+    if(dir==DIR_I2R){
+      SSL_DECODE_UINT16(ssl,"supported_groups list length",0,data,&l);
+      LF;
+      while(l) {
+	p=data->len;
+	SSL_DECODE_UINT16(ssl, "supported group", 0, data, &g);
+        if(!ja3_ec_str)
+            ja3_ec_str = calloc(7, 1);
+        else
+            ja3_ec_str = realloc(ja3_ec_str, strlen(ja3_ec_str) + 7);
+	snprintf(ja3_ec_str + strlen(ja3_ec_str), 7, "%u-", g);
+	l-=(p-data->len);
+      }
+      if(ja3_ec_str && ja3_ec_str[strlen(ja3_ec_str) - 1] == '-')
+          ja3_ec_str[strlen(ja3_ec_str) - 1] = '\0';
+    }
+    else{
+      data->len-=l;
+      data->data+=l;
+    }
+    ssl->cur_ja3_ec_str = ja3_ec_str;
+    return(0);
+  }
+
+// Extension #11 ec_point_formats
+static int decode_extension_ec_point_formats(ssl,dir,seg,data)
+  ssl_obj *ssl;
+  int dir;
+  segment *seg;
+  Data *data;
+  {
+    int r,p;
+    UINT4 l,f;
+    char *ja3_ecp_str = NULL;
+    SSL_DECODE_UINT16(ssl,"extension length",0,data,&l);
+
+    if(dir==DIR_I2R){
+      SSL_DECODE_UINT8(ssl,"ec_point_formats list length",0,data,&l);
+      LF;
+      while(l) {
+	p=data->len;
+	SSL_DECODE_UINT8(ssl, "ec point format", 0, data, &f);
+        if(!ja3_ecp_str)
+            ja3_ecp_str = calloc(5, 1);
+        else
+            ja3_ecp_str = realloc(ja3_ecp_str, strlen(ja3_ecp_str) + 5);
+	snprintf(ja3_ecp_str + strlen(ja3_ecp_str), 5, "%u-", f);
+	l-=(p-data->len);
+      }
+      if(ja3_ecp_str && ja3_ecp_str[strlen(ja3_ecp_str) - 1] == '-')
+          ja3_ecp_str[strlen(ja3_ecp_str) - 1] = '\0';
+    }
+    else{
+      data->len-=l;
+      data->data+=l;
+    }
+
+    ssl->cur_ja3_ecp_str = ja3_ecp_str;
+    return(0);
+  }
 
 decoder extension_decoder[] = {
 	{
@@ -2719,12 +2956,12 @@ decoder extension_decoder[] = {
         {
                 10,
                 "supported_groups",
-                decode_extension
+                decode_extension_supported_groups
         },
         {
                 11,
                 "ec_point_formats",
-                decode_extension
+                decode_extension_ec_point_formats
         },
         {
                 12,
