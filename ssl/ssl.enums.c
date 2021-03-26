@@ -339,17 +339,22 @@ static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
     snprintf(ja3_str, ja3_str_len, "%s,%s,%s,%s,%s",
 	ja3_ver_str, ja3_cs_str, ja3_ex_str, ja3_ec_str, ja3_ecp_str);
 
-    MD5_CTX md5;
-    UCHAR tmp[16];
+    EVP_MD_CTX *mdctx;
+    const EVP_MD *md;
+    unsigned char md_value[EVP_MAX_MD_SIZE];
+    unsigned int md_len, i;
 
-    MD5_Init(&md5);
-    MD5_Update(&md5, ja3_str, ja3_str_len);
-    MD5_Final(tmp,&md5);
+    md = EVP_get_digestbyname("MD5");
+    mdctx = EVP_MD_CTX_new();
+    EVP_DigestInit_ex(mdctx, md, NULL);
+    EVP_DigestUpdate(mdctx, ja3_str, strlen(ja3_str));
+    EVP_DigestFinal_ex(mdctx, md_value, &md_len);
+    EVP_MD_CTX_free(mdctx);
 
     ja3_fp = calloc(33,1);
     *ja3_fp = '\0';
-    for(int i=0; i<16; i++) {
-	snprintf(ja3_fp + strlen(ja3_fp), 3, "%02x", tmp[i]);
+    for(i=0; i<16; i++) {
+	snprintf(ja3_fp + strlen(ja3_fp), 3, "%02x", md_value[i]);
     }
 
     json_object_object_add(jobj, "ja3_str", json_object_new_string(ja3_str));
@@ -475,17 +480,22 @@ static int decode_HandshakeType_ServerHello(ssl,dir,seg,data)
     snprintf(ja3s_str, ja3s_str_len, "%s,%s,%s",
 	ja3s_ver_str, ja3s_c_str, ja3s_ex_str);
 
-    MD5_CTX md5;
-    UCHAR tmp[16];
+    EVP_MD_CTX *mdctx;
+    const EVP_MD *md;
+    unsigned char md_value[EVP_MAX_MD_SIZE];
+    unsigned int md_len, i;
 
-    MD5_Init(&md5);
-    MD5_Update(&md5, ja3s_str, ja3s_str_len);
-    MD5_Final(tmp,&md5);
+    md = EVP_get_digestbyname("MD5");
+    mdctx = EVP_MD_CTX_new();
+    EVP_DigestInit_ex(mdctx, md, NULL);
+    EVP_DigestUpdate(mdctx, ja3s_str, strlen(ja3s_str));
+    EVP_DigestFinal_ex(mdctx, md_value, &md_len);
+    EVP_MD_CTX_free(mdctx);
 
     ja3s_fp = calloc(33,1);
     *ja3s_fp = '\0';
-    for(int i=0; i<16; i++) {
-	snprintf(ja3s_fp + strlen(ja3s_fp), 3, "%02x", tmp[i]);
+    for(i=0; i<16; i++) {
+	snprintf(ja3s_fp + strlen(ja3s_fp), 3, "%02x", md_value[i]);
     }
 
     json_object_object_add(jobj, "ja3s_str", json_object_new_string(ja3s_str));
