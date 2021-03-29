@@ -109,6 +109,8 @@ typedef struct ssl_obj_ {
      int indent_depth;
      int indent_name_len;
      struct json_object *cur_json_st;
+     char *cur_ja3_ec_str;
+     char *cur_ja3_ecp_str;
 } ssl_obj;
 
 typedef struct decoder_ {

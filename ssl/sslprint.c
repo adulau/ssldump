@@ -250,7 +250,7 @@ int ssl_expand_record(ssl,q,direction,data,len)
     Data d;
     UINT4 ct,vermaj,vermin,length;
     int version;
-    char verstr[4];
+    char verstr[8];
     char enumstr[20];
     struct json_object *jobj;
     jobj = ssl->cur_json_st;
@@ -272,7 +272,7 @@ int ssl_expand_record(ssl,q,direction,data,len)
     P_(P_RH){
        explain(ssl," V%d.%d(%d)",vermaj,vermin,length);
        json_object_object_add(jobj, "record_len", json_object_new_int(length));
-       snprintf(verstr,4,"%d.%d",vermaj,vermin);
+       snprintf(verstr,8,"%d.%d",vermaj,vermin);
        json_object_object_add(jobj, "record_ver", json_object_new_string(verstr));
     }
 
