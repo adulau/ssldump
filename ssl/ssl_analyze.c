@@ -46,6 +46,7 @@
 
 #include <json-c/json.h>
 #include <arpa/inet.h>
+#include <netdb.h>
 #include "network.h"
 #include "debug.h"
 #include "sslprint.h"
@@ -59,8 +60,8 @@ static int parse_ssl_flags PROTO_LIST((char *str));
 static int create_ssl_ctx PROTO_LIST((void *handle,proto_ctx **ctxp));
 static int create_ssl_analyzer PROTO_LIST((void *handle,
   proto_ctx *ctx,tcp_conn *conn,proto_obj **objp,
-  struct in_addr *i_addr,u_short i_port,
-  struct in_addr *r_addr,u_short r_port, struct timeval *base_time));
+  struct sockaddr_storage *i_addr,u_short i_port,
+  struct sockaddr_storage *r_addr,u_short r_port, struct timeval *base_time));
 static int destroy_ssl_ctx PROTO_LIST((void *handle,proto_ctx **ctxp));
 static int destroy_ssl_analyzer PROTO_LIST((proto_obj **objp));
 static int read_ssl_record PROTO_LIST((ssl_obj *obj,r_queue *q,segment *seg,
@@ -240,7 +241,7 @@ static int destroy_ssl_ctx(handle,ctxp)
   }
 
 static int create_ssl_analyzer(void *handle, proto_ctx *ctx, tcp_conn *conn,
-  proto_obj **objp, struct in_addr *i_addr, u_short i_port, struct in_addr *r_addr,
+  proto_obj **objp, struct sockaddr_storage *i_addr, u_short i_port, struct sockaddr_storage *r_addr,
   u_short r_port, struct timeval *base_time)
   {
     int r,_status;
@@ -257,15 +258,12 @@ static int create_ssl_analyzer(void *handle, proto_ctx *ctx, tcp_conn *conn,
     if((r=create_r_queue(&obj->i2r_queue)))
       ABORT(r);
 
-    lookuphostname(i_addr,&obj->client_name);
-    if(!(obj->client_ip=(char *)calloc(1,INET_ADDRSTRLEN)))
-      ABORT(R_NO_MEMORY);
-    inet_ntop(AF_INET, i_addr, obj->client_ip, INET_ADDRSTRLEN);
+    obj->client_name = strndup(conn->i_name, NI_MAXHOST);
+    obj->client_ip = strndup(conn->i_num, INET6_ADDRSTRLEN);
     obj->client_port=i_port;
-    lookuphostname(r_addr,&obj->server_name);
-    if(!(obj->server_ip=(char *)calloc(1,INET_ADDRSTRLEN)))
-      ABORT(R_NO_MEMORY);
-    inet_ntop(AF_INET, r_addr, obj->server_ip, INET_ADDRSTRLEN);
+
+    obj->server_name = strndup(conn->r_name, NI_MAXHOST);
+    obj->server_ip = strndup(conn->r_num, INET6_ADDRSTRLEN);
     obj->server_port=r_port;
     
     obj->i_state=SSL_ST_SENT_NOTHING;

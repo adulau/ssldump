@@ -107,16 +107,18 @@ int network_handler_destroy(mod,handlerp)
     return(0);
   }
 
-int network_process_packet(handler,timestamp,data,length)
+int network_process_packet(handler,timestamp,data,length,af)
   n_handler *handler;
   struct timeval *timestamp;
   UCHAR *data;
   int length;
+  int af;
   {
     int r;
     int hlen;
     packet p;
     u_short off;
+    int proto;
     
     /*We can pretty much ignore all the options*/
     memcpy(&p.ts,timestamp,sizeof(struct timeval));
@@ -124,7 +126,7 @@ int network_process_packet(handler,timestamp,data,length)
     p._len=length;
     p.data=data;
     p.len=length;
-    p.ip=(struct ip *)data;
+    p.af=af;
 
     if(p.len < 20) {
       if(!(NET_print_flags & NET_PRINT_JSON))
@@ -132,37 +134,77 @@ int network_process_packet(handler,timestamp,data,length)
       return(0);
     }
 
-    /*Handle, or rather mishandle, fragmentation*/
-    off=ntohs(p.ip->ip_off);
-    
-    if((off & 0x1fff) ||  /*Later fragment*/
-       (off & 0x2000)){	  /*More fragments*/
-/*      fprintf(stderr,"Fragmented packet! rejecting\n"); */
-      return(0);
+    memset(&p.i_addr.so_st, 0x0, sizeof(struct sockaddr_storage));
+    memset(&p.r_addr.so_st, 0x0, sizeof(struct sockaddr_storage));
+
+    if(af == AF_INET) {
+        p.l3_hdr.ip=(struct ip *)data;
+        memcpy(&p.i_addr.so_in.sin_addr, &p.l3_hdr.ip->ip_src, sizeof(struct in_addr));
+        p.i_addr.so_in.sin_family = AF_INET;
+        memcpy(&p.r_addr.so_in.sin_addr, &p.l3_hdr.ip->ip_dst, sizeof(struct in_addr));
+        p.r_addr.so_in.sin_family = AF_INET;
+
+	/*Handle, or rather mishandle, fragmentation*/
+	off=ntohs(p.l3_hdr.ip->ip_off);
+
+	if((off & 0x1fff) ||  /*Later fragment*/
+	   (off & 0x2000)){	  /*More fragments*/
+	/*      fprintf(stderr,"Fragmented packet! rejecting\n"); */
+	  return(0);
+	}
+
+	hlen=p.l3_hdr.ip->ip_hl * 4;
+	p.data += hlen;
+	p.len = ntohs(p.l3_hdr.ip->ip_len);
+
+	if(p.len > length) {
+	  if(!(NET_print_flags & NET_PRINT_JSON))
+	    printf("Malformed packet, size from IP header is larger than size reported by libpcap, skipping ...\n");
+	  return(0);
+	}
+
+	if (p.len == 0) {
+	    DBG((0,"ip length reported as 0, presumed to be because of 'TCP segmentation offload' (TSO)\n"));
+	    p.len = p._len;
+	}
+	p.len -= hlen;
+
+	proto = p.l3_hdr.ip->ip_p;
+    } else {
+        p.l3_hdr.ip6=(struct ip6_hdr *)data;
+        memcpy(&p.i_addr.so_in6.sin6_addr, &p.l3_hdr.ip6->ip6_src, sizeof(struct in6_addr));
+        p.i_addr.so_in6.sin6_family = AF_INET6;
+        memcpy(&p.r_addr.so_in6.sin6_addr, &p.l3_hdr.ip6->ip6_dst, sizeof(struct in6_addr));
+        p.r_addr.so_in6.sin6_family = AF_INET6;
+	// Skip packets with header extensions
+	if(p.l3_hdr.ip6->ip6_ctlun.ip6_un1.ip6_un1_nxt != IPPROTO_TCP) {
+	    return 0;
+	}
+
+	hlen=40; // Fixed header size with no extension
+	p.data += hlen;
+	p.len = ntohs(p.l3_hdr.ip6->ip6_ctlun.ip6_un1.ip6_un1_plen);
+	if(p.len > length) {
+	  if(!(NET_print_flags & NET_PRINT_JSON))
+	    printf("Malformed packet, size from IP header is larger than size reported by libpcap, skipping ...\n");
+	  return(0);
+	}
+
+	if (p.len == 0) {
+	    DBG((0,"ip length reported as 0, presumed to be because of 'TCP segmentation offload' (TSO)\n"));
+	    p.len = p._len;
+	}
+
+	proto = p.l3_hdr.ip6->ip6_ctlun.ip6_un1.ip6_un1_nxt;
     }
 
-    hlen=p.ip->ip_hl * 4;
-    p.data += hlen;
-    p.len = ntohs(p.ip->ip_len);
-
-    if(p.len > length) {
-      if(!(NET_print_flags & NET_PRINT_JSON))
-        printf("Malformed packet, size from IP header is larger than size reported by libpcap, skipping ...\n");
-      return(0);
-    }
-
-    if (p.len == 0) {
-        DBG((0,"ip length reported as 0, presumed to be because of 'TCP segmentation offload' (TSO)\n"));
-        p.len = p._len;
-    }
-    p.len -= hlen;
-    
-    switch(p.ip->ip_p){
+    switch(proto){
       case IPPROTO_TCP:
-	if((r=process_tcp_packet(handler->mod,handler->ctx,&p)))
-	  ERETURN(r);
-	break;
+        if((r=process_tcp_packet(handler->mod,handler->ctx,&p)))
+          ERETURN(r);
+        break;
     }
+
     return(0);
   }
 
@@ -238,26 +280,43 @@ int timestamp_diff(t1,t0,diff)
 
       
 
-int lookuphostname(addr,namep)
-  struct in_addr *addr;
+int lookuphostname(so_st,namep)
+  struct sockaddr_storage *so_st;
   char **namep;
   {
-    struct hostent *ne=0;
+    int r = 1;
+    *namep = calloc(1, NI_MAXHOST);
+    void *addr = NULL;
 
-    if(!(NET_print_flags & NET_PRINT_NO_RESOLVE)){
-      ne=gethostbyaddr((char *)addr,4,AF_INET);
+    if(!(NET_print_flags & NET_PRINT_NO_RESOLVE)) {
+        r = getnameinfo((struct sockaddr *) so_st, sizeof(struct sockaddr_storage), *namep, NI_MAXHOST, NULL, 0, 0);
     }
 
-    if(!ne){
-      *namep=strdup((char *)inet_ntoa(*addr));
-    }
-    else{
-      *namep=strdup(ne->h_name);
+    if(r) {
+	if(so_st->ss_family == AF_INET) {
+            addr = &((struct sockaddr_in *) so_st)->sin_addr;
+        } else {
+            addr = &((struct sockaddr_in6 *) so_st)->sin6_addr;
+        }
+        inet_ntop(so_st->ss_family, addr, *namep, INET6_ADDRSTRLEN);
     }
 
     return(0);
   }
         
-    
-    
-  
+int addrtotext(so_st,namep)
+  struct sockaddr_storage *so_st;
+  char **namep;
+  {
+    *namep = calloc(1, NI_MAXHOST);
+    void *addr = NULL;
+
+    if(so_st->ss_family == AF_INET) {
+        addr = &((struct sockaddr_in *) so_st)->sin_addr;
+    } else {
+        addr = &((struct sockaddr_in6 *) so_st)->sin6_addr;
+    }
+    inet_ntop(so_st->ss_family, addr, *namep, INET6_ADDRSTRLEN);
+
+    return(0);
+  }

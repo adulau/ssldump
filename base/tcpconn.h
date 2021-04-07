@@ -72,12 +72,16 @@ typedef struct tcp_conn_ {
 #define TCP_STATE_FIN1	5
 #define TCP_STATE_CLOSED 6
      /*The address which sent the first SYN*/
-     struct in_addr i_addr;   
+     struct sockaddr_storage i_addr;
      u_short i_port;
+     char *i_name;
+     char *i_num;
 
      /*The address which sent the second SYN*/
-     struct in_addr r_addr;   
+     struct sockaddr_storage r_addr;
      u_short r_port;
+     char *r_name;
+     char *r_num;
 
      stream_data i2r;   /*The stream from initiator to responder*/
      stream_data r2i;   /*The stream from responder to initiator*/
@@ -90,12 +94,12 @@ typedef struct tcp_conn_ {
 
 int tcp_find_conn PROTO_LIST((tcp_conn **connp,
   int *directionp,
-  struct in_addr *src_addr, u_short src_port,
-  struct in_addr *dst_addr, u_short dst_port));
+  struct sockaddr_storage *src_addr, u_short src_port,
+  struct sockaddr_storage *dst_addr, u_short dst_port));
 
 int tcp_create_conn PROTO_LIST((tcp_conn **connp,
-  struct in_addr *initiator_addr, u_short initiator_port,
-  struct in_addr *responder_addr, u_short responder_port));
+  struct sockaddr_storage *initiator_addr, u_short initiator_port,
+  struct sockaddr_storage *responder_addr, u_short responder_port));
 
 int tcp_destroy_conn PROTO_LIST((tcp_conn *conn));
 int free_tcp_segment_queue PROTO_LIST((segment *seg));

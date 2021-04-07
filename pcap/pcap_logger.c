@@ -17,8 +17,8 @@
 
 static int init_pcap_logger PROTO_LIST((void * data));
 static int deinit_pcap_logger PROTO_LIST(());
-static int create_pcap_logger PROTO_LIST((proto_obj **objp, struct in_addr *i_addr,
-                u_short i_port,struct in_addr *r_addr, u_short r_port, struct timeval *base_time));
+static int create_pcap_logger PROTO_LIST((proto_obj **objp, struct sockaddr_storage *i_addr,
+                u_short i_port,struct sockaddr_storage *r_addr, u_short r_port, struct timeval *base_time));
 static int destroy_pcap_logger PROTO_LIST((proto_obj **objp));
 static int data_pcap_logger PROTO_LIST((proto_obj *_obj, unsigned char *data,unsigned int len, int dir));
 static int close_pcap_logger PROTO_LIST((proto_obj *_obj, unsigned char *data,unsigned int len, int dir));
@@ -52,7 +52,7 @@ static int deinit_pcap_logger()
     return 0;
   }
 
-static int create_pcap_logger(proto_obj **objp, struct in_addr *i_addr, u_short i_port, struct in_addr *r_addr, u_short r_port, struct timeval *base_time)
+static int create_pcap_logger(proto_obj **objp, struct sockaddr_storage *i_addr, u_short i_port, struct sockaddr_storage *r_addr, u_short r_port, struct timeval *base_time)
   {
     int r,_status;
     logpkt_ctx_t *pcap_obj=0;
@@ -61,13 +61,15 @@ static int create_pcap_logger(proto_obj **objp, struct in_addr *i_addr, u_short 
     if(!(pcap_obj=(logpkt_ctx_t *)calloc(1,sizeof(logpkt_ctx_t))))
       ABORT(R_NO_MEMORY);
 
-    src_addr.sin_family = AF_INET;
-    src_addr.sin_port = htons(i_port);
-    src_addr.sin_addr = *i_addr;
+    //src_addr.sin_family = AF_INET;
+    //src_addr.sin_port = htons(i_port);
+    //src_addr.sin_addr = *i_addr;
+    memcpy(&src_addr, i_addr, sizeof(struct sockaddr_in));
 
-    dst_addr.sin_family = AF_INET;
-    dst_addr.sin_port = htons(r_port);
-    dst_addr.sin_addr = *r_addr;
+    //dst_addr.sin_family = AF_INET;
+    //dst_addr.sin_port = htons(r_port);
+    //dst_addr.sin_addr = *r_addr;
+    memcpy(&dst_addr, r_addr, sizeof(struct sockaddr_in));
 
     logpkt_ctx_init(pcap_obj,NULL,0,content_pcap_src_ether, content_pcap_dst_ether,
                                 (const struct sockaddr*)&src_addr, sizeof(src_addr),

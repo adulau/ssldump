@@ -70,16 +70,16 @@ static int zero_conn(conn)
     return(0);
   }
 
-int tcp_find_conn(tcp_conn **connp, int *directionp,struct in_addr *saddr,
-	u_short sport, struct in_addr *daddr, u_short dport)
+int tcp_find_conn(tcp_conn **connp, int *directionp,struct sockaddr_storage *saddr,
+	u_short sport, struct sockaddr_storage *daddr, u_short dport)
   {
     conn_struct *conn;
 
     for(conn=first_conn;conn;conn=conn->next){
 
       if(sport == conn->conn.i_port && dport==conn->conn.r_port){
-	if(!memcmp(saddr,&conn->conn.i_addr,sizeof(struct in_addr))
-	  && !memcmp(daddr,&conn->conn.r_addr,sizeof(struct in_addr)))
+	if(!memcmp(saddr,&conn->conn.i_addr,sizeof(struct sockaddr_storage))
+	  && !memcmp(daddr,&conn->conn.r_addr,sizeof(struct sockaddr_storage)))
 	{
 	  *directionp=DIR_I2R;
 	  *connp=&(conn->conn);
@@ -88,8 +88,8 @@ int tcp_find_conn(tcp_conn **connp, int *directionp,struct in_addr *saddr,
       }
 
       if(dport == conn->conn.i_port && sport==conn->conn.r_port){
-	if(!memcmp(saddr,&conn->conn.r_addr,sizeof(struct in_addr))
-	  && !memcmp(daddr,&conn->conn.i_addr,sizeof(struct in_addr)))
+	if(!memcmp(saddr,&conn->conn.r_addr,sizeof(struct sockaddr_storage))
+	  && !memcmp(daddr,&conn->conn.i_addr,sizeof(struct sockaddr_storage)))
 	{
 	  *directionp=DIR_R2I;
 	  *connp=&(conn->conn);
@@ -101,8 +101,8 @@ int tcp_find_conn(tcp_conn **connp, int *directionp,struct in_addr *saddr,
     return(R_NOT_FOUND);
   }
 
-int tcp_create_conn(tcp_conn **connp,struct in_addr *i_addr,
-	u_short i_port, struct in_addr *r_addr, u_short r_port)
+int tcp_create_conn(tcp_conn **connp,struct sockaddr_storage *i_addr,
+	u_short i_port, struct sockaddr_storage *r_addr, u_short r_port)
   {
     conn_struct *conn=0;
 
@@ -115,9 +115,9 @@ int tcp_create_conn(tcp_conn **connp,struct in_addr *i_addr,
     conn->conn.backptr=conn;
     conn->conn.conn_number=conn_number++;
     
-    memcpy(&conn->conn.i_addr,i_addr,sizeof(struct in_addr));
+    memcpy(&conn->conn.i_addr,i_addr,sizeof(struct sockaddr_storage));
     conn->conn.i_port=i_port;
-    memcpy(&conn->conn.r_addr,r_addr,sizeof(struct in_addr));
+    memcpy(&conn->conn.r_addr,r_addr,sizeof(struct sockaddr_storage));
     conn->conn.r_port=r_port;
     *connp=&(conn->conn);
 
@@ -150,6 +150,10 @@ int tcp_destroy_conn(conn)
     destroy_proto_handler(&conn->analyzer);
     free_tcp_segment_queue(conn->i2r.oo_queue);
     free_tcp_segment_queue(conn->r2i.oo_queue);
+    free(conn->i_name);
+    free(conn->r_name);
+    free(conn->i_num);
+    free(conn->r_num);
     zero_conn(conn);
     free(conn->backptr);
     free(conn);
