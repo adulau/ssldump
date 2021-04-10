@@ -60,8 +60,8 @@ struct proto_mod_vtbl_ {
      int (*create) PROTO_LIST((void *handle,proto_ctx *ctx,
        tcp_conn *conn,
        proto_obj **objp,
-       struct in_addr *i_addr,u_short i_port,
-       struct in_addr *r_addr,u_short r_port,struct timeval *time_base));
+       struct sockaddr_storage *i_addr,u_short i_port,
+       struct sockaddr_storage *r_addr,u_short r_port,struct timeval *time_base));
      int (*destroy_ctx) PROTO_LIST((void *handle,proto_ctx **ctxp));
      int (*destroy) PROTO_LIST((proto_obj **objp));
      int (*data) PROTO_LIST((proto_obj *obj,segment *data,int direction));
@@ -89,8 +89,8 @@ struct logger_mod_vtbl_ {
      int (*init) PROTO_LIST((void *data));
      //deinit must be async signal safe(!!!)
      int (*deinit) PROTO_LIST(());
-     int (*create) PROTO_LIST((proto_obj **objp, struct in_addr *i_addr,u_short i_port,
-                                       struct in_addr *r_addr,u_short r_port,struct timeval *time_base));
+     int (*create) PROTO_LIST((proto_obj **objp, struct sockaddr_storage *i_addr,u_short i_port,
+                                       struct sockaddr_storage *r_addr,u_short r_port,struct timeval *time_base));
      int (*destroy) PROTO_LIST((proto_obj **objp));
      int (*data) PROTO_LIST((proto_obj *obj,unsigned char *data,unsigned int len,int direction));
      int (*close) PROTO_LIST((proto_obj *obj,unsigned char *data,unsigned int len,int direction));

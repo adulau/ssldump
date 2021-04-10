@@ -64,6 +64,7 @@
 #endif
 #include <netinet/in_systm.h>
 #include <netinet/ip.h>
+#include <netinet/ip6.h>
 #include <netinet/tcp.h>
 #include <r_time.h>
 #include <r_data.h>
@@ -77,12 +78,13 @@ int network_handler_create PROTO_LIST((proto_mod *mod,
   n_handler **handlerp));
 int network_handler_destroy PROTO_LIST((proto_mod *mod,n_handler **handlerp));
 int network_process_packet PROTO_LIST((n_handler *handler,
-  struct timeval *timestamp,UCHAR *data,int length));
+  struct timeval *timestamp,UCHAR *data,int length,int af));
 int packet_copy PROTO_LIST((packet *in,packet **out));
 int packet_destroy PROTO_LIST((packet *p));
 int timestamp_diff PROTO_LIST(( struct timeval *t1,struct timeval *t0,
   struct timeval *diff));
-int lookuphostname PROTO_LIST((struct in_addr *addr,char **name));
+int lookuphostname PROTO_LIST((struct sockaddr_storage *addr,char **name));
+int addrtotext PROTO_LIST((struct sockaddr_storage *addr,char **name));
 
 struct packet_ {
      struct timeval ts;
@@ -94,7 +96,22 @@ struct packet_ {
      /*These just save us the effort of doing casts to the data
        segments*/
      struct ip *ip;	/*The IP header*/
+     int af;
+     union {
+         struct ip *ip;	/*The IP header*/
+         struct ip6_hdr *ip6;	/*The IP header*/
+     } l3_hdr;
      struct tcphdr *tcp; /*The TCP header*/
+     union {
+         struct sockaddr_storage so_st;
+         struct sockaddr_in so_in;
+         struct sockaddr_in6 so_in6;
+     } i_addr;
+     union {
+         struct sockaddr_storage so_st;
+         struct sockaddr_in so_in;
+         struct sockaddr_in6 so_in6;
+     } r_addr;
 };
 
 #include "tcpconn.h"

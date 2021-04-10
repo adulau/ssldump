@@ -204,9 +204,9 @@ void pcap_cb(ptr,hdr,data)
           len+=4;
         }
 
-        if(type!=ETHERTYPE_IP)
+        if(type!=ETHERTYPE_IP && type!=ETHERTYPE_IPV6)
           return;
-        
+
         break;
       case DLT_IEEE802:
         data+=22;
@@ -276,7 +276,11 @@ void pcap_cb(ptr,hdr,data)
         break;
 #endif
     }
-    network_process_packet(n,(struct timeval *) &hdr->ts,(u_char *)data,len);
+
+    if(type == ETHERTYPE_IPV6)
+       network_process_packet(n,(struct timeval *) &hdr->ts,(u_char *)data,len, AF_INET6);
+    else
+       network_process_packet(n,(struct timeval *) &hdr->ts,(u_char *)data,len, AF_INET);
 
     if(packet_cnt == conn_freq) {
         packet_cnt = 0;

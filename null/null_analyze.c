@@ -56,11 +56,11 @@ typedef struct null_analyzer_ {
 
 static int create_null_analyzer PROTO_LIST((void *handle,
   proto_ctx *ctx,tcp_conn *conn,proto_obj **objp,
-  struct in_addr *i_addr,u_short i_port,
-  struct in_addr *r_addr,u_short r_port, struct timeval *base_time));
+  struct sockaddr_storage *i_addr,u_short i_port,
+  struct sockaddr_storage *r_addr,u_short r_port, struct timeval *base_time));
 
 static int create_null_analyzer(void *handle, proto_ctx *ctx, tcp_conn *conn,
-  proto_obj **objp, struct in_addr *i_addr, u_short i_port, struct in_addr *r_addr,
+  proto_obj **objp, struct sockaddr_storage *i_addr, u_short i_port, struct sockaddr_storage *r_addr,
   u_short r_port, struct timeval *base_time)
   {
     null_analyzer *obj=0;

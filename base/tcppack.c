@@ -88,8 +88,8 @@ int process_tcp_packet(handler,ctx,p)
 
     print_tcp_packet(p);
 
-    if((r=tcp_find_conn(&conn,&direction,&p->ip->ip_src,
-      ntohs(p->tcp->th_sport),&p->ip->ip_dst,ntohs(p->tcp->th_dport)))){
+    if((r=tcp_find_conn(&conn,&direction,&p->i_addr.so_st,
+      ntohs(p->tcp->th_sport),&p->r_addr.so_st,ntohs(p->tcp->th_dport)))){
       if(r!=R_NOT_FOUND)
 	ABORT(r);
 
@@ -126,26 +126,21 @@ int process_tcp_packet(handler,ctx,p)
         break;
       case TCP_STATE_ACK:
         {
-          char *sn=0,*dn=0;
 	if(direction != DIR_I2R)
 	  break;
 	DBG((0,"ACK seq: %u",ntohl(p->tcp->th_seq)));
 	conn->i2r.ack=ntohl(p->tcp->th_ack)+1;
-        lookuphostname(&conn->i_addr,&sn);
-        lookuphostname(&conn->r_addr,&dn);
         if(!(NET_print_flags & NET_PRINT_JSON)) {
           if(NET_print_flags & NET_PRINT_TYPESET)
             printf("\\fC");
           printf("New TCP connection #%d: %s(%d) <-> %s(%d)\n",
             conn->conn_number,
-            sn,conn->i_port,
-            dn,conn->r_port);
+            conn->i_name,conn->i_port,
+            conn->r_name,conn->r_port);
           if(NET_print_flags & NET_PRINT_TYPESET)
             printf("\\fR");
         }
 	conn->state=TCP_STATE_ESTABLISHED;
-        free(sn);
-        free(dn);
         }
       case TCP_STATE_ESTABLISHED:
       case TCP_STATE_FIN1:
@@ -180,16 +175,16 @@ static int new_connection(handler,ctx,p,connp)
     tcp_conn *conn=0;
 
     if ((p->tcp->th_flags & (TH_SYN|TH_ACK))==TH_SYN) {
-      if((r=tcp_create_conn(&conn,&p->ip->ip_src,ntohs(p->tcp->th_sport),
-        &p->ip->ip_dst,ntohs(p->tcp->th_dport))))
+      if((r=tcp_create_conn(&conn,&p->i_addr.so_st,ntohs(p->tcp->th_sport),
+        &p->r_addr.so_st,ntohs(p->tcp->th_dport))))
         ABORT(r);
       DBG((0,"SYN1 seq: %u",ntohl(p->tcp->th_seq)));
       conn->i2r.seq=ntohl(p->tcp->th_seq)+1;
       conn->i2r.ack=ntohl(p->tcp->th_ack)+1;
       conn->state=TCP_STATE_SYN1;
     } else { // SYN&ACK comes first somehow
-      if((r=tcp_create_conn(&conn,&p->ip->ip_dst,ntohs(p->tcp->th_dport),
-        &p->ip->ip_src,ntohs(p->tcp->th_sport))))
+      if((r=tcp_create_conn(&conn,&p->r_addr.so_st,ntohs(p->tcp->th_dport),
+        &p->i_addr.so_st,ntohs(p->tcp->th_sport))))
         ABORT(r);
       DBG((0,"SYN2 seq: %u",ntohl(p->tcp->th_seq)));
       conn->r2i.seq=ntohl(p->tcp->th_seq)+1;
@@ -198,6 +193,10 @@ static int new_connection(handler,ctx,p,connp)
     }
     memcpy(&conn->start_time,&p->ts,sizeof(struct timeval));
     memcpy(&conn->last_seen_time,&p->ts,sizeof(struct timeval));
+    lookuphostname(&conn->i_addr,&conn->i_name);
+    lookuphostname(&conn->r_addr,&conn->r_name);
+    addrtotext(&conn->i_addr,&conn->i_num);
+    addrtotext(&conn->r_addr,&conn->r_num);
     if((r=create_proto_handler(handler,ctx,&conn->analyzer,conn,&p->ts)))
       ABORT(r);
     
@@ -402,8 +401,8 @@ static int print_tcp_packet(p)
     if(!(NET_print_flags & NET_PRINT_TCP_HDR))
       return(0);
 
-    lookuphostname(&p->ip->ip_src,&src);
-    lookuphostname(&p->ip->ip_dst,&dst);
+    lookuphostname(&p->i_addr.so_st,&src);
+    lookuphostname(&p->r_addr.so_st,&dst);
     
     if(!(NET_print_flags & NET_PRINT_JSON)) {
       printf("TCP: %s(%d) -> %s(%d) ",
