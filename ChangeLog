@@ -2,6 +2,34 @@ Changelog
 =========
 
 
+v1.4 (2021-04-12)
+-----------------
+
+Changes
+~~~~~~~
+- [doc] cleanup README. [Alexandre Dulaunoy]
+- [doc] v1.3 released. [Alexandre Dulaunoy]
+
+Other
+~~~~~
+- Merge pull request #53 from wllm-rbnt/dev. [Alexandre Dulaunoy]
+
+  Add support for IPv6 traffic dump
+- Add support for IPv6 traffic dump. [William Robinet]
+- Merge pull request #51 from wllm-rbnt/dev. [Alexandre Dulaunoy]
+
+  dev 1.4 beta
+- Fix ja3(s) length of strings used in MD5 computation + update MD5
+  functions. [William Robinet]
+- Extract traffic mirroring commands from docker run scripts. [William
+  Robinet]
+- Add support for ja3 & ja3s. [William Robinet]
+- Fix snprintf warning. [William Robinet]
+- Fix file ownership in Dockerfiles. [William Robinet]
+- Docker files initial import. [William Robinet]
+- Bump version to 1.4b. [William Robinet]
+
+
 v1.3 (2021-02-02)
 -----------------
 
