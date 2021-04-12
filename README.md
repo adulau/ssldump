@@ -5,8 +5,8 @@
 
 # Release and tagging
 
-- Current version of ssldump is v1.3 (released: 2021-02-02) - [ChangeLog](https://raw.githubusercontent.com/adulau/ssldump/master/ChangeLog)
-- Previous version of ssldump is v1.2 (released: 2020-09-22) - [ChangeLog](https://raw.githubusercontent.com/adulau/ssldump/master/ChangeLog)
+- Current version of ssldump is v1.4 (released: 2021-04-12) - [ChangeLog](https://raw.githubusercontent.com/adulau/ssldump/master/ChangeLog)
+- Previous version of ssldump is v1.3 (released: 2021-02-02) - [ChangeLog](https://raw.githubusercontent.com/adulau/ssldump/master/ChangeLog)
 
 # What about the original ssldump?
 
@@ -32,10 +32,10 @@ Because it's a mess. The software maintenance process for old free (unmaintained
 like ssldump is a complete chaotic process. I do this to ease my pain and this could help
 other too (but this is just a collateral damage).
 
-# Where do you use ssldump?
+# Where ssldump is used?
 
-I used it for a relatively small project called Passive SSL. For more information, [Passive SSL Passive Detection and Reconnaissance Techniques, to Find, Track, and Attribute Vulnerable ”Devices”](https://www.first.org/resources/papers/conf2015/first_2015_-_leverett_-_dulaunoy_-_passive_detection_20150604.pdf).
-Additional back-end code available is in the [crl-monitor ](https://github.com/adulau/crl-monitor/tree/master/bin/x509) repository.
+- I used it for a relatively small project called Passive SSL. For more information, [Passive SSL Passive Detection and Reconnaissance Techniques, to Find, Track, and Attribute Vulnerable ”Devices”](https://www.first.org/resources/papers/conf2015/first_2015_-_leverett_-_dulaunoy_-_passive_detection_20150604.pdf). Additional back-end code available is in the [crl-monitor ](https://github.com/adulau/crl-monitor/tree/master/bin/x509) repository.
+- ssldump is used in the [D4-Project](https://github.com/D4-project/).
 
 # Build instructions
 
