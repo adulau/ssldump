@@ -2,16 +2,22 @@ Changelog
 =========
 
 
-v1.4 (2021-04-12)
+v1.4 (2021-04-13)
 -----------------
 
 Changes
 ~~~~~~~
-- [doc] cleanup README. [Alexandre Dulaunoy]
 - [doc] v1.4 released. [Alexandre Dulaunoy]
+- [doc] v1.4 released. [Alexandre Dulaunoy]
+- [doc] cleanup README. [Alexandre Dulaunoy]
+- [doc] v1.3 released. [Alexandre Dulaunoy]
 
 Other
 ~~~~~
+- Merge pull request #54 from wllm-rbnt/dev. [Alexandre Dulaunoy]
+
+  Fix release version
+- Fix release version. [William Robinet]
 - Merge pull request #53 from wllm-rbnt/dev. [Alexandre Dulaunoy]
 
   Add support for IPv6 traffic dump
