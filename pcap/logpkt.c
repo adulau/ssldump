@@ -219,25 +219,30 @@ logpkt_pcap_open_fd(int fd) {
 	pcap_file_hdr_t hdr;
 	off_t sz;
 	ssize_t n;
+	struct stat st;
 
-	sz = lseek(fd, 0, SEEK_END);
-	if (sz == -1)
+	if(fstat(fd, &st))
 		return -1;
 
-	if (sz > 0) {
-		if (lseek(fd, 0, SEEK_SET) == -1)
+	if(!S_ISFIFO(st.st_mode)) {
+		sz = lseek(fd, 0, SEEK_END);
+		if (sz == -1)
 			return -1;
-		n = read(fd, &hdr, sizeof(pcap_file_hdr_t));
-		if (n != sizeof(pcap_file_hdr_t))
-			return -1;
-		if (hdr.magic_number == PCAP_MAGIC)
-			return lseek(fd, 0, SEEK_END) == -1 ? -1 : 0;
-		if (lseek(fd, 0, SEEK_SET) == -1)
-			return -1;
-		if (ftruncate(fd, 0) == -1)
-			return -1;
-	}
 
+		if (sz > 0) {
+			if (lseek(fd, 0, SEEK_SET) == -1)
+				return -1;
+			n = read(fd, &hdr, sizeof(pcap_file_hdr_t));
+			if (n != sizeof(pcap_file_hdr_t))
+				return -1;
+			if (hdr.magic_number == PCAP_MAGIC)
+				return lseek(fd, 0, SEEK_END) == -1 ? -1 : 0;
+			if (lseek(fd, 0, SEEK_SET) == -1)
+				return -1;
+			if (ftruncate(fd, 0) == -1)
+				return -1;
+		}
+	}
 	return logpkt_write_global_pcap_hdr(fd);
 }
 
