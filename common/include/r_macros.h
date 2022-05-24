@@ -76,11 +76,11 @@
 #define FREE(a) if(a) free(a)
 #endif
 #ifndef MIN
-#define MIN(a,b) ((a)>(b))?(b):(a)
+#define MIN(a,b) (((a)>(b))?(b):(a))
 #endif
 
 #ifndef MAX
-#define MAX(a,b) ((b)>(a))?(b):(a)
+#define MAX(a,b) (((b)>(a))?(b):(a))
 #endif
 
 #ifdef DEBUG
