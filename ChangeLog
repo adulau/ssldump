@@ -1,282 +1,399 @@
-Changelog
-=========
+# Changelog
 
 
-v1.4 (2021-04-13)
------------------
+## v1.5 (2022-05-26)
 
-Changes
-~~~~~~~
-- [doc] v1.4 released. [Alexandre Dulaunoy]
-- [doc] v1.4 released. [Alexandre Dulaunoy]
-- [doc] cleanup README. [Alexandre Dulaunoy]
-- [doc] v1.3 released. [Alexandre Dulaunoy]
+### Changes
 
-Other
-~~~~~
-- Merge pull request #54 from wllm-rbnt/dev. [Alexandre Dulaunoy]
+* [doc] An example use-case of JA3. [Alexandre Dulaunoy]
+
+* [doc] Changelog updated. [Alexandre Dulaunoy]
+
+### Other
+
+* Merge pull request #60 from lord8266/max. [Alexandre Dulaunoy]
+
+  Add parentheses around MAX and MIN
+
+* Add parentheses around MAX and MIN. [Vishwa Pravin]
+
+* Merge pull request #58 from wllm-rbnt/dev. [Alexandre Dulaunoy]
+
+  Add support for pcap output to FIFO
+
+* Add support for pcap output to FIFO. [William Robinet]
+
+
+## v1.4 (2021-04-13)
+
+### Changes
+
+* [doc] v1.4 released. [Alexandre Dulaunoy]
+
+* [doc] v1.4 released. [Alexandre Dulaunoy]
+
+* [doc] cleanup README. [Alexandre Dulaunoy]
+
+* [doc] v1.3 released. [Alexandre Dulaunoy]
+
+### Other
+
+* Merge pull request #54 from wllm-rbnt/dev. [Alexandre Dulaunoy]
 
   Fix release version
-- Fix release version. [William Robinet]
-- Merge pull request #53 from wllm-rbnt/dev. [Alexandre Dulaunoy]
+
+* Fix release version. [William Robinet]
+
+* Merge pull request #53 from wllm-rbnt/dev. [Alexandre Dulaunoy]
 
   Add support for IPv6 traffic dump
-- Add support for IPv6 traffic dump. [William Robinet]
-- Merge pull request #51 from wllm-rbnt/dev. [Alexandre Dulaunoy]
+
+* Add support for IPv6 traffic dump. [William Robinet]
+
+* Merge pull request #51 from wllm-rbnt/dev. [Alexandre Dulaunoy]
 
   dev 1.4 beta
-- Fix ja3(s) length of strings used in MD5 computation + update MD5
-  functions. [William Robinet]
-- Extract traffic mirroring commands from docker run scripts. [William
-  Robinet]
-- Add support for ja3 & ja3s. [William Robinet]
-- Fix snprintf warning. [William Robinet]
-- Fix file ownership in Dockerfiles. [William Robinet]
-- Docker files initial import. [William Robinet]
-- Bump version to 1.4b. [William Robinet]
+
+* Fix ja3(s) length of strings used in MD5 computation + update MD5 functions. [William Robinet]
+
+* Extract traffic mirroring commands from docker run scripts. [William Robinet]
+
+* Add support for ja3 & ja3s. [William Robinet]
+
+* Fix snprintf warning. [William Robinet]
+
+* Fix file ownership in Dockerfiles. [William Robinet]
+
+* Docker files initial import. [William Robinet]
+
+* Bump version to 1.4b. [William Robinet]
 
 
-v1.3 (2021-02-02)
------------------
+## v1.3 (2021-02-02)
 
-Changes
-~~~~~~~
-- [doc] prepare for release v1.3. [Alexandre Dulaunoy]
-- [copyright] added additional copyright for all new contribution.
-  [Alexandre Dulaunoy]
+### Changes
+
+* [doc] prepare for release v1.3. [Alexandre Dulaunoy]
+
+* [copyright] added additional copyright for all new contribution. [Alexandre Dulaunoy]
 
   ssldump is collectively owned by all the contributors. There is no
   change to the original license.
-- [doc] man page fixed for copyright notice + README updated. [Alexandre
-  Dulaunoy]
-- [doc] William has a real name. [Alexandre Dulaunoy]
-- [credits] updated. [Alexandre Dulaunoy]
-- [doc] v1.2 released. [Alexandre Dulaunoy]
-- [doc] v1.2 released. [Alexandre Dulaunoy]
 
-Other
-~~~~~
-- Merge pull request #49 from wllm-rbnt/leaks. [Alexandre Dulaunoy]
+* [doc] man page fixed for copyright notice + README updated. [Alexandre Dulaunoy]
+
+* [doc] William has a real name. [Alexandre Dulaunoy]
+
+* [credits] updated. [Alexandre Dulaunoy]
+
+* [doc] v1.2 released. [Alexandre Dulaunoy]
+
+* [doc] v1.2 released. [Alexandre Dulaunoy]
+
+### Other
+
+* Merge pull request #49 from wllm-rbnt/leaks. [Alexandre Dulaunoy]
 
   Adjust copyright info
-- Adjust copyright info. [William Robinet]
-- Merge branch 'wllm-rbnt-leaks' [Alexandre Dulaunoy]
-- Fix bug introduced in 64effa3bb93c3a219fb0afd868c5bc2609093ced.
-  [William Robinet]
-- Merge remote-tracking branch 'upstream/master' into leaks. [William
-  Robinet]
-- Merge pull request #46 from wllm-rbnt/leaks. [Alexandre Dulaunoy]
+
+* Adjust copyright info. [William Robinet]
+
+* Merge branch 'wllm-rbnt-leaks' [Alexandre Dulaunoy]
+
+* Fix bug introduced in 64effa3bb93c3a219fb0afd868c5bc2609093ced. [William Robinet]
+
+* Merge remote-tracking branch 'upstream/master' into leaks. [William Robinet]
+
+* Merge pull request #46 from wllm-rbnt/leaks. [Alexandre Dulaunoy]
 
   Leaks
-- Avoid leak in TCP segment reassembly code. [William Robinet]
-- Clean remaining json object in case of error. [William Robinet]
-- Abort properly on decode error. [William Robinet]
-- Avoid client session_id related leak. [William Robinet]
-- Avoid server_random related leak. [William Robinet]
-- Avoid client_random related leak. [William Robinet]
-- Check ssl_decode_enum() return code correctly. [William Robinet]
-- Exit process_tcp_packet() in case TCP header is incomplete. [William
-  Robinet]
-- Check timestamp_diff return code correctly. [William Robinet]
-- Cleanup before exit on error. [William Robinet]
-- Fix for crash if length of captured frame is less than Ethernet header
-  size. [William Robinet]
-- Check packet size before looking at IP header. [William Robinet]
-- Check return code after string extraction. [William Robinet]
-- Limit length during server name decoding. [William Robinet]
-- Bump version to 1.3 in configure.ac. [William Robinet]
-- Decode ClientHello v2 properly. [William Robinet]
-- Output error to stderr. [William Robinet]
-- Add proper return value. [William Robinet]
-- Avoid leak by freeing SSL decoding context properly. [William Robinet]
-- Close everything properly in case of SIGINT. [William Robinet]
-- Fix leak in associative array implementation. [William Robinet]
-- Merge branch 'wllm-rbnt-json' [Alexandre Dulaunoy]
-- Avoid some memory leaks. [William Robinet]
-- Fix time struct related warning (2) [William Robinet]
-- Fix time struct related warning. [William Robinet]
-- Add checks for libjson-c to configure.ac. [William Robinet]
-- Update CI workflow descriptions (2) [William Robinet]
-- Update CI workflow descriptions. [William Robinet]
-- First import of the JSON output code
-  (https://github.com/adulau/ssldump/issues/41) [William Robinet]
-- Do not print information message when no connection is cleaned at
-  shutdown. [William Robinet]
-- Fix memory leak in ssl_process_server_session_id() [William Robinet]
-- Close global pcap struct properly in case of SIGINT. [William Robinet]
-- Change binary installation directory to /usr/sbin. [William Robinet]
-- Move unused files away. [William Robinet]
-- Fix README.md - wrong package name for rpm based distros. [William
-  Robinet]
-- Merge pull request #42 from wllm-rbnt/extensions. [Alexandre Dulaunoy]
+
+* Avoid leak in TCP segment reassembly code. [William Robinet]
+
+* Clean remaining json object in case of error. [William Robinet]
+
+* Abort properly on decode error. [William Robinet]
+
+* Avoid client session_id related leak. [William Robinet]
+
+* Avoid server_random related leak. [William Robinet]
+
+* Avoid client_random related leak. [William Robinet]
+
+* Check ssl_decode_enum() return code correctly. [William Robinet]
+
+* Exit process_tcp_packet() in case TCP header is incomplete. [William Robinet]
+
+* Check timestamp_diff return code correctly. [William Robinet]
+
+* Cleanup before exit on error. [William Robinet]
+
+* Fix for crash if length of captured frame is less than Ethernet header size. [William Robinet]
+
+* Check packet size before looking at IP header. [William Robinet]
+
+* Check return code after string extraction. [William Robinet]
+
+* Limit length during server name decoding. [William Robinet]
+
+* Bump version to 1.3 in configure.ac. [William Robinet]
+
+* Decode ClientHello v2 properly. [William Robinet]
+
+* Output error to stderr. [William Robinet]
+
+* Add proper return value. [William Robinet]
+
+* Avoid leak by freeing SSL decoding context properly. [William Robinet]
+
+* Close everything properly in case of SIGINT. [William Robinet]
+
+* Fix leak in associative array implementation. [William Robinet]
+
+* Merge branch 'wllm-rbnt-json' [Alexandre Dulaunoy]
+
+* Avoid some memory leaks. [William Robinet]
+
+* Fix time struct related warning (2) [William Robinet]
+
+* Fix time struct related warning. [William Robinet]
+
+* Add checks for libjson-c to configure.ac. [William Robinet]
+
+* Update CI workflow descriptions (2) [William Robinet]
+
+* Update CI workflow descriptions. [William Robinet]
+
+* First import of the JSON output code (https://github.com/adulau/ssldump/issues/41) [William Robinet]
+
+* Do not print information message when no connection is cleaned at shutdown. [William Robinet]
+
+* Fix memory leak in ssl_process_server_session_id() [William Robinet]
+
+* Close global pcap struct properly in case of SIGINT. [William Robinet]
+
+* Change binary installation directory to /usr/sbin. [William Robinet]
+
+* Move unused files away. [William Robinet]
+
+* Fix README.md - wrong package name for rpm based distros. [William Robinet]
+
+* Merge pull request #42 from wllm-rbnt/extensions. [Alexandre Dulaunoy]
 
   Add missing extension names
-- Add missing extension names. [William Robinet]
-- Merge pull request #39 from wllm-rbnt/save2pcap. [Alexandre Dulaunoy]
+
+* Add missing extension names. [William Robinet]
+
+* Merge pull request #39 from wllm-rbnt/save2pcap. [Alexandre Dulaunoy]
 
   Rework of https://github.com/adulau/ssldump/pull/26 after build system changes
-- Mention https://github.com/droe/sslsplit in README.md, fix man page.
-  [William Robinet]
-- Add libnet1-dev deps to CI and README.md. [William Robinet]
-- Merge remote-tracking branch 'upstream/master' into save2pcap.
-  [William Robinet]
-- Merge pull request #38 from wllm-rbnt/warnings. [Alexandre Dulaunoy]
+
+* Mention https://github.com/droe/sslsplit in README.md, fix man page. [William Robinet]
+
+* Add libnet1-dev deps to CI and README.md. [William Robinet]
+
+* Merge remote-tracking branch 'upstream/master' into save2pcap. [William Robinet]
+
+* Merge pull request #38 from wllm-rbnt/warnings. [Alexandre Dulaunoy]
 
   Code cleanup
-- Add missing Makefile.am. [William Robinet]
-- Rework https://github.com/adulau/ssldump/pull/26 after build system
-  changes. [William Robinet]
-- Add save decrypted datato pcap. first alpha version. [Aleksey Ryabkov]
-- Fix for use of deprecated OpenSSL HMAC functions. [William Robinet]
-- Fix for type casting related warnings. [William Robinet]
-- Add missing function prototype. [William Robinet]
-- Fix for "warning: operator << has lower precedence than -" [William
-  Robinet]
-- Remove definitions of unused variables. [William Robinet]
-- Fix for "warning: promoted type int of K&R function parameter is not
-  compatible with the parameter type ..." [William Robinet]
-- Fix for "warning: using the result of an assignment as a condition
-  without parentheses" [William Robinet]
-- Merge pull request #37 from wllm-rbnt/fixes. [Alexandre Dulaunoy]
+
+* Add missing Makefile.am. [William Robinet]
+
+* Rework https://github.com/adulau/ssldump/pull/26 after build system changes. [William Robinet]
+
+* Add save decrypted datato pcap. first alpha version. [Aleksey Ryabkov]
+
+* Fix for use of deprecated OpenSSL HMAC functions. [William Robinet]
+
+* Fix for type casting related warnings. [William Robinet]
+
+* Add missing function prototype. [William Robinet]
+
+* Fix for "warning: operator << has lower precedence than -" [William Robinet]
+
+* Remove definitions of unused variables. [William Robinet]
+
+* Fix for "warning: promoted type int of K&R function parameter is not compatible with the parameter type ..." [William Robinet]
+
+* Fix for "warning: using the result of an assignment as a condition without parentheses" [William Robinet]
+
+* Merge pull request #37 from wllm-rbnt/fixes. [Alexandre Dulaunoy]
 
   Fixes
-- Link README to README.md. [William Robinet]
-- Fix for uninitialized variables and possible overflow. [William
-  Robinet]
-- Remove unused RCSSTRING variable globally. [William Robinet]
-- Reorganize README files. [William Robinet]
-- Add line return after "certificate_types" in output, see the problem
-  in https://github.com/adulau/ssldump/issues/36#issuecomment-702586335.
-  [William Robinet]
+
+* Link README to README.md. [William Robinet]
+
+* Fix for uninitialized variables and possible overflow. [William Robinet]
+
+* Remove unused RCSSTRING variable globally. [William Robinet]
+
+* Reorganize README files. [William Robinet]
+
+* Add line return after "certificate_types" in output, see the problem in https://github.com/adulau/ssldump/issues/36#issuecomment-702586335. [William Robinet]
 
 
-v1.2 (2020-09-22)
------------------
+## v1.2 (2020-09-22)
 
-Changes
-~~~~~~~
-- [cleanup] file cleanup (tab/ws mixed) [Alexandre Dulaunoy]
-- [doc] workflow badge added. [Alexandre Dulaunoy]
-- [workflow] config updated. [Alexandre Dulaunoy]
-- [workflow] pcap. [Alexandre Dulaunoy]
-- [workflow] add required packages. [Alexandre Dulaunoy]
-- [doc] clarification about ssldump repository + release v1.1.
-  [Alexandre Dulaunoy]
-- [doc] release v1.1 - ChangeLog updated. [Alexandre Dulaunoy]
+### Changes
 
-Other
-~~~~~
-- Merge pull request #34 from wllm-rbnt/build-sys. [Alexandre Dulaunoy]
+* [cleanup] file cleanup (tab/ws mixed) [Alexandre Dulaunoy]
+
+* [doc] workflow badge added. [Alexandre Dulaunoy]
+
+* [workflow] config updated. [Alexandre Dulaunoy]
+
+* [workflow] pcap. [Alexandre Dulaunoy]
+
+* [workflow] add required packages. [Alexandre Dulaunoy]
+
+* [doc] clarification about ssldump repository + release v1.1. [Alexandre Dulaunoy]
+
+* [doc] release v1.1 - ChangeLog updated. [Alexandre Dulaunoy]
+
+### Other
+
+* Merge pull request #34 from wllm-rbnt/build-sys. [Alexandre Dulaunoy]
 
   Build system updates
-- Fix long line in README.md. [William Robinet]
-- Update README.md with ./configure examples. [William Robinet]
-- Update README.md with ./configure options. [William Robinet]
-- Clean debug functions, remove duplicates. [William Robinet]
-- Define DEBUG when using --enable-debug. [William Robinet]
-- Add optional features to ./configure (ASAN, debug, optimization)
-  [William Robinet]
-- Reenable OpenSSL code compilation. [William Robinet]
-- Update .gitignore, rearrange CI workflows variable definition.
-  [William Robinet]
-- Remove -g from default CFLAGS and check for Clang explicitly. [William
-  Robinet]
-- Remove deprecated define. [William Robinet]
-- Reorder checks in configure.ac. [William Robinet]
-- Prepare ASAN build. [William Robinet]
-- Force use of GCC in GCC CI. [William Robinet]
-- Add Clang CI. [William Robinet]
-- Merge pull request #35 from mattslot/master. [Alexandre Dulaunoy]
+
+* Fix long line in README.md. [William Robinet]
+
+* Update README.md with ./configure examples. [William Robinet]
+
+* Update README.md with ./configure options. [William Robinet]
+
+* Clean debug functions, remove duplicates. [William Robinet]
+
+* Define DEBUG when using --enable-debug. [William Robinet]
+
+* Add optional features to ./configure (ASAN, debug, optimization) [William Robinet]
+
+* Reenable OpenSSL code compilation. [William Robinet]
+
+* Update .gitignore, rearrange CI workflows variable definition. [William Robinet]
+
+* Remove -g from default CFLAGS and check for Clang explicitly. [William Robinet]
+
+* Remove deprecated define. [William Robinet]
+
+* Reorder checks in configure.ac. [William Robinet]
+
+* Prepare ASAN build. [William Robinet]
+
+* Force use of GCC in GCC CI. [William Robinet]
+
+* Add Clang CI. [William Robinet]
+
+* Merge pull request #35 from mattslot/master. [Alexandre Dulaunoy]
 
   Add renegotiation_info extension
-- Add renegotiation_info extension. [Matt Slot]
-- Merge pull request #33 from wllm-rbnt/oob-reads. [Alexandre Dulaunoy]
+
+* Add renegotiation_info extension. [Matt Slot]
+
+* Merge pull request #33 from wllm-rbnt/oob-reads. [Alexandre Dulaunoy]
 
   Fix multiple segfaults on out-of-bounds read access
-- Fix multiple segfault by OOB read because of wrong format string
-  specifier. [William Robinet]
-- Fix segfault by OOB read on malformed packets (2) [William Robinet]
-- Fix segfault by OOB read on malformed packets. [William Robinet]
-- Merge pull request #31 from wllm-rbnt/autoconf2020. [Alexandre
-  Dulaunoy]
+
+* Fix multiple segfault by OOB read because of wrong format string specifier. [William Robinet]
+
+* Fix segfault by OOB read on malformed packets (2) [William Robinet]
+
+* Fix segfault by OOB read on malformed packets. [William Robinet]
+
+* Merge pull request #31 from wllm-rbnt/autoconf2020. [Alexandre Dulaunoy]
 
   Autoconf2020
-- Fix deprecation warning from libcap 1.9.1. [William Robinet]
-- Make FreeBSD (12.1) happy. [William Robinet]
-- Update CI workflow. [William Robinet]
-- Apply Replace-direct-struct-access-patterns-with-OpenSSL-1.1-ge.patch
-  from Debian pkg. [William Robinet]
-- Update readme. [William Robinet]
-- Fix readme. [William Robinet]
-- Improve lib detection and .gitignore. [William Robinet]
-- Remove generated file. [William Robinet]
-- Add man page to Makefile.am. [William Robinet]
-- Fix warning about type of arguments of pcap_handler. [William Robinet]
-- Fix warning about signal() arguments type. [William Robinet]
-- Fix build warnings for missing prototypes. [William Robinet]
-- Add build deps to readme. [William Robinet]
-- Fix readme. [William Robinet]
-- Autoconf setup rewritten. [William Robinet]
-- Set theme jekyll-theme-minimal. [Alexandre Dulaunoy]
-- Merge pull request #27 from microolap-technologies/resumed_sessions.
-  [Alexandre Dulaunoy]
+
+* Fix deprecation warning from libcap 1.9.1. [William Robinet]
+
+* Make FreeBSD (12.1) happy. [William Robinet]
+
+* Update CI workflow. [William Robinet]
+
+* Apply Replace-direct-struct-access-patterns-with-OpenSSL-1.1-ge.patch from Debian pkg. [William Robinet]
+
+* Update readme. [William Robinet]
+
+* Fix readme. [William Robinet]
+
+* Improve lib detection and .gitignore. [William Robinet]
+
+* Remove generated file. [William Robinet]
+
+* Add man page to Makefile.am. [William Robinet]
+
+* Fix warning about type of arguments of pcap_handler. [William Robinet]
+
+* Fix warning about signal() arguments type. [William Robinet]
+
+* Fix build warnings for missing prototypes. [William Robinet]
+
+* Add build deps to readme. [William Robinet]
+
+* Fix readme. [William Robinet]
+
+* Autoconf setup rewritten. [William Robinet]
+
+* Set theme jekyll-theme-minimal. [Alexandre Dulaunoy]
+
+* Merge pull request #27 from microolap-technologies/resumed_sessions. [Alexandre Dulaunoy]
 
   add support to decrypt resumed sessions
-- Add support to decrypt resumed sessions. [Aleksey Ryabkov]
-- First test workflow. [Alexandre Dulaunoy]
-- Merge pull request #25 from microolap-technologies/sni_2_srv_name.
-  [Alexandre Dulaunoy]
+
+* Add support to decrypt resumed sessions. [Aleksey Ryabkov]
+
+* First test workflow. [Alexandre Dulaunoy]
+
+* Merge pull request #25 from microolap-technologies/sni_2_srv_name. [Alexandre Dulaunoy]
 
   use sni in server_name
-- Use sni in server_name. [Aleksey Ryabkov]
+
+* Use sni in server_name. [Aleksey Ryabkov]
 
 
-v1.1 (2019-12-28)
------------------
+## v1.1 (2019-12-28)
 
-Changes
-~~~~~~~
-- [doc] Changelog reflecting v1.0 release. [Alexandre Dulaunoy]
+### Changes
 
-Other
-~~~~~
-- Merge pull request #24 from mattslot/master. [Alexandre Dulaunoy]
+* [doc] Changelog reflecting v1.0 release. [Alexandre Dulaunoy]
+
+### Other
+
+* Merge pull request #24 from mattslot/master. [Alexandre Dulaunoy]
 
   Explicit parameter types for static prototypes
-- Explicit parameter types for static prototypes. [Matt Slot]
-- Merge pull request #22 from EaseTheWorld/handshake. [Alexandre
-  Dulaunoy]
+
+* Explicit parameter types for static prototypes. [Matt Slot]
+
+* Merge pull request #22 from EaseTheWorld/handshake. [Alexandre Dulaunoy]
 
   Handle weird 3-way handshake(syn&ack -> syn -> ack)
-- Handle weird 3-way handshake(syn&ack -> syn -> ack) I have pcaps from
-  Cisco2960 span port and found some tcp handshake has weird order 3-way
-  handshake. It seems first packet order between sessions is not
-  guaranted for cisco span. maybe. Current state transition is
-  INIT -- syn --> SYN1 -- syn&ack --> SYN2 -- ack --> ESTABLISHED New
-  state transition starts with SYN1 or SYN2 and adds(revive actually)
-  STATE_ACK to handle both cases. case1 : INIT -- syn --> SYN1 --
-  syn&ack -->ACK -- ack --> ESTABLISHED (normal) case2 : INIT -- syn&ack
-  --> SYN2 -- syn -->ACK -- ack --> ESTABLISHED (weird) [EaseTheWorld]
+
+* Handle weird 3-way handshake(syn&ack -> syn -> ack) I have pcaps from Cisco2960 span port and found some tcp handshake has weird order 3-way handshake. It seems first packet order between sessions is not guaranted for cisco span. maybe. Current state transition is         INIT -- syn --> SYN1 -- syn&ack --> SYN2 -- ack --> ESTABLISHED New state transition starts with SYN1 or SYN2 and adds(revive actually) STATE_ACK to handle both cases. case1 : INIT -- syn --> SYN1 -- syn&ack -->ACK -- ack --> ESTABLISHED (normal) case2 : INIT -- syn&ack --> SYN2 -- syn -->ACK -- ack --> ESTABLISHED (weird) [EaseTheWorld]
 
 
-v1.0 (2019-05-26)
------------------
+## v1.0 (2019-05-26)
 
-Changes
-~~~~~~~
-- [build] v1.0 released. [Alexandre Dulaunoy]
-- [changelog] v1.0 released. [Alexandre Dulaunoy]
-- [build] gitchangelogrc configuration added. [Alexandre Dulaunoy]
+### Changes
 
-Other
-~~~~~
-- Merge pull request #21 from qha/repair-make-targets. [Alexandre
-  Dulaunoy]
+* [build] v1.0 released. [Alexandre Dulaunoy]
+
+* [changelog] v1.0 released. [Alexandre Dulaunoy]
+
+* [build] gitchangelogrc configuration added. [Alexandre Dulaunoy]
+
+### Other
+
+* Merge pull request #21 from qha/repair-make-targets. [Alexandre Dulaunoy]
 
   Repair make targets and ssl/ssldecode.c, bump version
-- Rerun autoconf. [Ulrik Haugen]
-- Bump version. [Ulrik Haugen]
-- Repair ssl_key_log_file handling. [Ulrik Haugen]
+
+* Rerun autoconf. [Ulrik Haugen]
+
+* Bump version. [Ulrik Haugen]
+
+* Repair ssl_key_log_file handling. [Ulrik Haugen]
 
   Set ssl_key_log_file to null in ssl_decode_ctx_create if no
   file name was supplied.
@@ -285,18 +402,26 @@ Other
   is non null.
 
   Repair order of fseek parameters.
-- Take project name and version from configure define. [Ulrik Haugen]
+
+* Take project name and version from configure define. [Ulrik Haugen]
 
   ... in print_version.
-- Enable compiling without std c99 when OPENSSL is defined. [Ulrik
-  Haugen]
-- Repair spelling in comments. [Ulrik Haugen]
-- Remove presumably extraneous files. [Ulrik Haugen]
-- Remove extraneous files. [Ulrik Haugen]
-- Add .gitignore. [Ulrik Haugen]
-- Make install target install doc files. [Ulrik Haugen]
-- Repair installdir variable names. [Ulrik Haugen]
-- Repair dist target. [Ulrik Haugen]
+
+* Enable compiling without std c99 when OPENSSL is defined. [Ulrik Haugen]
+
+* Repair spelling in comments. [Ulrik Haugen]
+
+* Remove presumably extraneous files. [Ulrik Haugen]
+
+* Remove extraneous files. [Ulrik Haugen]
+
+* Add .gitignore. [Ulrik Haugen]
+
+* Make install target install doc files. [Ulrik Haugen]
+
+* Repair installdir variable names. [Ulrik Haugen]
+
+* Repair dist target. [Ulrik Haugen]
 
   Mark phony targets as such.
 
@@ -307,158 +432,225 @@ Other
   Adjust dist archive location.
 
   Prune more backup files.
-- Whitespace. [Ulrik Haugen]
-- Set package name in configure.in, move version there. [Ulrik Haugen]
-- Merge pull request #19 from 1div0/master. [Alexandre Dulaunoy]
+
+* Whitespace. [Ulrik Haugen]
+
+* Set package name in configure.in, move version there. [Ulrik Haugen]
+
+* Merge pull request #19 from 1div0/master. [Alexandre Dulaunoy]
 
   GREASE
-- GREASE. [Peter Kovář]
-- Merge pull request #18 from mathewmarcus/dh_aes_gcm_support.
-  [Alexandre Dulaunoy]
+
+* GREASE. [Peter Kovář]
+
+* Merge pull request #18 from mathewmarcus/dh_aes_gcm_support. [Alexandre Dulaunoy]
 
   Dh aes gcm support
-- Use macro to check if cipher is AEAD. [mathewmarcus]
-- Update man page with -l sslkeylogfile option. [mathewmarcus]
-- Updated relevant ciphersuites with GCM enc. [mathewmarcus]
-- Added fix for AES256 GCM decryption. [mathewmarcus]
-- Added case insensitive string comparison macro. [mathewmarcus]
-- Added support for AES GCM decryption. [mathewmarcus]
-- Use sslkeylogfile to get MS if possible. [mathewmarcus]
-- Added function to extract MS from sslkeylogfile. [mathewmarcus]
-- Added GCM specific ciphersuite info. [mathewmarcus]
-- Added sslkeylogfile pointer to decode ctx. [mathewmarcus]
-- Fix decoding and printing of DiffieHellman Client params.
-  [mathewmarcus]
-- Add l option for SSLKEYLOGFILE. [mathewmarcus]
-- Merge pull request #17 from mathewmarcus/fix_extension_bug. [Alexandre
-  Dulaunoy]
+
+* Use macro to check if cipher is AEAD. [mathewmarcus]
+
+* Update man page with -l sslkeylogfile option. [mathewmarcus]
+
+* Updated relevant ciphersuites with GCM enc. [mathewmarcus]
+
+* Added fix for AES256 GCM decryption. [mathewmarcus]
+
+* Added case insensitive string comparison macro. [mathewmarcus]
+
+* Added support for AES GCM decryption. [mathewmarcus]
+
+* Use sslkeylogfile to get MS if possible. [mathewmarcus]
+
+* Added function to extract MS from sslkeylogfile. [mathewmarcus]
+
+* Added GCM specific ciphersuite info. [mathewmarcus]
+
+* Added sslkeylogfile pointer to decode ctx. [mathewmarcus]
+
+* Fix decoding and printing of DiffieHellman Client params. [mathewmarcus]
+
+* Add l option for SSLKEYLOGFILE. [mathewmarcus]
+
+* Merge pull request #17 from mathewmarcus/fix_extension_bug. [Alexandre Dulaunoy]
 
   correctly handle case where server hello does not request extension s…
-- Improve syntax. [mathewmarcus]
-- Correctly handle case where server hello does not request extension
-  specified by client. [mathewmarcus]
-- Merge pull request #16 from mathewmarcus/tls_extensions. [Alexandre
-  Dulaunoy]
+
+* Improve syntax. [mathewmarcus]
+
+* Correctly handle case where server hello does not request extension specified by client. [mathewmarcus]
+
+* Merge pull request #16 from mathewmarcus/tls_extensions. [Alexandre Dulaunoy]
 
   Tls extensions
-- Code cleanup. [mathewmarcus]
-- Added support for SNI. [mathewmarcus]
-- Added support for encrypt-then-mac. [mathewmarcus]
-- Finished support for extended master secret. [mathewmarcus]
-- Calculate session hash. [mathewmarcus]
-- Added struct to store extensions. [mathewmarcus]
-- Added struct to store extensions. [mathewmarcus]
-- Revert "moved struct ssl_decoder_ definition into header file because
-  we need it in ssl.enums.c" [Mathew Marcus]
+
+* Code cleanup. [mathewmarcus]
+
+* Added support for SNI. [mathewmarcus]
+
+* Added support for encrypt-then-mac. [mathewmarcus]
+
+* Finished support for extended master secret. [mathewmarcus]
+
+* Calculate session hash. [mathewmarcus]
+
+* Added struct to store extensions. [mathewmarcus]
+
+* Added struct to store extensions. [mathewmarcus]
+
+* Revert "moved struct ssl_decoder_ definition into header file because we need it in ssl.enums.c" [Mathew Marcus]
 
   This reverts commit 193c6001086920c0623593aba373f948aa275f8d.
-- Moved struct ssl_decoder_ definition into header file because we need
-  it in ssl.enums.c. [mathewmarcus]
-- Added handler for extended master secret extension. [mathewmarcus]
-- Rename functions. [mathewmarcus]
-- Record handshake messages for session hash. [Mathew Marcus]
-- Include extensions in output. [mathewmarcus]
-- Merge pull request #15 from Whissi/update-ciphers. [Alexandre
-  Dulaunoy]
+
+* Moved struct ssl_decoder_ definition into header file because we need it in ssl.enums.c. [mathewmarcus]
+
+* Added handler for extended master secret extension. [mathewmarcus]
+
+* Rename functions. [mathewmarcus]
+
+* Record handshake messages for session hash. [Mathew Marcus]
+
+* Include extensions in output. [mathewmarcus]
+
+* Merge pull request #15 from Whissi/update-ciphers. [Alexandre Dulaunoy]
 
   Update ciphers
-- Adjust cipher suite formation. [Thomas Deutschmann]
-- Add TLS 1.3 cipher suites. [Thomas Deutschmann]
-- Add fallback signaling cipher suite. [Thomas Deutschmann]
-- Add CHACHA20_POLY1305 cipher suite. [Thomas Deutschmann]
-- Merge pull request #14 from davidkretch/fix-typo. [Alexandre Dulaunoy]
+
+* Adjust cipher suite formation. [Thomas Deutschmann]
+
+* Add TLS 1.3 cipher suites. [Thomas Deutschmann]
+
+* Add fallback signaling cipher suite. [Thomas Deutschmann]
+
+* Add CHACHA20_POLY1305 cipher suite. [Thomas Deutschmann]
+
+* Merge pull request #14 from davidkretch/fix-typo. [Alexandre Dulaunoy]
 
   Fix a typo in the man page
-- Fix a typo in the man page. [David Kretch]
+
+* Fix a typo in the man page. [David Kretch]
 
   Delete the extra "to" in "To decrypt traffic to to host" under the examples section.
-- Merge pull request #13 from alperakcan/master. [Alexandre Dulaunoy]
+
+* Merge pull request #13 from alperakcan/master. [Alexandre Dulaunoy]
 
   fix ssl record queue data read
-- - fix mis calculation of read_left if queue already has some data,
-  which might not be bigger than ssl_header_size - update q->ptr only if
-  q->data is changed. [Alper Akcan]
-- Merge pull request #1 from adulau/master. [Alper Akcan]
+
+* - fix mis calculation of read_left if queue already has some data, which might not be bigger than ssl_header_size - update q->ptr only if q->data is changed. [Alper Akcan]
+
+* Merge pull request #1 from adulau/master. [Alper Akcan]
 
   Merge pull request #12 from alperakcan/master
-- Merge pull request #12 from alperakcan/master. [Alexandre Dulaunoy]
+
+* Merge pull request #12 from alperakcan/master. [Alexandre Dulaunoy]
 
   Fix packet length calculation if IP length is 0, due to TSO
-- Fix packet length calculation if IP length is 0, due to TSO. [Alper
-  Akcan]
-- Typo fixed. [Alexandre Dulaunoy]
-- Explanation added in a new README. [Alexandre Dulaunoy]
-- Merge pull request #9 from PequalsNP-team/master. [Alexandre Dulaunoy]
+
+* Fix packet length calculation if IP length is 0, due to TSO. [Alper Akcan]
+
+* Typo fixed. [Alexandre Dulaunoy]
+
+* Explanation added in a new README. [Alexandre Dulaunoy]
+
+* Merge pull request #9 from PequalsNP-team/master. [Alexandre Dulaunoy]
 
   updated configure for new libpcap location on most linux distro
-- Updated configure for new libpcap location on most linux distro.
-  [thez3ro]
-- Merge pull request #7 from knowtoto/master. [Alexandre Dulaunoy]
+
+* Updated configure for new libpcap location on most linux distro. [thez3ro]
+
+* Merge pull request #7 from knowtoto/master. [Alexandre Dulaunoy]
 
   Fix a null pointer dereference bug
-- Fix a null pointer dereference bug of tls12_prf be caused by invalid
-  extern declaration for digests variable. [hyunkyu.oh]
-- Merge pull request #5 from wllm-rbnt/master. [Alexandre Dulaunoy]
+
+* Fix a null pointer dereference bug of tls12_prf be caused by invalid extern declaration for digests variable. [hyunkyu.oh]
+
+* Merge pull request #5 from wllm-rbnt/master. [Alexandre Dulaunoy]
 
   More code cleaning
-- Include string.h (remove warnings about memcpy) [William Robinet]
-- Fix order of arguments in calls to calloc. [William Robinet]
-- "Each invocation of va_start() must be matched by a corresponding
-  invocation of va_end()" [William Robinet]
-- Remove dead code. [William Robinet]
-- Do not use uninitialized variable. [William Robinet]
-- Make valgrind/memcheck happy. [William Robinet]
-- Add missing comma (introduced by
-  2d067c26503ace1466d132e7efd9f0ff7885295a) [William Robinet]
-- Merge pull request #4 from wllm-rbnt/master. [Alexandre Dulaunoy]
+
+* Include string.h (remove warnings about memcpy) [William Robinet]
+
+* Fix order of arguments in calls to calloc. [William Robinet]
+
+* "Each invocation of va_start() must be matched by a corresponding invocation of va_end()" [William Robinet]
+
+* Remove dead code. [William Robinet]
+
+* Do not use uninitialized variable. [William Robinet]
+
+* Make valgrind/memcheck happy. [William Robinet]
+
+* Add missing comma (introduced by 2d067c26503ace1466d132e7efd9f0ff7885295a) [William Robinet]
+
+* Merge pull request #4 from wllm-rbnt/master. [Alexandre Dulaunoy]
 
   Fix cleanup loop
-- Avoid auto-vivisection during connection clean-up ... [William
-  Robinet]
-- Fix inactive connection removal. [William Robinet]
-- Merge pull request #3 from wllm-rbnt/master. [Alexandre Dulaunoy]
+
+* Avoid auto-vivisection during connection clean-up ... [William Robinet]
+
+* Fix inactive connection removal. [William Robinet]
+
+* Merge pull request #3 from wllm-rbnt/master. [Alexandre Dulaunoy]
 
   [bugfix] Initialize initial reference timeval
-- Initialize initial reference timeval Avoids wrong cleaning of first
-  connection(s) [William Robinet]
-- Merge pull request #2 from wllm-rbnt/master. [Alexandre Dulaunoy]
+
+* Initialize initial reference timeval Avoids wrong cleaning of first connection(s) [William Robinet]
+
+* Merge pull request #2 from wllm-rbnt/master. [Alexandre Dulaunoy]
 
   Fixes for 2 memory leaks and in flight structure cleaning
-- Fix memory leak if SSL session id is not present. [William Robinet]
-- In flight connection pool cleaning. [William Robinet]
-- Fix memory leak at connection closing. [William Robinet]
-- Merge pull request #1 from wllm-rbnt/csloop. [Alexandre Dulaunoy]
+
+* Fix memory leak if SSL session id is not present. [William Robinet]
+
+* In flight connection pool cleaning. [William Robinet]
+
+* Fix memory leak at connection closing. [William Robinet]
+
+* Merge pull request #1 from wllm-rbnt/csloop. [Alexandre Dulaunoy]
 
   Fix for infinite loop in Ciphers Suite decoding
-- Fix for infinite loop in Ciphers Suite decoding. [William Robinet]
-- Dtable bug fixed: list overrun (from NetBSD tree) [Alexandre Dulaunoy]
-- Memory leak per TLS session removed. Call cleanup after each
-  finalization. [Alexandre Dulaunoy]
-- Free also the packet structure. [Alexandre Dulaunoy]
-- Snaplen increased to the default jumbo frame size. [Alexandre
-  Dulaunoy]
+
+* Fix for infinite loop in Ciphers Suite decoding. [William Robinet]
+
+* Dtable bug fixed: list overrun (from NetBSD tree) [Alexandre Dulaunoy]
+
+* Memory leak per TLS session removed. Call cleanup after each finalization. [Alexandre Dulaunoy]
+
+* Free also the packet structure. [Alexandre Dulaunoy]
+
+* Snaplen increased to the default jumbo frame size. [Alexandre Dulaunoy]
 
   If the snaplen is lower than the total frame length announced,
   ssldump won't be able to reassemble the payload. "Length mismatch"
   error. Tested on Ethernet uplinks supporting jumbo frame.
-- Continue even if no IP address is assigned on the interface.
-  [Alexandre Dulaunoy]
+
+* Continue even if no IP address is assigned on the interface. [Alexandre Dulaunoy]
 
   ssldump in a production environment can be used on a capture
   interface where no IP addresses are assigned. Print a warning instead
   of exiting.
-- Modern config.guess/sub from Ubuntu ssldump package. [Alexandre
-  Dulaunoy]
-- Ssldump-0.9-ciphersuites.patch. [Alexandre Dulaunoy]
-- Ssldump-0.9-ssl-enums.patch. [Alexandre Dulaunoy]
-- Ssldump-0.9-tlsv12.patch. [Alexandre Dulaunoy]
-- Ssldump-0.9-pcap-vlan.patch. [Alexandre Dulaunoy]
-- Ssldump-0.9-link_layer.patch. [Alexandre Dulaunoy]
-- Ssldump-0.9-table-stops.patch. [Alexandre Dulaunoy]
-- Sldump-0.9-cvs-20060619.patch. [Alexandre Dulaunoy]
-- Sldump-0.9-aes.patch. [Alexandre Dulaunoy]
-- Sldump-0.9-libpcap.patch. [Alexandre Dulaunoy]
-- Ssldump-0.9-openssl.patch. [Alexandre Dulaunoy]
-- Ssldump_0.9b3.orig.tar.gz Import. [Alexandre Dulaunoy]
+
+* Modern config.guess/sub from Ubuntu ssldump package. [Alexandre Dulaunoy]
+
+* Ssldump-0.9-ciphersuites.patch. [Alexandre Dulaunoy]
+
+* Ssldump-0.9-ssl-enums.patch. [Alexandre Dulaunoy]
+
+* Ssldump-0.9-tlsv12.patch. [Alexandre Dulaunoy]
+
+* Ssldump-0.9-pcap-vlan.patch. [Alexandre Dulaunoy]
+
+* Ssldump-0.9-link_layer.patch. [Alexandre Dulaunoy]
+
+* Ssldump-0.9-table-stops.patch. [Alexandre Dulaunoy]
+
+* Sldump-0.9-cvs-20060619.patch. [Alexandre Dulaunoy]
+
+* Sldump-0.9-aes.patch. [Alexandre Dulaunoy]
+
+* Sldump-0.9-libpcap.patch. [Alexandre Dulaunoy]
+
+* Ssldump-0.9-openssl.patch. [Alexandre Dulaunoy]
+
+* Ssldump_0.9b3.orig.tar.gz Import. [Alexandre Dulaunoy]
 
 
