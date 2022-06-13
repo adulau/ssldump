@@ -1057,8 +1057,10 @@ static int ssl_generate_keying_material(ssl,d)
       }
     }
 
-    CRDUMP("Client MAC key",c_mk,ssl->cs->dig_len);
-    CRDUMP("Server MAC key",s_mk,ssl->cs->dig_len);    
+    if (!IS_AEAD_CIPHER(ssl->cs)){
+        CRDUMP("Client MAC key",c_mk,ssl->cs->dig_len);
+        CRDUMP("Server MAC key",s_mk,ssl->cs->dig_len);    
+    }
     CRDUMP("Client Write key",c_wk,ssl->cs->bits/8);
     CRDUMP("Server Write key",s_wk,ssl->cs->bits/8);    
 
