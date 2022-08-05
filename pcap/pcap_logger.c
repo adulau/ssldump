@@ -62,14 +62,14 @@ static int create_pcap_logger(proto_obj **objp, struct sockaddr_storage *i_addr,
       ABORT(R_NO_MEMORY);
 
     //src_addr.sin_family = AF_INET;
-    //src_addr.sin_port = htons(i_port);
     //src_addr.sin_addr = *i_addr;
     memcpy(&src_addr, i_addr, sizeof(struct sockaddr_in));
+    src_addr.sin_port = htons(i_port);
 
     //dst_addr.sin_family = AF_INET;
-    //dst_addr.sin_port = htons(r_port);
     //dst_addr.sin_addr = *r_addr;
     memcpy(&dst_addr, r_addr, sizeof(struct sockaddr_in));
+    dst_addr.sin_port = htons(r_port);
 
     logpkt_ctx_init(pcap_obj,NULL,0,content_pcap_src_ether, content_pcap_dst_ether,
                                 (const struct sockaddr*)&src_addr, sizeof(src_addr),
