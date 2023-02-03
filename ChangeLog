@@ -1,6 +1,29 @@
 # Changelog
 
 
+## v1.6 (2023-02-03)
+
+### Changes
+
+* [doc] v1.5 released. [Alexandre Dulaunoy]
+
+* [doc] ChangeLog updated with release v1.5. [Alexandre Dulaunoy]
+
+### Other
+
+* Merge pull request #63 from wllm-rbnt/dev. [Alexandre Dulaunoy]
+
+  Fix missing port # in pcap files
+
+* Fix missing port # in pcap files. [William Robinet]
+
+* Merge pull request #61 from lord8266/aead. [Alexandre Dulaunoy]
+
+  Print MAC keys only for non AEAD ciphers
+
+* Print MAC keys only for non AEAD ciphers. [Vishwa Pravin]
+
+
 ## v1.5 (2022-05-26)
 
 ### Changes
