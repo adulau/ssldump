@@ -1,7 +1,6 @@
 # ssldump - (de-facto repository gathering patches around the cyberspace)
 
-![Clang CI](https://github.com/adulau/ssldump/workflows/Clang%20CI/badge.svg)
-![GCC CI](https://github.com/adulau/ssldump/workflows/GCC%20CI/badge.svg)
+[![Build CI](https://github.com/adulau/ssldump/actions/workflows/build.yml/badge.svg)](https://github.com/adulau/ssldump/actions/workflows/build.yml)
 
 # Release and tagging
 

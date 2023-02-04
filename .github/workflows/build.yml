@@ -1,0 +1,35 @@
+name: Build CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+    # build the main branch every Monday morning
+    - cron: '37 9 * * 1'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler: [cc, clang, clang-13, gcc-10]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: ./autogen
+        run: ./autogen.sh
+      - name: Compiler version
+        run: $CC -v
+        env:
+          CC: ${{ matrix.compiler }}
+      - name: Install dependencies
+        run: sudo apt-get install autoconf libtls-dev libpcap-dev libnet1-dev libjson-c-dev
+      - name: ./configure
+        run: ./configure
+        env:
+          CC: ${{ matrix.compiler }}
+      - name: make
+        run: make
