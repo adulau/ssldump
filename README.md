@@ -1,6 +1,7 @@
 # ssldump - (de-facto repository gathering patches around the cyberspace)
 
 [![Build CI](https://github.com/adulau/ssldump/actions/workflows/build.yml/badge.svg)](https://github.com/adulau/ssldump/actions/workflows/build.yml)
+[![CodeQL analysis](https://github.com/adulau/ssldump/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/adulau/ssldump/actions/workflows/codeql-analysis.yml)
 
 # Release and tagging
 

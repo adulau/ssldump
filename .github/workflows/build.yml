@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: ./autogen
+      - name: ./autogen.sh
         run: ./autogen.sh
       - name: Compiler version
         run: $CC -v
