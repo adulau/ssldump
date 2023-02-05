@@ -714,26 +714,26 @@ int ssl_print_timestamp(ssl,ts)
     jobj = ssl->cur_json_st;
 
     if(jobj) {
-      snprintf(ts_str,40, "%ld%c%4.4ld",ts->tv_sec,'.',ts->tv_usec/100);
+      snprintf(ts_str,40, "%lld%c%4.4lld",(long long)ts->tv_sec,'.',(long long)ts->tv_usec/100);
       json_object *j_ts_str = json_object_new_string(ts_str);
       json_object_object_add(jobj, "timestamp", j_ts_str);
     }
     if(SSL_print_flags & SSL_PRINT_TIMESTAMP_ABSOLUTE) {
       if(!(SSL_print_flags & SSL_PRINT_JSON))
-        explain(ssl,"%d%c%4.4d ",ts->tv_sec,'.',ts->tv_usec/100);
+        explain(ssl,"%lld%c%4.4lld ",(long long)ts->tv_sec,'.',(long long)ts->tv_usec/100);
     }
     else{
       if((r=timestamp_diff(ts,&ssl->time_start,&dt)))
         ERETURN(r);
       if(!(SSL_print_flags & SSL_PRINT_JSON))
-        explain(ssl,"%d%c%4.4d ",dt.tv_sec,'.',dt.tv_usec/100);
+        explain(ssl,"%lld%c%4.4lld ",(long long)dt.tv_sec,'.',(long long)dt.tv_usec/100);
     }
     
     if((r=timestamp_diff(ts,&ssl->time_last,&dt))){
       ERETURN(r);
     }
     if(!(SSL_print_flags & SSL_PRINT_JSON))
-      explain(ssl,"(%d%c%4.4d)  ",dt.tv_sec,'.',dt.tv_usec/100);
+      explain(ssl,"(%lld%c%4.4lld)  ",(long long)dt.tv_sec,'.',(long long)dt.tv_usec/100);
 
     memcpy(&ssl->time_last,ts,sizeof(struct timeval));                
 
