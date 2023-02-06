@@ -43,6 +43,14 @@ other too (but this is just a collateral damage).
 - I used it for a relatively small project called Passive SSL. For more information, [Passive SSL Passive Detection and Reconnaissance Techniques, to Find, Track, and Attribute Vulnerable ”Devices”](https://www.first.org/resources/papers/conf2015/first_2015_-_leverett_-_dulaunoy_-_passive_detection_20150604.pdf). Additional back-end code available is in the [crl-monitor ](https://github.com/adulau/crl-monitor/tree/master/bin/x509) repository.
 - ssldump is used in the [D4-Project](https://github.com/D4-project/).
 
+# Where ssldump is available? 
+
+- Alpine Linux [ssldump](https://pkgs.alpinelinux.org/packages?name=ssldump&branch=edge&repo=&arch=&maintainer=)
+- Arch Linux [ssldump](https://aur.archlinux.org/packages/ssldump)
+- Fedora [ssldump](https://release-monitoring.org/project/141677/)
+- Kali Linux [ssldump](https://www.kali.org/tools/ssldump/)
+- Ubuntu Linux [ssldump](http://changelogs.ubuntu.com/changelogs/pool/universe/s/ssldump/)
+
 # Build instructions
 
 On Debian & Ubuntu:
