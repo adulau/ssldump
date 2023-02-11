@@ -62,7 +62,7 @@ make
 (optional) make install
 ```
 
-On Fedora, Centos & RHEL:
+On Fedora, CentOS, RHEL & Rocky:
 ```
 dnf install autoconf automake gcc make openssl-devel libpcap-devel libnet-devel json-c-devel
 ./autogen.sh
