@@ -79,6 +79,9 @@ typedef struct SSL_CipherSuite_ {
 #define ENC_NULL	0x3a
 #define ENC_AES128_GCM  0x3b
 #define ENC_AES256_GCM  0x3c
+#define ENC_CHACHA20_POLY1305  0x3d
+#define ENC_AES128_CCM  0x3e
+#define ENC_AES128_CCM_8  0x3f
 
 #define DIG_MD5		0x40
 #define DIG_SHA		0x41

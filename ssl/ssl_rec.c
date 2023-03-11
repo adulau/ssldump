@@ -53,9 +53,11 @@
 #include <openssl/ssl.h>
 #include <openssl/hmac.h>
 #include <openssl/evp.h>
+#include <openssl/err.h>
 #endif
 #include "ssldecode.h"
 #include "ssl_rec.h"
+
 
 struct ssl_rec_decoder_ {
      SSL_CipherSuite *cs;
@@ -65,9 +67,8 @@ struct ssl_rec_decoder_ {
 #ifdef OPENSSL     
      EVP_CIPHER_CTX *evp;
 #endif     
-     UINT4 seq;
+     UINT8 seq;
 };
-
 
 char *digests[]={
      "MD5",
@@ -92,7 +93,10 @@ char *ciphers[]={
      "SEED",
      NULL,
      "aes-128-gcm",
-     "aes-256-gcm"
+     "aes-256-gcm",
+     "ChaCha20-Poly1305",
+     "aes-128-ccm",
+     "aes-128-ccm", // for ccm 8, uses the same cipher
 };
 
 
@@ -100,9 +104,9 @@ static int tls_check_mac PROTO_LIST((ssl_rec_decoder *d,int ct,
   int ver,UCHAR *data,UINT4 datalen,UCHAR *iv,UINT4 ivlen,UCHAR *mac));
 static int fmt_seq PROTO_LIST((UINT4 num,UCHAR *buf));
 
-int ssl_create_rec_decoder(dp,cs,mk,sk,iv)
+int ssl_create_rec_decoder(dp,ssl,mk,sk,iv)
   ssl_rec_decoder **dp;
-  SSL_CipherSuite *cs;
+  ssl_obj *ssl;
   UCHAR *mk;
   UCHAR *sk;
   UCHAR *iv;
@@ -111,10 +115,11 @@ int ssl_create_rec_decoder(dp,cs,mk,sk,iv)
     ssl_rec_decoder *dec=0;
 #ifdef OPENSSL
     const EVP_CIPHER *ciph=0;
+	int iv_len = ssl->version == TLSV13_VERSION?12:ssl->cs->block;
 
     /* Find the SSLeay cipher */
-    if(cs->enc!=ENC_NULL){
-      ciph=(EVP_CIPHER *)EVP_get_cipherbyname(ciphers[cs->enc-0x30]);
+    if(ssl->cs->enc!=ENC_NULL){
+      ciph=(EVP_CIPHER *)EVP_get_cipherbyname(ciphers[ssl->cs->enc-0x30]);
       if(!ciph)
         ABORT(R_INTERNAL);
     }
@@ -125,28 +130,28 @@ int ssl_create_rec_decoder(dp,cs,mk,sk,iv)
     if(!(dec=(ssl_rec_decoder *)calloc(1,sizeof(ssl_rec_decoder))))
       ABORT(R_NO_MEMORY);
 
-    dec->cs=cs;
+    dec->cs=ssl->cs;
 
-    if((r=r_data_alloc(&dec->mac_key,cs->dig_len)))
+    if((r=r_data_alloc(&dec->mac_key,ssl->cs->dig_len)))
       ABORT(r);
 
-    if((r=r_data_alloc(&dec->implicit_iv,cs->block)))
+    if((r=r_data_alloc(&dec->implicit_iv,iv_len)))
       ABORT(r);
-    memcpy(dec->implicit_iv->data,iv,cs->block);
+    memcpy(dec->implicit_iv->data,iv, iv_len);
 
-    if((r=r_data_create(&dec->write_key,sk,cs->eff_bits/8)))
+    if((r=r_data_create(&dec->write_key,sk,ssl->cs->eff_bits/8)))
       ABORT(r);
 
     /*
        This is necessary for AEAD ciphers, because we must wait to fully initialize the cipher
        in order to include the implicit IV
     */
-    if(IS_AEAD_CIPHER(cs)){
+    if(IS_AEAD_CIPHER(ssl->cs)){
       sk=NULL;
       iv=NULL;
     }
     else
-      memcpy(dec->mac_key->data,mk,cs->dig_len);
+      memcpy(dec->mac_key->data,mk,ssl->cs->dig_len);
 
     if(!(dec->evp=EVP_CIPHER_CTX_new()))
       ABORT(R_NO_MEMORY);
@@ -189,6 +194,95 @@ int ssl_destroy_rec_decoder(dp)
 
 #define MSB(a) ((a>>8)&0xff)
 #define LSB(a) (a&0xff)
+
+int tls13_update_rec_key(d,newkey,newiv)
+	ssl_rec_decoder *d;
+	UCHAR *newkey;
+	UCHAR *newiv;
+{
+	d->write_key->data = newkey;
+	d->implicit_iv->data = newiv;
+	d->seq = 0;
+}
+
+int tls13_decode_rec_data(ssl,d,ct,version,in,inl,out,outl)
+  ssl_obj *ssl;
+  ssl_rec_decoder *d;
+  int ct;
+  int version;
+  UCHAR *in;
+  int inl;
+  UCHAR *out;
+  int *outl;
+  {
+    int pad,i;
+    int r,encpadl,x,_status=0;
+    UCHAR aad[5],aead_nonce[12], *tag;
+	int taglen = d->cs->enc==ENC_AES128_CCM_8?8:16;
+    CRDUMP("CipherText",in,inl);
+    CRDUMPD("KEY",d->write_key);
+    CRDUMPD("IV",d->implicit_iv);
+    if (!IS_AEAD_CIPHER(d->cs)){
+      fprintf(stderr, "Non aead cipher in tls13\n");
+      ABORT(-1);
+    }
+    memcpy(aead_nonce, d->implicit_iv->data, 12);
+    for (i = 0; i < 8; i++) { // AEAD NONCE according to RFC TLS1.3
+        aead_nonce[12 - 1 - i] ^= ((d->seq >> (i * 8)) & 0xFF);
+    }
+    d->seq++;
+    CRDUMP("NONCE",aead_nonce,12);
+    tag = in+(inl-taglen);
+    CRDUMP("Tag", tag, taglen);
+
+    aad[0] = ct;
+    aad[1] = 0x03;
+    aad[2] = 0x03;
+    aad[3] = MSB(inl);
+    aad[4] = LSB(inl);
+    CRDUMP("AAD",aad,5);
+    inl-=taglen;
+
+	if (!EVP_CIPHER_CTX_ctrl(d->evp, EVP_CTRL_AEAD_SET_IVLEN, 12, NULL)) {
+		fprintf(stderr, "Unable to set ivlen\n");
+		ABORT(-1);
+	}
+
+	if (IS_CCM_CIPHER(d->cs) && !EVP_CIPHER_CTX_ctrl(d->evp, EVP_CTRL_AEAD_SET_TAG, taglen, tag)) {
+		fprintf(stderr, "Unable to set tag for ccm cipher\n");
+		ABORT(-1);
+	}
+
+    if(!EVP_DecryptInit_ex(d->evp,NULL,NULL,d->write_key->data,aead_nonce)){
+      fprintf(stderr,"Unable to init evp1\n");
+      ABORT(-1);
+    }
+
+    if (IS_CCM_CIPHER(d->cs) && !EVP_DecryptUpdate(d->evp,NULL,outl,NULL,inl)){
+    	  fprintf(stderr,"Unable to update data length\n");
+    	  ABORT(-1);
+	}
+
+    if (!EVP_DecryptUpdate(d->evp,NULL,outl,aad,5)){
+      fprintf(stderr,"Unable to update aad\n");
+      ABORT(-1);
+    }
+
+    CRDUMP("Real CipherText", in, inl);
+    if (!EVP_DecryptUpdate(d->evp,out,outl,in,inl)){
+      fprintf(stderr,"Unable to update with CipherText\n");
+      ABORT(-1);
+    }
+
+    if (!IS_CCM_CIPHER(d->cs) && (!EVP_CIPHER_CTX_ctrl(d->evp,EVP_CTRL_GCM_SET_TAG,taglen,tag) || !EVP_DecryptFinal(d->evp,NULL,&x))) {
+      	fprintf(stderr,"BAD MAC\n");
+      	ABORT(SSL_BAD_MAC);
+    }
+
+abort:
+    ERR_print_errors_fp(stderr);	
+    return _status;
+}
 
 int ssl_decode_rec_data(ssl,d,ct,version,in,inl,out,outl)
   ssl_obj *ssl;

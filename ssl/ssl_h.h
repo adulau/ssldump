@@ -70,6 +70,8 @@ typedef struct d_queue_ {
 typedef struct ssl_extensions_ {
   int encrypt_then_mac;
   int extended_master_secret;
+  int client_certificate_type;
+  int server_certificate_type;
 } ssl_extensions;
 
 typedef struct ssl_obj_ {
@@ -135,6 +137,7 @@ typedef struct decoder_ {
 #define TLSV1_VERSION	       0x301
 #define TLSV11_VERSION	       0x302
 #define TLSV12_VERSION	       0x303
+#define TLSV13_VERSION	       0x304
 
 /*State defines*/
 #define SSL_ST_SENT_NOTHING             0
