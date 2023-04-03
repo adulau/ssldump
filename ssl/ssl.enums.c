@@ -579,38 +579,26 @@ static int decode_HandshakeType_SessionTicket(ssl,dir,seg,data)
     UINT4 exlen, ex, val;
     extern decoder extension_decoder[];
 										
-    LF;
-    SSL_DECODE_UINT32(ssl, "ticket_lifetime",0, data, &val);
-    explain(ssl, "ticket_lifetime %u\n", val);
-    SSL_DECODE_UINT32(ssl, "ticket_age_add", 0,data, &val);
-    explain(ssl, "ticket_age_add %u\n", val);
-    SSL_DECODE_UINT8(ssl, "ticket_nonce",0,data, &val);
-    if (val>data->len) {
-      fprintf(stderr, "Short read: %d bytes available (expecting %d)\n", data->len, val);
-      ERETURN(R_EOD);
-    }
-    CRDUMP("ticket_nonce", data->data, val);
-    data->data+=val;data->len-=val;
-    SSL_DECODE_UINT16(ssl, "ticket",0,data, &val);
-    if (val>data->len) {
-      fprintf(stderr, "Short read: %d bytes available (expecting %d)\n", data->len, val);
-      ERETURN(R_EOD);
-    }
-    CRDUMP("ticket", data->data, val);
-    data->data+=val;data->len-=val;
-    SSL_DECODE_UINT16(ssl, "exlen", 0, data, &exlen);
-    LF;
-    if (exlen) {
-      while (data->len) {
-        SSL_DECODE_UINT16(ssl, "extension type", 0, data, &ex);
-        if (ssl_decode_switch(ssl, extension_decoder, ex, dir, seg, data) == R_NOT_FOUND) {
-          decode_extension(ssl, dir, seg, data);
-          P_(P_RH) { explain(ssl, "Extension type: %u not yet implemented in ssldump\n", ex); }
-          continue;
-        }
-        LF;
-      }
-    }
+    SSL_DECODE_UINT32(ssl, "ticket_lifetime",P_HL, data, &val);
+	if (ssl->version == TLSV13_VERSION) {
+    	SSL_DECODE_UINT32(ssl, "ticket_age_add", P_HL, data, &val);
+    	SSL_DECODE_OPAQUE_ARRAY(ssl,"ticket_nonce",-((1<<7)-1), P_ND, data, NULL);
+	}
+    SSL_DECODE_OPAQUE_ARRAY(ssl,"ticket",-((1<<15)-1), P_ND, data, NULL);
+	if (ssl->version == TLSV13_VERSION) {
+    	SSL_DECODE_UINT16(ssl, "exlen", 0, data, &exlen);
+    	if (exlen) {
+    	  while (data->len) {
+    	    SSL_DECODE_UINT16(ssl, "extension type", 0, data, &ex);
+    	    if (ssl_decode_switch(ssl, extension_decoder, ex, dir, seg, data) == R_NOT_FOUND) {
+    	      if ((r=decode_extension(ssl, dir, seg, data))) ERETURN(r);
+    	      P_(P_RH) { explain(ssl, "Extension type: %u not yet implemented in ssldump\n", ex); }
+    	      continue;
+    	    }
+    	    LF;
+    	  }
+    	}
+	}
 }
 
 static int decode_HandshakeType_EncryptedExtensions(ssl,dir,seg,data)
