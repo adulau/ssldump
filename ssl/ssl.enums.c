@@ -549,7 +549,7 @@ static int decode_HandshakeType_Certificate(ssl,dir,seg,data)
         0,data,&cert);
       sslx_print_certificate(ssl,&cert,P_ND);
       len-=(cert.len + 3);
-      if (ssl->version==TLSV13_VERSION) { // TLS 1.3 has certificates
+      if (ssl->version==TLSV13_VERSION) { // TLS 1.3 has certificate extensions
         SSL_DECODE_UINT16(ssl,"certificate extensions len",0,data,&exlen);
         len-=2;
      	while (exlen) {
