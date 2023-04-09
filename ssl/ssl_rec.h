@@ -51,13 +51,16 @@ typedef struct ssl_rec_decoder_ ssl_rec_decoder;
 
 int ssl_destroy_rec_decoder PROTO_LIST((ssl_rec_decoder **dp));
 int ssl_create_rec_decoder PROTO_LIST((ssl_rec_decoder **dp,
-  SSL_CipherSuite *cs,UCHAR *mk,UCHAR *sk,UCHAR *iv));
+  ssl_obj *ssl,UCHAR *mk,UCHAR *sk,UCHAR *iv));
 int ssl_decode_rec_data PROTO_LIST((ssl_obj *ssl,ssl_rec_decoder *d,
   int ct,int version,UCHAR *in,int inl,UCHAR *out,int *outl));
+int tls13_decode_rec_data PROTO_LIST((ssl_obj *ssl,ssl_rec_decoder *d,int ct,int version,UCHAR *in,int inl,UCHAR *out,int *outl));
+int tls13_update_rec_key PROTO_LIST((ssl_rec_decoder *d,UCHAR *newkey, UCHAR *newiv));
 
 int ssl3_check_mac(ssl_rec_decoder *d, int ct, int ver, UCHAR *data,
   UINT4 datalen, UCHAR *mac);
 
-#define IS_AEAD_CIPHER(cs) (cs->enc==0x3b||cs->enc==0x3c)
+#define IS_AEAD_CIPHER(cs) (cs->enc==0x3b||cs->enc==0x3c||cs->enc==0x3d||cs->enc==0x3e||cs->enc==0x3f)
+#define IS_CCM_CIPHER(cs) (cs->enc==0x3e||cs->enc==0x3f)
 #endif
 

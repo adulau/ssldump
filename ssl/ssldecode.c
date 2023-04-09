@@ -48,6 +48,8 @@
 #include "sslprint.h"
 #include "ssl.enums.h"
 #ifdef OPENSSL
+#include <openssl/err.h>
+#include <openssl/kdf.h>
 #include <openssl/ssl.h>
 #include <openssl/hmac.h>
 #include <openssl/evp.h>
@@ -91,6 +93,10 @@ struct ssl_decoder_ {
      int ephemeral_rsa;
      Data *PMS;
      Data *MS;
+     Data *SHTS;//Server Handshake traffic secret
+     Data *CHTS;//Client Handshake traffic secret
+     Data *STS;//Server traffic Secret
+     Data *CTS;//Client traffic secret
      Data *handshake_messages;
      Data *session_hash;
      ssl_rec_decoder *c_to_s;
@@ -115,7 +121,7 @@ static int ssl_generate_keying_material PROTO_LIST((ssl_obj *ssl,
   ssl_decoder *d));
 static int ssl_generate_session_hash PROTO_LIST((ssl_obj *ssl,
   ssl_decoder *d));
-static int ssl_read_key_log_file PROTO_LIST((ssl_decoder *d));
+static int ssl_read_key_log_file PROTO_LIST((ssl_obj* obj,ssl_decoder *d));
 #endif
 
 static int ssl_create_session_lookup_key PROTO_LIST((ssl_obj *ssl,
@@ -196,6 +202,7 @@ int ssl_decode_ctx_destroy(dp)
   {
 #ifdef OPENSSL
     ssl_decode_ctx *d = *dp;
+	if (!d) return 0;
     if(d->ssl_key_log_file) {
       fclose(d->ssl_key_log_file);
     }
@@ -320,19 +327,23 @@ int ssl_process_server_session_id(ssl,d,msg,len)
     
     INIT_DATA(idd,msg,len);
     
-    /* First check to see if the client tried to restore */
-    if(d->session_id){
-      /* Now check to see if we restored */
-      if((r=r_data_compare(&idd,d->session_id)))
-	ABORT(r);
+    if (ssl->version==TLSV13_VERSION){
+    // No need to save/restore session in tls1.3 since the only way of decrypting is through log file
+    } else {
+      /* First check to see if the client tried to restore */
+      if(d->session_id){
+        /* Now check to see if we restored */
+        if((r=r_data_compare(&idd,d->session_id)))
+          ABORT(r);
 
-      /* Now try to look up the session. We may not be able
-         to find it if, for instance, the original session
-         was initiated with something other than static RSA */
-      if((r=ssl_restore_session(ssl,d)))
-        ABORT(r);
+        /* Now try to look up the session. We may not be able
+           to find it if, for instance, the original session
+           was initiated with something other than static RSA */
+        if((r=ssl_restore_session(ssl,d)))
+          ABORT(r);
 
-      restored=1;
+        restored=1;
+      }
     }
     
     _status=0;
@@ -365,7 +376,7 @@ int ssl_process_client_session_id(ssl,d,msg,len)
       //todo: better save and destroy only when successfully read key log
       r_data_destroy(&d->MS);
 
-      if(d->ctx->ssl_key_log_file && (ssl_read_key_log_file(d)==0) && d->MS)
+      if(d->ctx->ssl_key_log_file && (ssl_read_key_log_file(ssl, d)==0) && d->MS)
       {
         //we found master secret for session in keylog
         //try to save session
@@ -387,24 +398,37 @@ int ssl_process_client_session_id(ssl,d,msg,len)
 #endif      
   }
 
+int ssl_process_handshake_finished(ssl_obj* ssl,ssl_decoder *dec, Data *data){
+   if (ssl->version==TLSV13_VERSION){
+    if (ssl->direction==DIR_I2R){ // Change from handshake decoder to data traffic decoder
+      dec->c_to_s = dec->c_to_s_n;
+      dec->c_to_s_n = 0;
+	} else {
+      dec->s_to_c = dec->s_to_c_n;
+      dec->s_to_c_n = 0;
+    }
+   }
+}
+
 int ssl_process_change_cipher_spec(ssl,d,direction)
   ssl_obj *ssl;
   ssl_decoder *d;
   int direction;
   {
-#ifdef OPENSSL    
-    if(direction==DIR_I2R){
-      d->c_to_s=d->c_to_s_n;
-      d->c_to_s_n=0;
-      if(d->c_to_s) ssl->process_ciphertext |= direction;
+#ifdef OPENSSL
+    if (ssl->version!=TLSV13_VERSION){
+       if(direction==DIR_I2R){
+         d->c_to_s=d->c_to_s_n;
+         d->c_to_s_n=0;
+         if(d->c_to_s) ssl->process_ciphertext |= direction;
+       }
+       else {
+         d->s_to_c=d->s_to_c_n;
+         d->s_to_c_n=0;
+         if(d->s_to_c) ssl->process_ciphertext |= direction;      
+       }
     }
-    else{
-      d->s_to_c=d->s_to_c_n;
-      d->s_to_c_n=0;
-      if(d->s_to_c) ssl->process_ciphertext |= direction;      
-    }
-
-#endif    
+#endif  
     return(0);
   }
 int ssl_decode_record(ssl,dec,direction,ct,version,d)
@@ -426,8 +450,11 @@ int ssl_decode_record(ssl,dec,direction,ct,version,d)
     else
       rd=0;
     state=(direction==DIR_I2R)?ssl->i_state:ssl->r_state;
-
-    if(!rd){
+	
+	if (ssl->version == TLSV13_VERSION && ct != 23) { // Only type 23 is encrypted in tls1.3
+		ssl->record_encryption = REC_PLAINTEXT;
+		return 0;
+	} else if(!rd){
       if(state & SSL_ST_SENT_CHANGE_CIPHER_SPEC){
         ssl->record_encryption=REC_CIPHERTEXT;
         return(SSL_NO_DECRYPT);
@@ -443,7 +470,12 @@ int ssl_decode_record(ssl,dec,direction,ct,version,d)
     if(!(out=(UCHAR *)malloc(d->len)))
       ABORT(R_NO_MEMORY);
 
-    if((r=ssl_decode_rec_data(ssl,rd,ct,version,d->data,d->len,out,&outl))){
+	if (ssl->version==TLSV13_VERSION){
+      r=tls13_decode_rec_data(ssl,rd,ct,version,d->data,d->len,out,&outl);	
+	} else {
+      r=ssl_decode_rec_data(ssl,rd,ct,version,d->data,d->len,out,&outl);	
+    }
+    if(r) {
       ABORT(r);
     }
     
@@ -620,7 +652,7 @@ int ssl_process_client_key_exchange(ssl,d,msg,len)
     r_data_destroy(&d->MS);
 
     if(!d->ctx->ssl_key_log_file ||
-       ssl_read_key_log_file(d) ||
+       ssl_read_key_log_file(ssl,d) ||
        !d->MS){
       if(ssl->cs->kex!=KEX_RSA)
 	return(-1);
@@ -1070,10 +1102,10 @@ static int ssl_generate_keying_material(ssl,d)
     }
 
     if((r=ssl_create_rec_decoder(&d->c_to_s_n,
-      ssl->cs,c_mk,c_wk,c_iv)))
+      ssl,c_mk,c_wk,c_iv)))
       ABORT(r);
     if((r=ssl_create_rec_decoder(&d->s_to_c_n,
-      ssl->cs,s_mk,s_wk,s_iv)))
+      ssl,s_mk,s_wk,s_iv)))
       ABORT(r);
 
     
@@ -1085,6 +1117,175 @@ static int ssl_generate_keying_material(ssl,d)
     }
     return(_status);
   }
+
+static int hkdf_expand_label(ssl,d,secret,label,context,length,out)
+  ssl_obj *ssl;
+  ssl_decoder *d;
+  Data *secret;
+  char *label;
+  Data *context;
+  uint16_t length;
+  UCHAR **out;
+  {
+    int r;
+	size_t outlen = length;
+ 	EVP_PKEY_CTX *pctx;
+
+ 	pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_HKDF, NULL);
+
+    Data hkdf_label;
+    UCHAR *ptr;
+
+    //Construct HkdfLabel
+    hkdf_label.data = ptr = malloc(512);
+    *(uint16_t*)ptr = ntohs(length);
+    ptr+=2;
+    *(uint8_t*)ptr++ = 6+(label?strlen(label):0);
+    memcpy(ptr, "tls13 ", 6);
+    ptr+=6;
+    if (label) {
+      memcpy(ptr, label, strlen(label));
+      ptr+=strlen(label);
+    }
+    *(uint8_t*)ptr++ = context?context->len:0;
+    if (context) {
+      memcpy(ptr, context->data, context->len);
+      ptr+=context->len;
+    }
+    hkdf_label.len = ptr - hkdf_label.data;
+    CRDUMPD("hkdf_label", &hkdf_label);
+    // Load parameters
+    *out = malloc(length);
+ 	if (EVP_PKEY_derive_init(pctx) <= 0) {
+		fprintf(stderr, "EVP_PKEY_derive_init failed\n");
+	}
+ 	    /* Error */
+	if (EVP_PKEY_CTX_hkdf_mode(pctx, EVP_PKEY_HKDEF_MODE_EXPAND_ONLY)<=0) {
+		fprintf(stderr, "EVP_PKEY_CTX_hkdf_mode failed\n");
+		goto abort;
+	}
+ 	if (EVP_PKEY_CTX_set_hkdf_md(pctx, EVP_get_digestbyname(digests[ssl->cs->dig-0x40])) <= 0) {
+		fprintf(stderr, "EVP_PKEY_CTX_set_hkdf_md failed\n");
+		goto abort;
+	}
+ 	if (EVP_PKEY_CTX_set1_hkdf_key(pctx, secret->data, secret->len) <= 0) {
+		fprintf(stderr, "EVP_PKEY_CTX_set_hkdf_md failed\n");
+		goto abort;
+	}
+ 	if (EVP_PKEY_CTX_add1_hkdf_info(pctx, hkdf_label.data, hkdf_label.len) <= 0) {
+		fprintf(stderr, "EVP_PKEY_CTX_add1_hkdf_info failed\n");
+		goto abort;
+	}
+ 	if (EVP_PKEY_derive(pctx, *out, &outlen) <= 0) {
+		fprintf(stderr, "EVP_PKEY_derive failed\n");
+		goto abort;
+	}
+
+  	CRDUMP("out_hkdf", *out, outlen);
+	return 0;
+abort:
+	ERR_print_errors_fp(stderr);
+    return r;
+  }
+
+// Will update the keys for the particular direction
+int ssl_tls13_update_keying_material(ssl,d,direction)
+	ssl_obj *ssl;
+	ssl_decoder *d;
+	int direction;
+{
+	Data *secret;
+	ssl_rec_decoder *decoder;
+	UCHAR *newsecret;
+	UCHAR *newkey;
+	UCHAR *newiv;
+
+	if (direction == DIR_I2R) {
+		secret = d->CTS;
+		decoder = d->c_to_s;
+	} else {
+		secret = d->STS;
+		decoder = d->s_to_c;
+	}
+  	hkdf_expand_label(ssl, d, secret, "traffic upd", NULL, ssl->cs->dig_len, &newsecret);
+	secret->data = newsecret;
+  	hkdf_expand_label(ssl, d, secret, "key", NULL, ssl->cs->eff_bits/8, &newkey);
+  	hkdf_expand_label(ssl, d, secret, "iv", NULL, 12, &newiv);
+	tls13_update_rec_key(decoder,newkey,newiv);
+
+	return 0;
+}
+
+int ssl_tls13_generate_keying_material(ssl,d)
+  ssl_obj* ssl;
+  ssl_decoder *d;
+{
+  int r,_status;
+  Data out;
+  UCHAR *s_wk_h,*s_iv_h,*c_wk_h,*c_iv_h,
+        *s_wk,*s_iv,*c_wk,*c_iv;
+   if (!(d->ctx->ssl_key_log_file && ssl_read_key_log_file(ssl, d)==0 && 
+     d->SHTS && d->CHTS && d->STS && d->CTS)){
+     ABORT(-1);
+   }
+  // It is 12 for all ciphers
+  if (hkdf_expand_label(ssl, d, d->SHTS, "key", NULL, ssl->cs->eff_bits/8, &s_wk_h)) {
+		fprintf(stderr, "s_wk_h hkdf_expand_label failed\n");
+		goto abort;
+  }
+  if (hkdf_expand_label(ssl, d, d->SHTS, "iv", NULL, 12, &s_iv_h)) {
+	  fprintf(stderr, "s_iv_h hkdf_expand_label failed\n");
+	  goto abort;
+  }
+  if (hkdf_expand_label(ssl, d, d->CHTS, "key", NULL, ssl->cs->eff_bits/8, &c_wk_h)) {
+	  fprintf(stderr, "c_wk_h hkdf_expand_label failed\n");
+	  goto abort;
+  }
+  if (hkdf_expand_label(ssl, d, d->CHTS, "iv", NULL, 12, &c_iv_h)) {
+	  fprintf(stderr, "c_iv_h hkdf_expand_label failed\n");
+	  goto abort;
+  }
+  if (hkdf_expand_label(ssl, d, d->STS, "key", NULL, ssl->cs->eff_bits/8, &s_wk)) {
+	  fprintf(stderr, "s_wk hkdf_expand_label failed\n");
+	  goto abort;
+  }
+  if (hkdf_expand_label(ssl, d, d->STS, "iv", NULL, 12, &s_iv)) {
+	  fprintf(stderr, "s_iv hkdf_expand_label failed\n");
+	  goto abort;
+  }
+  if (hkdf_expand_label(ssl, d, d->CTS, "key", NULL, ssl->cs->eff_bits/8, &c_wk)) {
+	  fprintf(stderr, "c_wk hkdf_expand_label failed\n");
+	  goto abort;
+  }
+  if (hkdf_expand_label(ssl, d, d->CTS, "iv", NULL, 12, &c_iv)) {
+	  fprintf(stderr, "c_iv hkdf_expand_label failed\n");
+	  goto abort;
+  }
+  CRDUMP("Server Handshake Write key", s_wk_h,ssl->cs->eff_bits/8 );
+  CRDUMP("Server Handshake IV", s_iv_h, 12);
+  CRDUMP("Client Handshake Write key", c_wk_h, ssl->cs->eff_bits/8);
+  CRDUMP("Client Handshake IV", c_iv_h,12);
+  CRDUMP("Server Write key", s_wk,ssl->cs->eff_bits/8);
+  CRDUMP("Server IV", s_iv,12);
+  CRDUMP("Client Write key",c_wk, ssl->cs->eff_bits/8);
+  CRDUMP("Client IV", c_iv,12);
+   
+  if((r=ssl_create_rec_decoder(&d->c_to_s_n,
+    ssl,NULL,c_wk,c_iv)))
+    ABORT(r);
+  if((r=ssl_create_rec_decoder(&d->s_to_c_n,
+    ssl,NULL,s_wk,s_iv)))
+    ABORT(r);
+  if((r=ssl_create_rec_decoder(&d->c_to_s,
+    ssl,NULL,c_wk_h,c_iv_h)))
+    ABORT(r);
+  if((r=ssl_create_rec_decoder(&d->s_to_c,
+    ssl,NULL,s_wk_h,s_iv_h)))
+    ABORT(r);
+  return 0;
+abort:
+  return r;
+}
 
 static int ssl_generate_session_hash(ssl,d)
   ssl_obj *ssl;
@@ -1134,36 +1335,64 @@ static int ssl_generate_session_hash(ssl,d)
     return(_status);
   }
 
-static int ssl_read_key_log_file(d)
+static int read_hex_string(char *str, UCHAR *buf, int n) {
+  unsigned int t;
+  int i;
+  for (i = 0; i < n; i++) {
+    if (sscanf(str + i * 2, "%02x", &t) != 1)
+      return -1;
+    buf[i] = (char)t;
+  }
+  return 0;
+}
+static int ssl_read_key_log_file(ssl,d)
+  ssl_obj *ssl;
   ssl_decoder *d;
   {
     int r,_status,n,i;
     unsigned int t;
     size_t l=0;
-    char *line,*label_data;
-
-    while ((n=getline(&line,&l,d->ctx->ssl_key_log_file))!=-1) {
-      if(n==(d->client_random->len*2)+112 &&
-	 !strncmp(line,"CLIENT_RANDOM",13)) {
-
-	if(!(label_data=malloc((d->client_random->len*2)+1)))
-	  ABORT(r);
-
-        for(i=0;i<d->client_random->len;i++)
-	  if(snprintf(label_data+(i*2),3,"%02x",d->client_random->data[i])!=2)
-	    ABORT(r);
-
-	if(STRNICMP(line+14,label_data,64))
-	  continue;
-
-	if((r=r_data_alloc(&d->MS,48)))
-	  ABORT(r);
-
-        for(i=0; i < d->MS->len; i++) {
-	  if(sscanf(line+14+65+(i*2),"%2x",&t)!=1)
-	    ABORT(r);
-	  *(d->MS->data+i)=(char)t;
-	}
+    char *line, *d_client_random, *label, *client_random, *secret;
+    if (ssl->version==TLSV13_VERSION && !ssl->cs)// ssl->cs is not set when called from ssl_process_client_session_id
+      ABORT(r);
+    if (!(d_client_random = malloc((d->client_random->len * 2) + 1)))
+      ABORT(r);
+    for (i = 0; i < d->client_random->len; i++)
+      if (snprintf(d_client_random + (i * 2), 3, "%02x", d->client_random->data[i]) != 2)
+        ABORT(r);
+    while ((n = getline(&line, &l, d->ctx->ssl_key_log_file)) != -1) {
+      if (line[n-1] =='\n') line[n-1] = '\0';
+      if (!(label=strtok(line, " "))) continue;
+      if (!(client_random=strtok(NULL, " ")) || strlen(client_random)!=64 || STRNICMP(client_random, d_client_random, 64)) continue;
+      secret=strtok(NULL, " ");
+      if (!(secret) || strlen(secret)!=(ssl->version==TLSV13_VERSION?ssl->cs->dig_len*2:96)) continue;
+      if (!strncmp(label, "CLIENT_RANDOM", 13)) {
+        if ((r=r_data_alloc(&d->MS, 48)))
+          ABORT(r);
+        if (read_hex_string(secret, d->MS->data, 48))
+          ABORT(r);
+      }
+      if (ssl->version!=TLSV13_VERSION) continue;
+      if (!strncmp(label, "SERVER_HANDSHAKE_TRAFFIC_SECRET", 31)){
+        if ((r=r_data_alloc(&d->SHTS, ssl->cs->dig_len)))
+          ABORT(r);
+        if (read_hex_string(secret, d->SHTS->data, ssl->cs->dig_len))
+          ABORT(r);
+      } else if (!strncmp(label, "CLIENT_HANDSHAKE_TRAFFIC_SECRET", 31)){
+        if ((r=r_data_alloc(&d->CHTS, ssl->cs->dig_len)))
+          ABORT(r);
+        if (read_hex_string(secret, d->CHTS->data, ssl->cs->dig_len))
+          ABORT(r);
+      } else if (!strncmp(label, "SERVER_TRAFFIC_SECRET_0", 23)){
+        if ((r=r_data_alloc(&d->STS, ssl->cs->dig_len)))
+          ABORT(r);
+        if (read_hex_string(secret, d->STS->data, ssl->cs->dig_len))
+          ABORT(r);
+      } else if (!strncmp(label, "CLIENT_TRAFFIC_SECRET_0", 23)){
+        if ((r=r_data_alloc(&d->CTS, ssl->cs->dig_len)))
+          ABORT(r);
+        if (read_hex_string(secret, d->CTS->data, ssl->cs->dig_len))
+          ABORT(r);
       }
       /*
 	 Eventually add support for other labels defined here:

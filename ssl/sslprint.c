@@ -268,18 +268,16 @@ int ssl_expand_record(ssl,q,direction,data,len)
       explain(ssl,"  Short record: %u bytes available (expecting: %u)\n",length,d.len);
       return(0);
     }
+    version = ssl->version ? ssl->version : (vermaj*256+vermin);
    
     P_(P_RH){
-       explain(ssl," V%d.%d(%d)",vermaj,vermin,length);
+       explain(ssl," V%d.%d(%d)",(version>>8)&0xff,version&0xff,length);
        json_object_object_add(jobj, "record_len", json_object_new_int(length));
-       snprintf(verstr,8,"%d.%d",vermaj,vermin);
+       snprintf(verstr,8,"%d.%d",(version>>8)&0xff,version&0xff);
        json_object_object_add(jobj, "record_ver", json_object_new_string(verstr));
     }
 
-    version=vermaj*256+vermin;
-    
-    r=ssl_decode_record(ssl,ssl->decoder,direction,ct,version,&d);
-
+    r = ssl_decode_record(ssl, ssl->decoder, direction, ct, version, &d);
     if(r==SSL_BAD_MAC){
       explain(ssl,"  bad MAC\n");
       return(0);
@@ -303,9 +301,15 @@ int ssl_expand_record(ssl,q,direction,data,len)
     else{
       //try to save unencrypted data to logger
       //we must save record with type "application_data" (this is unencrypted data)
-      if ((ct == 23) && (logger)) logger->vtbl->data(ssl->logger_obj,d.data,d.len,direction);
-
-      if((r=ssl_decode_switch(ssl,ContentType_decoder,data[0],direction,q, &d))) {
+      if (ct==23){
+        if (logger) {
+          logger->vtbl->data(ssl->logger_obj,d.data,d.len,direction);
+        }
+        if (ssl->version==TLSV13_VERSION){
+          ct = d.data[--d.len]; // In TLS 1.3 ct is stored in the end for encrypted records
+        }
+      } 
+      if((r=ssl_decode_switch(ssl,ContentType_decoder,ct,direction,q, &d))) {
         if(!(SSL_print_flags & SSL_PRINT_JSON))
           printf("  unknown record type: %d\n", ct);
         ERETURN(r);
