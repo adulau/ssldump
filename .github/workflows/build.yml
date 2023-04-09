@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        compiler: [cc, clang, clang-13, gcc-10]
+        compiler: [cc, clang, gcc-12]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
