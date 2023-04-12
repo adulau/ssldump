@@ -12,21 +12,37 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [ubuntu-latest, macos-latest]
         compiler: [cc, clang, gcc-12]
+        exclude:
+          - os: macos-latest
+            compiler: cc
+          - os: macos-latest
+            compiler: gcc-12
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+      - name: Install macOS autogen prerequisites
+        run: brew install autoconf automake
+        if: ${{ runner.os == 'macOS' }}
       - name: ./autogen.sh
         run: ./autogen.sh
       - name: Compiler version
         run: $CC -v
         env:
           CC: ${{ matrix.compiler }}
-      - name: Install dependencies
+      - name: Install Linux dependencies
         run: sudo apt install autoconf libssl-dev libpcap-dev libnet1-dev libjson-c-dev
+        if: ${{ runner.os == 'Linux' }}
+      - name: Install macOS dependencies
+        run: |
+          brew install openssl@3 libpcap libnet json-c
+          echo "LDFLAGS=-L$(brew --prefix openssl@3)/lib" >> $GITHUB_ENV
+          echo "CPPFLAGS=-I$(brew --prefix openssl@3)/include" >> $GITHUB_ENV
+        if: ${{ runner.os == 'macOS' }}
       - name: ./configure
         run: ./configure
         env:
