@@ -397,7 +397,9 @@ static int print_tcp_packet(p)
   packet *p;
   {
     char *src=0,*dst=0;
-    
+
+    struct timeval *ts = &p->ts;
+
     if(!(NET_print_flags & NET_PRINT_TCP_HDR))
       return(0);
 
@@ -405,6 +407,9 @@ static int print_tcp_packet(p)
     lookuphostname(&p->r_addr.so_st,&dst);
     
     if(!(NET_print_flags & NET_PRINT_JSON)) {
+        if(NET_print_flags & NET_PRINT_TS) {
+            printf("%lld%c%4.4lld ", (long long)ts->tv_sec,'.',(long long)ts->tv_usec/100);
+        }
       printf("TCP: %s(%d) -> %s(%d) ",
         src,
         ntohs(p->tcp->th_sport),

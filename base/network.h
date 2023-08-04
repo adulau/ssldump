@@ -124,5 +124,6 @@ extern UINT4 NET_print_flags;
 #define NET_PRINT_ACKS	    4
 #define NET_PRINT_NO_RESOLVE  8
 #define NET_PRINT_JSON  16
+#define NET_PRINT_TS    32
 #endif
 

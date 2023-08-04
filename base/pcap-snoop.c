@@ -111,7 +111,7 @@ int err_exit(str,num)
 int usage()
   {
     fprintf(stderr,"Usage: ssldump [-r dumpfile] [-i interface] [-l sslkeylogfile] [-w outpcapfile]\n");
-    fprintf(stderr,"               [-k keyfile] [-p password] [-vtaTnsAxVNde]\n");
+    fprintf(stderr,"               [-k keyfile] [-p password] [-vtaTznsAxVNde]\n");
     fprintf(stderr,"               [filter]\n");
     exit(0);
   }
@@ -120,7 +120,7 @@ int print_version()
   {
     printf(PACKAGE_STRING "\n");
     printf("Maintained by a bunch of volunteers, see https://github.com/adulau/ssldump/blob/master/CREDITS\n");
-    printf("Copyright (C) 2015-2021 the aforementioned volunteers\n");
+    printf("Copyright (C) 2015-2023 the aforementioned volunteers\n");
     printf("Copyright (C) 1998-2001 RTFM, Inc.\n");
     printf("All rights reserved.\n");
 #ifdef OPENSSL    
@@ -332,7 +332,7 @@ int main(argc,argv)
 
     signal(SIGINT,sig_handler);
     
-    while((c=getopt(argc,argv,"vr:F:f:S:jyTt:ai:k:l:w:p:nsAxXhHVNdqem:P"))!=EOF){
+    while((c=getopt(argc,argv,"vr:F:f:S:jyTt:ai:k:l:w:p:znsAxXhHVNdqem:P"))!=EOF){
       switch(c){
         case 'v':
           print_version();
@@ -353,6 +353,9 @@ int main(argc,argv)
         case 'j':
           NET_print_flags |= NET_PRINT_JSON;
           SSL_print_flags |= SSL_PRINT_JSON;
+          break;
+        case 'z':
+          NET_print_flags |= NET_PRINT_TS;
           break;
 	case 'a':
 	  NET_print_flags |= NET_PRINT_ACKS;
