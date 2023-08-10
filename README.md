@@ -53,22 +53,23 @@ other too (but this is just a collateral damage).
 
 # Build instructions
 
-On Debian & Ubuntu:
+Install dependencies on Debian & Ubuntu (as root):
 ```
 apt install build-essential cmake ninja-build libssl-dev libpcap-dev libnet1-dev libjson-c-dev
-cmake -G Ninja -B build
-ninja -C build
-./build/ssldump -v
 ```
 
-On Fedora, CentOS, RHEL & Rocky:
+On Fedora, CentOS, RHEL & Rocky (as root):
 ```
 dnf install cmake ninja-build gcc openssl-devel libpcap-devel libnet-devel json-c-devel
+```
+
+Compile & install:
+```
 cmake -G Ninja -B build
 ninja -C build
 ./build/ssldump -v
+(optional, as root) ninja -C build install
 ```
-
 # Notes
 
 The "save to pcap" (-w) option by @ryabkov, is heavily based on the work of

@@ -111,3 +111,6 @@ target_link_libraries(ssldump
         ${JSONC_LIBRARIES}
 )
 
+set(CMAKE_INSTALL_PREFIX "/usr/local")
+install(TARGETS ssldump DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
+
