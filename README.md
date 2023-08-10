@@ -73,6 +73,11 @@ On FreeBSD (as root):
 pkg install git cmake ninja json-c libnet
 ```
 
+On MacOS (as root):
+```
+brew install cmake ninja openssl@3 libpcap libnet json-c
+```
+
 Compile & install:
 ```
 git clone https://github.com/adulau/ssldump.git
