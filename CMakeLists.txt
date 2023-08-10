@@ -114,3 +114,5 @@ target_link_libraries(ssldump
 set(CMAKE_INSTALL_PREFIX "/usr/local")
 install(TARGETS ssldump DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
+set(CMAKE_INSTALL_MANDIR "/usr/local/share/man")
+install(FILES ssldump.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
