@@ -34,12 +34,12 @@ set(SOURCES
 	pcap/sys.c
 )
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/modules/")
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules/" ${CMAKE_MODULE_PATH})
 
 find_package(OpenSSL REQUIRED)
 find_package(PCAP REQUIRED)
 find_package(LIBNET REQUIRED)
-find_package(json-c REQUIRED)
+find_package(JSONC REQUIRED)
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
@@ -63,14 +63,14 @@ target_include_directories(ssldump
         ${OPENSSL_INCLUDE_DIR}
         ${PCAP_INCLUDE_DIR}
         ${LIBNET_INCLUDE_DIR}
-        ${json-c_INCLUDE_DIR}
+        ${JSONC_INCLUDE_DIRS}
 )
 
 target_link_libraries(ssldump
     PRIVATE
         ${OPENSSL_LIBRARIES}
-        pcap
-        net
-        json-c
+        ${PCAP_LIBRARY}
+        ${LIBNET_LIBRARY}
+        ${JSONC_LIBRARIES}
 )
 
