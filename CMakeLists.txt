@@ -5,7 +5,7 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 project(
     ssldump
-    VERSION 1.9
+    VERSION 1.8
     LANGUAGES C
 )
 
