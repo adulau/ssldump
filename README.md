@@ -55,21 +55,34 @@ other too (but this is just a collateral damage).
 
 Install dependencies on Debian & Ubuntu (as root):
 ```
-apt install build-essential cmake ninja-build libssl-dev libpcap-dev libnet1-dev libjson-c-dev
+apt install build-essential git cmake ninja-build libssl-dev libpcap-dev libnet1-dev libjson-c-dev
 ```
 
 On Fedora, CentOS, RHEL & Rocky (as root):
 ```
-dnf install cmake ninja-build gcc openssl-devel libpcap-devel libnet-devel json-c-devel
+dnf install git cmake ninja-build gcc openssl-devel libpcap-devel libnet-devel json-c-devel
+```
+
+On OpenBSD (as root):
+```
+pkg_add git cmake ninja json-c libnet
+```
+
+On FreeBSD (as root):
+```
+pkg install git cmake ninja json-c libnet
 ```
 
 Compile & install:
 ```
+git clone https://github.com/adulau/ssldump.git
+cd ssldump
 cmake -G Ninja -B build
 ninja -C build
 ./build/ssldump -v
 (optional, as root) ninja -C build install
 ```
+
 # Notes
 
 The "save to pcap" (-w) option by @ryabkov, is heavily based on the work of

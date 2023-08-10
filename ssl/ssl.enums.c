@@ -1,4 +1,4 @@
-#include <json-c/json.h>
+#include <json.h>
 #include <openssl/md5.h>
 #include "network.h"
 #include "ssl_h.h"

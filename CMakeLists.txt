@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.16.3)
 include(CheckSymbolExists)
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
-
 project(
     ssldump
     VERSION 1.8
@@ -100,7 +98,7 @@ target_include_directories(ssldump
         ${OPENSSL_INCLUDE_DIR}
         ${PCAP_INCLUDE_DIR}
         ${LIBNET_INCLUDE_DIR}
-        ${JSONC_INCLUDE_DIRS}
+        ${JSONC_INCLUDE_DIR}
 )
 
 target_link_libraries(ssldump
