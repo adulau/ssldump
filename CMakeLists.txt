@@ -36,10 +36,47 @@ set(SOURCES
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules/" ${CMAKE_MODULE_PATH})
 
-find_package(OpenSSL REQUIRED)
-find_package(PCAP REQUIRED)
-find_package(LIBNET REQUIRED)
-find_package(JSONC REQUIRED)
+find_package(OpenSSL)
+if(NOT OPENSSL_FOUND)
+    message( FATAL_ERROR
+"Unable to find OpenSSL development files on this system
+On Debian and Ubuntu systems you can install the required library and header files with
+    apt install libssl-dev
+On Fedora systems, with
+    dnf install openssl-devel" )
+endif()
+
+#dnf install openssl-devel libpcap-devel libnet-devel json-c-devel
+
+find_package(PCAP)
+if(NOT PCAP_FOUND)
+    message( FATAL_ERROR
+"Unable to find libpcap development files on this system
+On Debian and Ubuntu systems you can install the required library and header files with
+    apt install libpcap-dev
+On Fedora systems, with
+    dnf install libpcap-devel" )
+endif()
+
+find_package(LIBNET)
+if(NOT LIBNET_FOUND)
+    message( FATAL_ERROR
+"Unable to find libnet development files on this system
+On Debian and Ubuntu systems you can install the required library and header files with
+    apt install libnet1-dev
+On Fedora systems, with
+    dnf install libnet-devel" )
+endif()
+
+find_package(JSONC)
+if(NOT JSONC_FOUND)
+    message( FATAL_ERROR
+"Unable to find libjson-c development files on this system
+On Debian and Ubuntu systems you can install the required library and header files with
+    apt install libjson-c-dev
+On Fedora systems, with
+    dnf install json-c-devel" )
+endif()
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
