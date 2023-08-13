@@ -51,7 +51,9 @@
 
 #include <pcap.h>
 #include <unistd.h>
+#ifndef __OpenBSD__
 #include <pcap-bpf.h>
+#endif
 #ifndef _WIN32
 #include <sys/param.h>
 #endif
@@ -118,7 +120,7 @@ int usage()
 
 int print_version()
   {
-    printf(PACKAGE_STRING "\n");
+    printf("Version: @ssldump_VERSION@ (@ssldump_DESCRIPTION@)\n");
     printf("Maintained by a bunch of volunteers, see https://github.com/adulau/ssldump/blob/master/CREDITS\n");
     printf("Copyright (C) 2015-2023 the aforementioned volunteers\n");
     printf("Copyright (C) 1998-2001 RTFM, Inc.\n");

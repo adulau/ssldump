@@ -1,7 +1,9 @@
 
 #include <pcap.h>
 #include <unistd.h>
+#ifndef __OpenBSD__
 #include <pcap-bpf.h>
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>

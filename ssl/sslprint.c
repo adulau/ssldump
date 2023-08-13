@@ -44,7 +44,7 @@
  */
 
 
-#include <json-c/json.h>
+#include <json.h>
 #include <ctype.h>
 #include <stdarg.h>
 #include "network.h"

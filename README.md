@@ -21,7 +21,7 @@ includes a JSON output option, supports [JA3](https://github.com/salesforce/ja3)
 
 # How to do I run ssldump?
 
-`./ssldump  -j -ANH -n -i any | jq` will run ssldump on all interfaces and output the result in JSON format including ja3 hashes.
+`./ssldump -j -ANH -n -i any | jq` will run ssldump on all interfaces and output the result in JSON format including ja3 hashes.
 
 For more details, check the man page.
 
@@ -29,7 +29,7 @@ For more details, check the man page.
 
 This example will query ja3er.com service to display the known ja3 hashes from the TLS handshaked in the pcap.
 
-`ssldump -r yourcapture.pcap -j  | jq -r 'select(.ja3_fp != null) | .ja3_fp' | parallel 'curl -s -X GET 'https://ja3er.com/search/{}' | jq .'`
+`ssldump -r yourcapture.pcap -j | jq -r 'select(.ja3_fp != null) | .ja3_fp' | parallel 'curl -s -X GET 'https://ja3er.com/search/{}' | jq .'`
 
 # Why do you maintain this repository?
 
@@ -53,41 +53,39 @@ other too (but this is just a collateral damage).
 
 # Build instructions
 
-On Debian & Ubuntu:
+Install dependencies on Debian & Ubuntu (as root):
 ```
-apt install build-essential autoconf libssl-dev libpcap-dev libnet1-dev libjson-c-dev
-./autogen.sh
-./configure --prefix=/usr/local
-make
-(optional) make install
+apt install build-essential git cmake ninja-build libssl-dev libpcap-dev libnet1-dev libjson-c-dev
 ```
 
-On Fedora, CentOS, RHEL & Rocky:
+On Fedora, CentOS, RHEL & Rocky (as root):
 ```
-dnf install autoconf automake gcc make openssl-devel libpcap-devel libnet-devel json-c-devel
-./autogen.sh
-./configure --prefix=/usr/local
-make
-(optional) make install
+dnf install git cmake ninja-build gcc openssl-devel libpcap-devel libnet-devel json-c-devel
 ```
 
-Optional configuration features (aka ./configure options):
+On OpenBSD (as root):
 ```
-  --disable-optimization  disable compiler optimizations (change from -O2 to -O0)
-  --enable-debug	  enable debug info (add "-g -DDEBUG" to CFLAGS)
-  --enable-asan		  enable AddressSanitizer and other checks
-	add "-fsanitize=address,undefined,leak -Wformat -Werror=format-security
-		-Werror=array-bounds" to CFLAGS
-	use libasan with GCC and embedded ASAN with Clang
+pkg_add git cmake ninja json-c libnet
 ```
 
-Configuration examples:
+On FreeBSD (as root):
 ```
-- Use GCC with libasan, debug info and custom CFLAGS:
-	./configure CC=/usr/bin/gcc --enable-asan --enable-debug CFLAGS="-Wall"
+pkg install git cmake ninja json-c libnet
+```
 
-- Use Clang with ASAN and no optimizations (-O0)
-	./configure CC=/usr/bin/clang --enable-asan --disable-optimization
+On MacOS (as root):
+```
+brew install cmake ninja openssl@3 libpcap libnet json-c
+```
+
+Compile & install:
+```
+git clone https://github.com/adulau/ssldump.git
+cd ssldump
+cmake -G Ninja -B build
+ninja -C build
+./build/ssldump -v
+(optional, as root) ninja -C build install
 ```
 
 # Notes
