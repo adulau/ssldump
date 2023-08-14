@@ -1,6 +1,6 @@
 #!/bin/bash
 
-local_if=ens3f0
+local_if=eth0
 container_ip=172.17.0.2
 
 sudo iptables -t mangle -I PREROUTING 1 -i ${local_if} -j TEE --gateway ${container_ip}
