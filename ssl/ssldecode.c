@@ -677,12 +677,11 @@ ssl_process_client_key_exchange (ssl_obj *ssl, ssl_decoder *d, UCHAR *msg, int l
 
 
 #ifdef OPENSSL
-static int tls_P_hash(ssl,secret,seed,md,out)
-  ssl_obj *ssl;
-  Data *secret;
-  Data *seed;
-  const EVP_MD *md;
-  Data *out;
+static int tls_P_hash(ssl_obj *ssl,
+  Data *secret,
+  Data *seed,
+  const EVP_MD *md,
+  Data *out)
   {
     UCHAR *ptr=out->data;
     int left=out->len;
@@ -1066,14 +1065,13 @@ ssl_generate_keying_material (ssl_obj *ssl, ssl_decoder *d)
     return(_status);
   }
 
-static int hkdf_expand_label(ssl,d,secret,label,context,length,out)
-  ssl_obj *ssl;
-  ssl_decoder *d;
-  Data *secret;
-  char *label;
-  Data *context;
-  uint16_t length;
-  UCHAR **out;
+static int hkdf_expand_label(ssl_obj *ssl,
+  ssl_decoder *d,
+  Data *secret,
+  char *label,
+  Data *context,
+  uint16_t length,
+  UCHAR **out)
   {
     int r;
 	size_t outlen = length;

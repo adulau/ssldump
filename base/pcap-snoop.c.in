@@ -101,16 +101,16 @@ struct timeval last_packet_seen_time = // Timestamp of the last packet of the
 
 logger_mod *logger=NULL;
 
-int err_exit(str,num)
-  char *str;
-  int num;
+int 
+err_exit (char *str, int num)
   {
     fprintf(stderr,"ERROR: %s\n",str);
     sig_handler(SIGQUIT);
     exit(num);
   }
 
-int usage()
+int 
+usage (void)
   {
     fprintf(stderr,"Usage: ssldump [-r dumpfile] [-i interface] [-l sslkeylogfile] [-w outpcapfile]\n");
     fprintf(stderr,"               [-k keyfile] [-p password] [-vtaTznsAxVNde]\n");
@@ -118,7 +118,8 @@ int usage()
     exit(0);
   }
 
-int print_version()
+int 
+print_version (void)
   {
     printf("Version: @ssldump_VERSION@ (@ssldump_DESCRIPTION@)\n");
     printf("Maintained by a bunch of volunteers, see https://github.com/adulau/ssldump/blob/master/CREDITS\n");
@@ -162,10 +163,7 @@ void sig_handler(int sig)
     exit(sig);
   }
     
-void pcap_cb(ptr,hdr,data)
-  u_char *ptr;
-  const struct pcap_pkthdr *hdr;
-  const u_char *data;
+void pcap_cb(u_char *ptr, const struct pcap_pkthdr *hdr, const u_char *data)
   {
     n_handler *n;
     int len;
@@ -311,9 +309,8 @@ static module_def modules[]={
 
 int parse_ssl_flag PROTO_LIST((int c));
 
-int main(argc,argv)
-  int argc;
-  char **argv;
+int 
+main (int argc, char **argv)
   {
     int r;
 #ifdef _WIN32
@@ -546,9 +543,8 @@ int main(argc,argv)
   }
       
 
-char *collapse_args(argc,argv)
-  int argc;
-  char **argv;
+char *
+collapse_args (int argc, char **argv)
   {
     int i,len=0;
     char *ret;

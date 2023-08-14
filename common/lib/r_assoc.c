@@ -230,14 +230,14 @@ r_assoc_fetch (r_assoc *assoc, char *key, int len, void **datap)
     return(0);
   }
 
-int r_assoc_insert(assoc,key,len,data,copy,destroy,how)
-  r_assoc *assoc;
-  char *key;
-  int len;
-  void *data;
-  int (*copy) PROTO_LIST((void **new,void *old));
-  int (*destroy) PROTO_LIST((void *ptr));
-  int how;
+int r_assoc_insert(
+  r_assoc *assoc,
+  char *key,
+  int len,
+  void *data,
+  int (*copy) PROTO_LIST((void **new,void *old)),
+  int (*destroy) PROTO_LIST((void *ptr)),
+  int how)
   {
     r_assoc_el *bucket,*new_bucket=0;
     int r,_status;
