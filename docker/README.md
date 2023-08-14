@@ -1,6 +1,6 @@
 # Docker instructions
 
-*Note:* Dockerfiles are only provided for Debian-like distributions so far.
+*Note: Dockerfiles are only provided for Debian-like distributions so far.*
 
 ## Configure image building:
 
@@ -10,11 +10,13 @@ Uncomment the distribution reference you want to use, in top section in
 ## Build the image:
 
 `cd debian-distros`
+
 `./docker_build.sh`
 
 ## Run the container, and start ssldump inside the container:
 
 `./docker_run.sh`
+
 `(in container) sudo ssldump -n -i eth0 -j -AH`
 
 ## Mirror traffic to container
