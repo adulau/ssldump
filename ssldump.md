@@ -1,6 +1,6 @@
 # ssldump(1) - dump SSL traffic on a network
 
-9th April 2023 - version 1.7
+14 August 2023 - version 1.8
 
 ```
 .na ssldump [ -aAdeFHjnNPqtTvxXyz ] [ -i interface ]

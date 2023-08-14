@@ -4,7 +4,7 @@ include(CheckSymbolExists)
 project(
     ssldump
     VERSION 1.8
-    DESCRIPTION 20230811
+    DESCRIPTION 20230814
     LANGUAGES C
 )
 
