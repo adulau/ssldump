@@ -1,10 +1,10 @@
-cmake_minimum_required(VERSION 3.16.3)
+cmake_minimum_required(VERSION 3.13.4)
 include(CheckSymbolExists)
 
 project(
     ssldump
-    VERSION 1.8
-    DESCRIPTION 20230811
+    VERSION 1.9
+    DESCRIPTION 20230814
     LANGUAGES C
 )
 
