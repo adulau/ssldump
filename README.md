@@ -29,7 +29,7 @@ For more details, check the man page.
 
 This example will query ja3er.com service to display the known ja3 hashes from the TLS handshaked in the pcap.
 
-`ssldump -r yourcapture.pcap -j | jq -r 'select(.ja3_fp != null) | .ja3_fp' | parallel 'curl -s -X GET 'https://ja3er.com/search/{}' | jq .'`
+`./ssldump -r yourcapture.pcap -j | jq -r 'select(.ja3_fp != null) | .ja3_fp' | parallel 'curl -s -X GET 'https://ja3er.com/search/{}' | jq .'`
 
 # Why do you maintain this repository?
 
