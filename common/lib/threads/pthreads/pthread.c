@@ -7,146 +7,125 @@
    ekr@rtfm.com  Tue Feb 23 15:08:03 1999
  */
 
-
-
 #include <r_common.h>
 #include <r_thread.h>
 #include <pthread.h>
 
-static int thread_count=0;
+static int thread_count = 0;
 
 typedef struct {
-     void (*func) PROTO_LIST((void *));
-     void *arg;
+  void(*func) PROTO_LIST((void *));
+  void *arg;
 } helper;
-
 
 static void *r_thread_real_create PROTO_LIST((void *arg));
 
-static void *
-r_thread_real_create (void *arg)
-  {
-    helper *h;
+static void *r_thread_real_create(void *arg) {
+  helper *h;
 
-    h=(helper *)arg;
+  h = (helper *)arg;
 
-    thread_count++;
+  thread_count++;
 
-    h->func(h->arg);
+  h->func(h->arg);
 
-    thread_count--;
-    free(h);
-    return(0);
-  }
-                     
-int r_thread_fork(func,arg,id)
-  void (*func) PROTO_LIST((void *));
-  void *arg;
-  r_thread *id;
-  {
-    pthread_t thread;
-    helper *h;
-    int r,_status;
+  thread_count--;
+  free(h);
+  return (0);
+}
 
-    h=(helper *)malloc(sizeof(helper));
-    
-    h->func=func;
-    h->arg=arg;
-    
-    if(r=pthread_create(&thread,0,r_thread_real_create,(void *)h))
-      ABORT(R_INTERNAL);
+int r_thread_fork(func, arg, id) void(*func) PROTO_LIST((void *));
+void *arg;
+r_thread *id;
+{
+  pthread_t thread;
+  helper *h;
+  int r, _status;
 
-    _status=0;
-  abort:
-    return(_status);
-  }
+  h = (helper *)malloc(sizeof(helper));
 
-int 
-r_thread_yield (void)
-  {
+  h->func = func;
+  h->arg = arg;
+
+  if(r = pthread_create(&thread, 0, r_thread_real_create, (void *)h))
+    ABORT(R_INTERNAL);
+
+  _status = 0;
+abort:
+  return (_status);
+}
+
+int r_thread_yield(void) {
+  pthread_yield();
+}
+
+int r_thread_exit(void) {
+  thread_count--;
+  pthread_exit(0);
+  return (0);
+}
+
+int r_thread_wait_last(void) {
+  do {
     pthread_yield();
+    usleep(10000);
+    DBG((0, "%d threads left", thread_count));
+  } while(thread_count);
+
+  return (0);
+}
+
+int r_rwlock_create(r_rwlock **lockp) {
+  pthread_rwlock_t *lock;
+  int r;
+
+  if(!(lock = (pthread_rwlock_t *)malloc(sizeof(pthread_rwlock_t))))
+    ERETURN(R_NO_MEMORY);
+
+  if(r = pthread_rwlock_init(lock, 0))
+    ERETURN(R_INTERNAL);
+
+  *lockp = (void *)lock;
+  return (0);
+}
+
+int r_rwlock_destroy(r_rwlock **lock) {
+  pthread_rwlock_t *plock;
+
+  if(!lock || !*lock)
+    return (0);
+
+  plock = (pthread_rwlock_t *)(*lock);
+
+  pthread_rwlock_destroy(plock);
+
+  return (0);
+}
+
+int r_rwlock_lock(r_rwlock *lock, int action) {
+  pthread_rwlock_t *plock;
+  int r, _status;
+
+  plock = (pthread_rwlock_t *)lock;
+
+  switch(action) {
+    case R_RWLOCK_UNLOCK:
+      if(r = pthread_rwlock_unlock(plock))
+        ABORT(R_INTERNAL);
+      break;
+    case R_RWLOCK_RLOCK:
+      if(r = pthread_rwlock_rdlock(plock))
+        ABORT(R_INTERNAL);
+      break;
+    case R_RWLOCK_WLOCK:
+      if(r = pthread_rwlock_wrlock(plock))
+        ABORT(R_INTERNAL);
+      break;
+    default:
+      ABORT(R_BAD_ARGS);
   }
 
-int 
-r_thread_exit (void)
-  {
-    thread_count--;
-    pthread_exit(0);
-    return(0);
-  }
-
-int 
-r_thread_wait_last (void)
-  {
-    do {
-      pthread_yield();
-      usleep(10000);
-      DBG((0,"%d threads left",thread_count));
-    } while (thread_count);
-
-    return(0);
-  }
-
-int 
-r_rwlock_create (r_rwlock **lockp)
-  {
-    pthread_rwlock_t *lock;
-    int r;
-
-    if(!(lock=(pthread_rwlock_t *)malloc(sizeof(pthread_rwlock_t))))
-      ERETURN(R_NO_MEMORY);
-    
-    if(r=pthread_rwlock_init(lock,0))
-      ERETURN(R_INTERNAL);
-
-    *lockp=(void *)lock;
-    return(0);
-  }
-
-int 
-r_rwlock_destroy (r_rwlock **lock)
-  {
-    pthread_rwlock_t *plock;
-
-    if(!lock || !*lock)
-      return(0);
-
-    plock=(pthread_rwlock_t *)(*lock);
-    
-    pthread_rwlock_destroy(plock);
-
-    return(0);
-  }
-
-int 
-r_rwlock_lock (r_rwlock *lock, int action)
-  {
-    pthread_rwlock_t *plock;
-    int r,_status;
-    
-    plock=(pthread_rwlock_t *)lock;
-
-    switch(action){
-      case R_RWLOCK_UNLOCK:
-	if(r=pthread_rwlock_unlock(plock))
-	  ABORT(R_INTERNAL);
-	break;
-      case R_RWLOCK_RLOCK:
-	if(r=pthread_rwlock_rdlock(plock))
-	  ABORT(R_INTERNAL);
-	break;
-      case R_RWLOCK_WLOCK:
-	if(r=pthread_rwlock_wrlock(plock))
-	  ABORT(R_INTERNAL);
-	break;
-      default:
-	ABORT(R_BAD_ARGS);
-    }
-
-    _status=0;
-  abort:
-    return(_status);
-  }
-
-	
-    
+  _status = 0;
+abort:
+  return (_status);
+}

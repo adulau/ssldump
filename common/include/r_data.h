@@ -18,7 +18,7 @@
       documentation and/or other materials provided with the distribution.
    3. All advertising materials mentioning features or use of this software
       must display the following acknowledgement:
-   
+
       This product includes software developed by Eric Rescorla for
       RTFM, Inc.
 
@@ -35,7 +35,8 @@
    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH
+   DAMAGE.
 
    $Id: r_data.h,v 1.2 2000/10/17 16:09:59 ekr Exp $
 
@@ -43,26 +44,30 @@
    ekr@rtfm.com  Wed Feb 10 14:18:19 1999
  */
 
-
 #ifndef _r_data_h
 #define _r_data_h
 
 typedef struct Data_ {
-     UCHAR *data;
-     int len;
+  UCHAR *data;
+  int len;
 } Data;
 
-int r_data_create PROTO_LIST((Data **dp,UCHAR *d,int l));
-int r_data_alloc PROTO_LIST((Data **dp, int l));
-int r_data_make PROTO_LIST((Data *dp, UCHAR *d,int l));
-int r_data_destroy PROTO_LIST((Data **dp));
-int r_data_copy PROTO_LIST((Data *dst,Data *src));
-int r_data_zfree PROTO_LIST((Data *d));
-int r_data_compare PROTO_LIST((Data *d1,Data *d2));
+int r_data_create PROTO_LIST((Data * *dp, UCHAR *d, int l));
+int r_data_alloc PROTO_LIST((Data * *dp, int l));
+int r_data_make PROTO_LIST((Data * dp, UCHAR *d, int l));
+int r_data_destroy PROTO_LIST((Data * *dp));
+int r_data_copy PROTO_LIST((Data * dst, Data *src));
+int r_data_zfree PROTO_LIST((Data * d));
+int r_data_compare PROTO_LIST((Data * d1, Data *d2));
 
-#define INIT_DATA(a,b,c) (a).data=b; (a).len=c
-#define ATTACH_DATA(a,b) (a).data=b; (a).len=sizeof(b)
-#define ZERO_DATA(a) (a).data=0; (a).len=0
+#define INIT_DATA(a, b, c) \
+  (a).data = b;            \
+  (a).len = c
+#define ATTACH_DATA(a, b) \
+  (a).data = b;           \
+  (a).len = sizeof(b)
+#define ZERO_DATA(a) \
+  (a).data = 0;      \
+  (a).len = 0
 
 #endif
-

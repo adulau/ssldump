@@ -18,7 +18,7 @@
       documentation and/or other materials provided with the distribution.
    3. All advertising materials mentioning features or use of this software
       must display the following acknowledgement:
-   
+
       This product includes software developed by Eric Rescorla for
       RTFM, Inc.
 
@@ -35,14 +35,14 @@
    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH
+   DAMAGE.
 
    $Id: r_types.h,v 1.3 2002/09/09 21:02:58 ekr Exp $
 
 
    ekr@rtfm.com  Tue Dec 22 10:36:02 1998
  */
-
 
 #ifndef _r_types_h
 #define _r_types_h
@@ -55,15 +55,15 @@
 #ifndef SIZEOF_UNSIGNED_INT
 typedef unsigned int UINT4;
 #else
-# if (SIZEOF_UNSIGNED_INT==4)
+#if(SIZEOF_UNSIGNED_INT == 4)
 typedef unsigned int UINT4;
-# elif (SIZEOF_UNSIGNED_SHORT==4)
+#elif(SIZEOF_UNSIGNED_SHORT == 4)
 typedef unsigned short UINT4;
-# elif (SIZEOF_UNSIGNED_LONG==4)
+#elif(SIZEOF_UNSIGNED_LONG == 4)
 typedef unsigned long UINT4;
-# else
-# error no type for UINT4
-# endif
+#else
+#error no type for UINT4
+#endif
 #endif
 #endif
 
@@ -71,19 +71,19 @@ typedef unsigned long UINT4;
 #ifndef SIZEOF_UNSIGNED_LONG
 typedef unsigned long UINT8;
 #else
-# if (SIZEOF_UNSIGNED_INT==8)
+#if(SIZEOF_UNSIGNED_INT == 8)
 typedef unsigned int UINT8;
-# elif (SIZEOF_UNSIGNED_SHORT==8)
+#elif(SIZEOF_UNSIGNED_SHORT == 8)
 typedef unsigned short UINT8;
-# elif (SIZEOF_UNSIGNED_LONG==8)
+#elif(SIZEOF_UNSIGNED_LONG == 8)
 typedef unsigned long UINT8;
-# elif (SIZEOF_UNSIGNED_LONG_LONG==8)
+#elif(SIZEOF_UNSIGNED_LONG_LONG == 8)
 typedef unsigned long long UINT8;
-# elif defined (_WIN32) && defined (_MSC_VER)
+#elif defined(_WIN32) && defined(_MSC_VER)
 typedef unsigned __int64 UINT8;
-# else
-# error no type for UINT8
-# endif
+#else
+#error no type for UINT8
+#endif
 #endif
 #endif
 
@@ -92,4 +92,3 @@ typedef unsigned char UCHAR;
 #endif
 
 #endif
-

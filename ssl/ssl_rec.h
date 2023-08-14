@@ -18,7 +18,7 @@
       documentation and/or other materials provided with the distribution.
    3. All advertising materials mentioning features or use of this software
       must display the following acknowledgement:
-   
+
       This product includes software developed by Eric Rescorla for
       RTFM, Inc.
 
@@ -35,7 +35,8 @@
    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH
+   DAMAGE.
 
    $Id: ssl_rec.h,v 1.2 2000/10/17 16:10:02 ekr Exp $
 
@@ -43,24 +44,43 @@
    ekr@rtfm.com  Wed Aug 18 16:16:23 1999
  */
 
-
 #ifndef _ssl_rec_h
 #define _ssl_rec_h
 
 typedef struct ssl_rec_decoder_ ssl_rec_decoder;
 
-int ssl_destroy_rec_decoder PROTO_LIST((ssl_rec_decoder **dp));
-int ssl_create_rec_decoder PROTO_LIST((ssl_rec_decoder **dp,
-  ssl_obj *ssl,UCHAR *mk,UCHAR *sk,UCHAR *iv));
-int ssl_decode_rec_data PROTO_LIST((ssl_obj *ssl,ssl_rec_decoder *d,
-  int ct,int version,UCHAR *in,int inl,UCHAR *out,int *outl));
-int tls13_decode_rec_data PROTO_LIST((ssl_obj *ssl,ssl_rec_decoder *d,int ct,int version,UCHAR *in,int inl,UCHAR *out,int *outl));
-int tls13_update_rec_key PROTO_LIST((ssl_rec_decoder *d,UCHAR *newkey, UCHAR *newiv));
+int ssl_destroy_rec_decoder PROTO_LIST((ssl_rec_decoder * *dp));
+int ssl_create_rec_decoder PROTO_LIST(
+    (ssl_rec_decoder * *dp, ssl_obj *ssl, UCHAR *mk, UCHAR *sk, UCHAR *iv));
+int ssl_decode_rec_data PROTO_LIST((ssl_obj * ssl,
+                                    ssl_rec_decoder *d,
+                                    int ct,
+                                    int version,
+                                    UCHAR *in,
+                                    int inl,
+                                    UCHAR *out,
+                                    int *outl));
+int tls13_decode_rec_data PROTO_LIST((ssl_obj * ssl,
+                                      ssl_rec_decoder *d,
+                                      int ct,
+                                      int version,
+                                      UCHAR *in,
+                                      int inl,
+                                      UCHAR *out,
+                                      int *outl));
+int tls13_update_rec_key PROTO_LIST((ssl_rec_decoder * d,
+                                     UCHAR *newkey,
+                                     UCHAR *newiv));
 
-int ssl3_check_mac(ssl_rec_decoder *d, int ct, int ver, UCHAR *data,
-  UINT4 datalen, UCHAR *mac);
+int ssl3_check_mac(ssl_rec_decoder *d,
+                   int ct,
+                   int ver,
+                   UCHAR *data,
+                   UINT4 datalen,
+                   UCHAR *mac);
 
-#define IS_AEAD_CIPHER(cs) (cs->enc==0x3b||cs->enc==0x3c||cs->enc==0x3d||cs->enc==0x3e||cs->enc==0x3f)
-#define IS_CCM_CIPHER(cs) (cs->enc==0x3e||cs->enc==0x3f)
+#define IS_AEAD_CIPHER(cs)                                                     \
+  (cs->enc == 0x3b || cs->enc == 0x3c || cs->enc == 0x3d || cs->enc == 0x3e || \
+   cs->enc == 0x3f)
+#define IS_CCM_CIPHER(cs) (cs->enc == 0x3e || cs->enc == 0x3f)
 #endif
-

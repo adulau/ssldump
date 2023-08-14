@@ -18,7 +18,7 @@
       documentation and/or other materials provided with the distribution.
    3. All advertising materials mentioning features or use of this software
       must display the following acknowledgement:
-   
+
       This product includes software developed by Eric Rescorla for
       RTFM, Inc.
 
@@ -35,7 +35,8 @@
    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH
+   DAMAGE.
 
    $Id: r_errors.h,v 1.3 2002/01/21 17:36:51 ekr Exp $
 
@@ -43,20 +44,18 @@
    ekr@rtfm.com  Tue Dec 22 10:59:49 1998
  */
 
-
 #ifndef _r_errors_h
 #define _r_errors_h
 
-#define R_NO_MEMORY      1 /*out of memory*/
-#define R_NOT_FOUND	 2 /*Item not found*/
-#define R_INTERNAL	 3 /*Unspecified internal error*/
-#define R_ALREADY	 4 /*Action already done*/
-#define R_EOD            5 /*end of data*/
-#define R_BAD_ARGS       6 /*Bad arguments*/
-#define R_BAD_DATA	 7 /*Bad data*/
-#define R_WOULDBLOCK     8 /*Operation would block */
+#define R_NO_MEMORY 1  /*out of memory*/
+#define R_NOT_FOUND 2  /*Item not found*/
+#define R_INTERNAL 3   /*Unspecified internal error*/
+#define R_ALREADY 4    /*Action already done*/
+#define R_EOD 5        /*end of data*/
+#define R_BAD_ARGS 6   /*Bad arguments*/
+#define R_BAD_DATA 7   /*Bad data*/
+#define R_WOULDBLOCK 8 /*Operation would block */
 
-int verr_exit PROTO_LIST((char *fmt,...));
+int verr_exit PROTO_LIST((char *fmt, ...));
 
 #endif
-

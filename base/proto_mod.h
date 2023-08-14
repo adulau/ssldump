@@ -18,7 +18,7 @@
       documentation and/or other materials provided with the distribution.
    3. All advertising materials mentioning features or use of this software
       must display the following acknowledgement:
-   
+
       This product includes software developed by Eric Rescorla for
       RTFM, Inc.
 
@@ -35,7 +35,8 @@
    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH
+   DAMAGE.
 
    $Id: proto_mod.h,v 1.4 2001/11/26 22:28:16 ekr Exp $
 
@@ -43,67 +44,76 @@
    ekr@rtfm.com  Thu Dec 24 21:10:05 1998
  */
 
-
 #ifndef _proto_mod_h
 #define _proto_mod_h
 
 typedef struct proto_obj_ proto_obj;
 typedef struct proto_ctx_ proto_ctx;
 
-#define DIR_I2R    1
-#define DIR_R2I	   2
+#define DIR_I2R 1
+#define DIR_R2I 2
 
 struct proto_mod_vtbl_ {
-     int (*parse_flags) PROTO_LIST((char *str));
-     int (*parse_flag) PROTO_LIST((int flag));
-     int (*create_ctx) PROTO_LIST((void *handle,proto_ctx **ctxp));
-     int (*create) PROTO_LIST((void *handle,proto_ctx *ctx,
-       tcp_conn *conn,
-       proto_obj **objp,
-       struct sockaddr_storage *i_addr,u_short i_port,
-       struct sockaddr_storage *r_addr,u_short r_port,struct timeval *time_base));
-     int (*destroy_ctx) PROTO_LIST((void *handle,proto_ctx **ctxp));
-     int (*destroy) PROTO_LIST((proto_obj **objp));
-     int (*data) PROTO_LIST((proto_obj *obj,segment *data,int direction));
-     int (*close) PROTO_LIST((proto_obj *obj,packet *p,int direction));
+  int(*parse_flags) PROTO_LIST((char *str));
+  int(*parse_flag) PROTO_LIST((int flag));
+  int(*create_ctx) PROTO_LIST((void *handle, proto_ctx **ctxp));
+  int(*create) PROTO_LIST((void *handle,
+                           proto_ctx *ctx,
+                           tcp_conn *conn,
+                           proto_obj **objp,
+                           struct sockaddr_storage *i_addr,
+                           u_short i_port,
+                           struct sockaddr_storage *r_addr,
+                           u_short r_port,
+                           struct timeval *time_base));
+  int(*destroy_ctx) PROTO_LIST((void *handle, proto_ctx **ctxp));
+  int(*destroy) PROTO_LIST((proto_obj * *objp));
+  int(*data) PROTO_LIST((proto_obj * obj, segment *data, int direction));
+  int(*close) PROTO_LIST((proto_obj * obj, packet *p, int direction));
 };
 
 struct proto_mod_ {
-     void *handle;
-     struct proto_mod_vtbl_ *vtbl;
+  void *handle;
+  struct proto_mod_vtbl_ *vtbl;
 };
 
 struct proto_handler_ {
-     proto_obj *obj;
-     struct proto_mod_vtbl_ *vtbl;
+  proto_obj *obj;
+  struct proto_mod_vtbl_ *vtbl;
 };
 
-int create_proto_handler PROTO_LIST((proto_mod *mod,proto_ctx *ctx,
-  proto_handler **handlerp,
-  tcp_conn *conn,struct timeval *first_packet));
-int destroy_proto_handler PROTO_LIST((proto_handler **handlerp));
+int create_proto_handler PROTO_LIST((proto_mod * mod,
+                                     proto_ctx *ctx,
+                                     proto_handler **handlerp,
+                                     tcp_conn *conn,
+                                     struct timeval *first_packet));
+int destroy_proto_handler PROTO_LIST((proto_handler * *handlerp));
 
-
-//add logger
+// add logger
 struct logger_mod_vtbl_ {
-     int (*init) PROTO_LIST((void *data));
-     //deinit must be async signal safe(!!!)
-     int (*deinit) PROTO_LIST(());
-     int (*create) PROTO_LIST((proto_obj **objp, struct sockaddr_storage *i_addr,u_short i_port,
-                                       struct sockaddr_storage *r_addr,u_short r_port,struct timeval *time_base));
-     int (*destroy) PROTO_LIST((proto_obj **objp));
-     int (*data) PROTO_LIST((proto_obj *obj,unsigned char *data,unsigned int len,int direction));
-     int (*close) PROTO_LIST((proto_obj *obj,unsigned char *data,unsigned int len,int direction));
+  int(*init) PROTO_LIST((void *data));
+  // deinit must be async signal safe(!!!)
+  int(*deinit) PROTO_LIST(());
+  int(*create) PROTO_LIST((proto_obj * *objp,
+                           struct sockaddr_storage *i_addr,
+                           u_short i_port,
+                           struct sockaddr_storage *r_addr,
+                           u_short r_port,
+                           struct timeval *time_base));
+  int(*destroy) PROTO_LIST((proto_obj * *objp));
+  int(*data) PROTO_LIST(
+      (proto_obj * obj, unsigned char *data, unsigned int len, int direction));
+  int(*close) PROTO_LIST(
+      (proto_obj * obj, unsigned char *data, unsigned int len, int direction));
 };
 
 struct logger_mod_ {
-     char *name;
-     struct logger_mod_vtbl_ *vtbl;
+  char *name;
+  struct logger_mod_vtbl_ *vtbl;
 };
 
 typedef struct logger_mod_ logger_mod;
 
-extern logger_mod *logger; 
+extern logger_mod *logger;
 
 #endif
-

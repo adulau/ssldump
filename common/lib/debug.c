@@ -18,7 +18,7 @@
       documentation and/or other materials provided with the distribution.
    3. All advertising materials mentioning features or use of this software
       must display the following acknowledgement:
-   
+
       This product includes software developed by Eric Rescorla for
       RTFM, Inc.
 
@@ -35,7 +35,8 @@
    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH
+   DAMAGE.
 
    $Id: debug.c,v 1.3 2001/12/24 06:06:26 ekr Exp $
 
@@ -43,47 +44,34 @@
    ekr@rtfm.com  Wed Jan  6 17:08:58 1999
  */
 
-
-
-
 #include <stdarg.h>
 #include <stdio.h>
 #include "r_common.h"
 #include "debug.h"
 
-int debug(int class,char *format,...)
-  {
-    va_list ap;
+int debug(int class, char *format, ...) {
+  va_list ap;
 
-    va_start(ap,format);
-    vfprintf(stderr,format,ap);
-    fprintf(stderr,"\n");
-    va_end(ap);
-    return(0);
+  va_start(ap, format);
+  vfprintf(stderr, format, ap);
+  fprintf(stderr, "\n");
+  va_end(ap);
+  return (0);
+}
+
+int xdump(char *name, UCHAR *data, int len) {
+  int i;
+
+  if(name) {
+    printf("%s[%d]=\n", name, len);
   }
-
-int 
-xdump (char *name, UCHAR *data, int len)
-  {
-    int i;
-
-    if(name){
-      printf("%s[%d]=\n",name,len);
-    }
-    for(i=0;i<len;i++){
-      
-      if((len>8) && i && !(i%12)){
-        printf("\n"); 
-      }
-      printf("%.2x ",data[i]&255);
-    }
-    if(i%12)
+  for(i = 0; i < len; i++) {
+    if((len > 8) && i && !(i % 12)) {
       printf("\n");
-    return(0);
+    }
+    printf("%.2x ", data[i] & 255);
   }
-      
-
-
-  
-  
-  
+  if(i % 12)
+    printf("\n");
+  return (0);
+}

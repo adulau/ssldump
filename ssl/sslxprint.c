@@ -18,7 +18,7 @@
       documentation and/or other materials provided with the distribution.
    3. All advertising materials mentioning features or use of this software
       must display the following acknowledgement:
-   
+
       This product includes software developed by Eric Rescorla for
       RTFM, Inc.
 
@@ -35,14 +35,14 @@
    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH
+   DAMAGE.
 
    $Id: sslxprint.c,v 1.3 2000/11/03 06:38:06 ekr Exp $
 
 
    ekr@rtfm.com  Thu Mar 25 21:17:16 1999
  */
-
 
 #include <json.h>
 #include "network.h"
@@ -57,201 +57,195 @@
 
 #define BUFSIZE 1024
 
-static int sslx__print_dn PROTO_LIST((ssl_obj *ssl,char *x));
+static int sslx__print_dn PROTO_LIST((ssl_obj * ssl, char *x));
 #ifdef OPENSSL
-static int sslx__print_serial PROTO_LIST((ssl_obj *ssl,ASN1_INTEGER *a));
+static int sslx__print_serial PROTO_LIST((ssl_obj * ssl, ASN1_INTEGER *a));
 #endif
 
-int 
-sslx_print_certificate (ssl_obj *ssl, Data *data, int pf)
-  {
-#ifdef OPENSSL    
-    X509 *x=0;
-    ASN1_INTEGER *a;
-#endif    
-    UCHAR *d;
-    int _status;
-    struct json_object *cert_obj;
-    
-#ifdef OPENSSL        
-    P_(P_ASN){
-      char buf[BUFSIZE];
-      int ext;
-      char *b64_cert;
-
-      char *serial_str = NULL;
-      Data data_tmp;
-
-      struct json_object *jobj;
-      jobj = ssl->cur_json_st;
-
-      cert_obj = json_object_new_object();
-
-      d=data->data;
-
-      if(!(b64_cert=(char *)calloc(1,sizeof(char) * ((((data->len) + 3 - 1)/3) * 4 + 1))))
-        ABORT(R_NO_MEMORY);
-
-      EVP_EncodeBlock((unsigned char *)b64_cert, d, data->len);
-      json_object_object_add(cert_obj, "cert_der", json_object_new_string(b64_cert));
-      free(b64_cert);
-
-      if(!(x=d2i_X509(0,(const unsigned char **) &d,data->len))){
-        explain(ssl,"Bad certificate");
-        ABORT(R_BAD_DATA);
-      }
-      X509_NAME_oneline(X509_get_subject_name(x),buf,
-        BUFSIZE);
-      explain(ssl,"Subject\n");
-      INDENT_INCR;
-      json_object_object_add(cert_obj, "cert_subject", json_object_new_string(buf));
-      sslx__print_dn(ssl,buf);
-      INDENT_POP;
-      X509_NAME_oneline(X509_get_issuer_name(x),buf,
-        BUFSIZE);
-      explain(ssl,"Issuer\n");
-      INDENT_INCR;
-      json_object_object_add(cert_obj, "cert_issuer", json_object_new_string(buf));
-      sslx__print_dn(ssl,buf);
-      INDENT_POP;
-      a=X509_get_serialNumber(x);
-      explain(ssl,"Serial ");
-      if(!(serial_str=(char *)calloc(1,sizeof(char) * (a->length * 3))))
-        ABORT(R_NO_MEMORY);
-      INIT_DATA(data_tmp,a->data,a->length);
-      exstr(ssl, serial_str, &data_tmp);
-      json_object_object_add(cert_obj, "cert_serial", json_object_new_string(serial_str));
-      free(serial_str);
-      sslx__print_serial(ssl,a);
-
-      ext=X509_get_ext_count(x);
-      if(ext>0){
-        int i,j;
-        UCHAR buf[1024];
-          
-        explain(ssl,"Extensions\n");
-        INDENT_INCR;
-        for(i=0;i<ext;i++){
-          X509_EXTENSION *ex;
-          ASN1_OBJECT *obj;
-
-          ex=X509_get_ext(x,i);
-          obj=X509_EXTENSION_get_object(ex);
-          i2t_ASN1_OBJECT((char *)buf,sizeof(buf),obj);
-            
-          explain(ssl,"Extension: %s\n",buf);
-          j=X509_EXTENSION_get_critical(ex);
-          if(j){
-            INDENT;
-            explain(ssl,"Critical\n");
-          }
-          if(SSL_print_flags & SSL_PRINT_NROFF){
-            if(ssl->process_ciphertext&ssl->direction)
-              printf("\\f(CI");
-            else
-              printf("\\fC");
-
-            INDENT_INCR;
-            INDENT;
-            if(!X509V3_EXT_print_fp(stdout,ex,0,0)){
-              printf("Hex value");
-            }
-            INDENT_POP;
-            explain(ssl,"\n");
-          }
-        }
-        INDENT_POP;
-        
-      }
-      else{
+int sslx_print_certificate(ssl_obj *ssl, Data *data, int pf) {
+#ifdef OPENSSL
+  X509 *x = 0;
+  ASN1_INTEGER *a;
 #endif
-        P_(pf){
-          exdump(ssl,"certificate",data);
-        }
-#ifdef OPENSSL        
-      }
+  UCHAR *d;
+  int _status;
+  struct json_object *cert_obj;
 
-	struct json_object *certs_array;
-	json_object_object_get_ex(jobj, "cert_chain", &certs_array);
-	json_object_array_add(certs_array,cert_obj);
+#ifdef OPENSSL
+  P_(P_ASN) {
+    char buf[BUFSIZE];
+    int ext;
+    char *b64_cert;
+
+    char *serial_str = NULL;
+    Data data_tmp;
+
+    struct json_object *jobj;
+    jobj = ssl->cur_json_st;
+
+    cert_obj = json_object_new_object();
+
+    d = data->data;
+
+    if(!(b64_cert = (char *)calloc(
+             1, sizeof(char) * ((((data->len) + 3 - 1) / 3) * 4 + 1))))
+      ABORT(R_NO_MEMORY);
+
+    EVP_EncodeBlock((unsigned char *)b64_cert, d, data->len);
+    json_object_object_add(cert_obj, "cert_der",
+                           json_object_new_string(b64_cert));
+    free(b64_cert);
+
+    if(!(x = d2i_X509(0, (const unsigned char **)&d, data->len))) {
+      explain(ssl, "Bad certificate");
+      ABORT(R_BAD_DATA);
     }
-#endif
+    X509_NAME_oneline(X509_get_subject_name(x), buf, BUFSIZE);
+    explain(ssl, "Subject\n");
+    INDENT_INCR;
+    json_object_object_add(cert_obj, "cert_subject",
+                           json_object_new_string(buf));
+    sslx__print_dn(ssl, buf);
+    INDENT_POP;
+    X509_NAME_oneline(X509_get_issuer_name(x), buf, BUFSIZE);
+    explain(ssl, "Issuer\n");
+    INDENT_INCR;
+    json_object_object_add(cert_obj, "cert_issuer",
+                           json_object_new_string(buf));
+    sslx__print_dn(ssl, buf);
+    INDENT_POP;
+    a = X509_get_serialNumber(x);
+    explain(ssl, "Serial ");
+    if(!(serial_str = (char *)calloc(1, sizeof(char) * (a->length * 3))))
+      ABORT(R_NO_MEMORY);
+    INIT_DATA(data_tmp, a->data, a->length);
+    exstr(ssl, serial_str, &data_tmp);
+    json_object_object_add(cert_obj, "cert_serial",
+                           json_object_new_string(serial_str));
+    free(serial_str);
+    sslx__print_serial(ssl, a);
 
-    _status=0;
-  abort:
-#ifdef OPENSSL    
-    if(x) X509_free(x);
-#endif
-    if(_status && cert_obj) json_object_put(cert_obj);
-    return(_status);
-  }  
+    ext = X509_get_ext_count(x);
+    if(ext > 0) {
+      int i, j;
+      UCHAR buf[1024];
 
-int 
-sslx_print_dn (ssl_obj *ssl, Data *data, int pf)
-  {
-    UCHAR buf[BUFSIZE];
-    int _status;
-    UCHAR *d=data->data;
-#ifdef OPENSSL    
-    X509_NAME *n=0;
-#endif
-    
-    P_(pf){
-#ifdef OPENSSL      
-      P_(P_ASN){
-	if(!(n=d2i_X509_NAME(0,(const unsigned char **) &d,data->len)))
-	  ABORT(R_BAD_DATA);
-	X509_NAME_oneline(n,(char *)buf,BUFSIZE);
-	sslx__print_dn(ssl,(char *)buf);
+      explain(ssl, "Extensions\n");
+      INDENT_INCR;
+      for(i = 0; i < ext; i++) {
+        X509_EXTENSION *ex;
+        ASN1_OBJECT *obj;
+
+        ex = X509_get_ext(x, i);
+        obj = X509_EXTENSION_get_object(ex);
+        i2t_ASN1_OBJECT((char *)buf, sizeof(buf), obj);
+
+        explain(ssl, "Extension: %s\n", buf);
+        j = X509_EXTENSION_get_critical(ex);
+        if(j) {
+          INDENT;
+          explain(ssl, "Critical\n");
+        }
+        if(SSL_print_flags & SSL_PRINT_NROFF) {
+          if(ssl->process_ciphertext & ssl->direction)
+            printf("\\f(CI");
+          else
+            printf("\\fC");
+
+          INDENT_INCR;
+          INDENT;
+          if(!X509V3_EXT_print_fp(stdout, ex, 0, 0)) {
+            printf("Hex value");
+          }
+          INDENT_POP;
+          explain(ssl, "\n");
+        }
       }
-      else{
-#endif        
-	exdump(ssl,0,data);
-#ifdef OPENSSL        
-      }
+      INDENT_POP;
+
+    } else {
 #endif
+      P_(pf) { exdump(ssl, "certificate", data); }
+#ifdef OPENSSL
     }
 
-    _status=0;
-  abort:
-#ifdef OPENSSL    
+    struct json_object *certs_array;
+    json_object_object_get_ex(jobj, "cert_chain", &certs_array);
+    json_object_array_add(certs_array, cert_obj);
+  }
+#endif
+
+  _status = 0;
+abort:
+#ifdef OPENSSL
+  if(x)
+    X509_free(x);
+#endif
+  if(_status && cert_obj)
+    json_object_put(cert_obj);
+  return (_status);
+}
+
+int sslx_print_dn(ssl_obj *ssl, Data *data, int pf) {
+  UCHAR buf[BUFSIZE];
+  int _status;
+  UCHAR *d = data->data;
+#ifdef OPENSSL
+  X509_NAME *n = 0;
+#endif
+
+  P_(pf){
+#ifdef OPENSSL
+      P_(P_ASN){if(!(n = d2i_X509_NAME(0, (const unsigned char **)&d,
+                                       data->len))) ABORT(R_BAD_DATA);
+  X509_NAME_oneline(n, (char *)buf, BUFSIZE);
+  sslx__print_dn(ssl, (char *)buf);
+}
+else {
+#endif
+  exdump(ssl, 0, data);
+#ifdef OPENSSL
+}
+#endif
+}
+
+_status = 0;
+abort :
+#ifdef OPENSSL
     if(n) X509_NAME_free(n);
-#endif    
-    return(_status);
-  }
+#endif
+return (_status);
+}
 
-static int 
-sslx__print_dn (ssl_obj *ssl, char *x)
-  {
-    char *slash;
+static int sslx__print_dn(ssl_obj *ssl, char *x) {
+  char *slash;
 
-    if(*x=='/') x++;
-    
-    while (x){
-      if((slash=strchr(x,'/'))){
-	*slash=0;
-      }
+  if(*x == '/')
+    x++;
 
-      explain(ssl,"%s\n",x);
+  while(x) {
+    if((slash = strchr(x, '/'))) {
+      *slash = 0;
+    }
 
-      x=slash?slash+1:0;
-    };
+    explain(ssl, "%s\n", x);
 
-    return(0);
-  }
+    x = slash ? slash + 1 : 0;
+  };
+
+  return (0);
+}
 
 #ifdef OPENSSL
-static int 
-sslx__print_serial (ssl_obj *ssl, ASN1_INTEGER *a)
-  {
-    Data d;
-    
-    if(a->length==0)
-      printf("0");
+static int sslx__print_serial(ssl_obj *ssl, ASN1_INTEGER *a) {
+  Data d;
 
-    INIT_DATA(d,a->data,a->length);
-    exdump(ssl,0,&d);
+  if(a->length == 0)
+    printf("0");
 
-    return(0);
-  }
+  INIT_DATA(d, a->data, a->length);
+  exdump(ssl, 0, &d);
+
+  return (0);
+}
 #endif

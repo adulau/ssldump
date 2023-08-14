@@ -18,7 +18,7 @@
       documentation and/or other materials provided with the distribution.
    3. All advertising materials mentioning features or use of this software
       must display the following acknowledgement:
-   
+
       This product includes software developed by Eric Rescorla for
       RTFM, Inc.
 
@@ -35,7 +35,8 @@
    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH
+   DAMAGE.
 
    $Id: print_utils.h,v 1.2 2000/10/17 16:09:58 ekr Exp $
 
@@ -43,14 +44,10 @@
    ekr@rtfm.com  Mon Feb 15 17:23:56 1999
  */
 
-
 #ifndef _print_utils_h
 #define _print_utils_h
 
-int explain PROTO_LIST((char *format,...));
-int exdump PROTO_LIST((char *name,
-  Data *data));
-
+int explain PROTO_LIST((char *format, ...));
+int exdump PROTO_LIST((char *name, Data *data));
 
 #endif
-

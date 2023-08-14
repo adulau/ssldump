@@ -18,7 +18,7 @@
       documentation and/or other materials provided with the distribution.
    3. All advertising materials mentioning features or use of this software
       must display the following acknowledgement:
-   
+
       This product includes software developed by Eric Rescorla for
       RTFM, Inc.
 
@@ -35,7 +35,8 @@
    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH
+   DAMAGE.
 
    $Id: proto_mod.c,v 1.3 2001/07/20 23:33:14 ekr Exp $
 
@@ -43,41 +44,40 @@
    ekr@rtfm.com  Thu Jan  7 22:35:23 1999
  */
 
-
-
 #include "network.h"
 
-int 
-create_proto_handler (proto_mod *mod, proto_ctx *ctx, proto_handler **handlerp, tcp_conn *conn, struct timeval *first_packet)
-  {
-    int r,_status;
-    proto_handler *handler=0;
+int create_proto_handler(proto_mod *mod,
+                         proto_ctx *ctx,
+                         proto_handler **handlerp,
+                         tcp_conn *conn,
+                         struct timeval *first_packet) {
+  int r, _status;
+  proto_handler *handler = 0;
 
-    if(!(handler=(proto_handler *)calloc(1,sizeof(proto_handler))))
-      ABORT(R_NO_MEMORY);
-    handler->vtbl=mod->vtbl;
-    if((r=mod->vtbl->create(mod->handle,ctx,conn,&handler->obj,
-      &conn->i_addr,conn->i_port,&conn->r_addr,conn->r_port,first_packet)))
-      ABORT(r);
+  if(!(handler = (proto_handler *)calloc(1, sizeof(proto_handler))))
+    ABORT(R_NO_MEMORY);
+  handler->vtbl = mod->vtbl;
+  if((r = mod->vtbl->create(mod->handle, ctx, conn, &handler->obj,
+                            &conn->i_addr, conn->i_port, &conn->r_addr,
+                            conn->r_port, first_packet)))
+    ABORT(r);
 
-    *handlerp=handler;
+  *handlerp = handler;
 
-    _status=0;
-  abort:
-    if(_status){
-      destroy_proto_handler(&handler);
-    }
-    return(_status);
+  _status = 0;
+abort:
+  if(_status) {
+    destroy_proto_handler(&handler);
   }
+  return (_status);
+}
 
-int 
-destroy_proto_handler (proto_handler **handlerp)
-  {
-    if(!handlerp || !*handlerp)
-      return(0);
+int destroy_proto_handler(proto_handler **handlerp) {
+  if(!handlerp || !*handlerp)
+    return (0);
 
-    (*handlerp)->vtbl->destroy(&(*handlerp)->obj);
-    free(*handlerp);
-    *handlerp=0;
-    return(0);
-  }
+  (*handlerp)->vtbl->destroy(&(*handlerp)->obj);
+  free(*handlerp);
+  *handlerp = 0;
+  return (0);
+}

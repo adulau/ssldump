@@ -18,7 +18,7 @@
       documentation and/or other materials provided with the distribution.
    3. All advertising materials mentioning features or use of this software
       must display the following acknowledgement:
-   
+
       This product includes software developed by Eric Rescorla for
       RTFM, Inc.
 
@@ -35,7 +35,8 @@
    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH
+   DAMAGE.
 
    $Id: sslciphers.h,v 1.3 2002/08/17 01:33:17 ekr Exp $
 
@@ -43,55 +44,52 @@
    ekr@rtfm.com  Tue Mar 30 18:11:55 1999
  */
 
-
 #ifndef _sslciphers_h
 #define _sslciphers_h
 typedef struct SSL_CipherSuite_ {
-     int number;
-     int kex;
-     int sig;
-     int enc;
-     int block;
-     int bits;
-     int eff_bits;
-     int dig;
-     int dig_len;
-     int export;
+  int number;
+  int kex;
+  int sig;
+  int enc;
+  int block;
+  int bits;
+  int eff_bits;
+  int dig;
+  int dig_len;
+  int export;
 } SSL_CipherSuite;
 
-#define KEX_RSA		0x10
-#define KEX_DH		0x11
+#define KEX_RSA 0x10
+#define KEX_DH 0x11
 
-#define SIG_RSA		0x20
-#define SIG_DSS		0x21
-#define SIG_NONE	0x22
+#define SIG_RSA 0x20
+#define SIG_DSS 0x21
+#define SIG_NONE 0x22
 
-#define ENC_DES		0x30
-#define ENC_3DES	0x31
-#define ENC_RC4		0x32
-#define ENC_RC2		0x33
-#define ENC_IDEA	0x34
-#define ENC_AES128	0x35
-#define ENC_AES256	0x36
-#define ENC_CAMELLIA128	0x37
-#define ENC_CAMELLIA256	0x38
-#define ENC_SEED	0x39
-#define ENC_NULL	0x3a
-#define ENC_AES128_GCM  0x3b
-#define ENC_AES256_GCM  0x3c
-#define ENC_CHACHA20_POLY1305  0x3d
-#define ENC_AES128_CCM  0x3e
-#define ENC_AES128_CCM_8  0x3f
+#define ENC_DES 0x30
+#define ENC_3DES 0x31
+#define ENC_RC4 0x32
+#define ENC_RC2 0x33
+#define ENC_IDEA 0x34
+#define ENC_AES128 0x35
+#define ENC_AES256 0x36
+#define ENC_CAMELLIA128 0x37
+#define ENC_CAMELLIA256 0x38
+#define ENC_SEED 0x39
+#define ENC_NULL 0x3a
+#define ENC_AES128_GCM 0x3b
+#define ENC_AES256_GCM 0x3c
+#define ENC_CHACHA20_POLY1305 0x3d
+#define ENC_AES128_CCM 0x3e
+#define ENC_AES128_CCM_8 0x3f
 
-#define DIG_MD5		0x40
-#define DIG_SHA		0x41
-#define DIG_SHA224	0x42  /* Not sure why EKR didn't follow RFC for */
-#define DIG_SHA256	0x43  /* these values, but whatever, just adding on */
-#define DIG_SHA384	0x44
-#define DIG_SHA512	0x45
+#define DIG_MD5 0x40
+#define DIG_SHA 0x41
+#define DIG_SHA224 0x42 /* Not sure why EKR didn't follow RFC for */
+#define DIG_SHA256 0x43 /* these values, but whatever, just adding on */
+#define DIG_SHA384 0x44
+#define DIG_SHA512 0x45
 
-int ssl_find_cipher PROTO_LIST((int num,SSL_CipherSuite **cs));
-
+int ssl_find_cipher PROTO_LIST((int num, SSL_CipherSuite **cs));
 
 #endif
-

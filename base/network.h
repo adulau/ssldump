@@ -18,7 +18,7 @@
       documentation and/or other materials provided with the distribution.
    3. All advertising materials mentioning features or use of this software
       must display the following acknowledgement:
-   
+
       This product includes software developed by Eric Rescorla for
       RTFM, Inc.
 
@@ -35,14 +35,14 @@
    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH
+   DAMAGE.
 
    $Id: network.h,v 1.3 2001/09/14 22:29:14 ekr Exp $
 
 
    ekr@rtfm.com  Tue Dec 29 09:53:50 1998
  */
-
 
 #ifndef _network_h
 #define _network_h
@@ -74,44 +74,47 @@ typedef struct proto_mod_ proto_mod;
 typedef struct proto_handler_ proto_handler;
 typedef struct packet_ packet;
 
-int network_handler_create PROTO_LIST((proto_mod *mod,
-  n_handler **handlerp));
-int network_handler_destroy PROTO_LIST((proto_mod *mod,n_handler **handlerp));
-int network_process_packet PROTO_LIST((n_handler *handler,
-  struct timeval *timestamp,UCHAR *data,int length,int af));
-int packet_copy PROTO_LIST((packet *in,packet **out));
-int packet_destroy PROTO_LIST((packet *p));
-int timestamp_diff PROTO_LIST(( struct timeval *t1,struct timeval *t0,
-  struct timeval *diff));
-int lookuphostname PROTO_LIST((struct sockaddr_storage *addr,char **name));
-int addrtotext PROTO_LIST((struct sockaddr_storage *addr,char **name));
+int network_handler_create PROTO_LIST((proto_mod * mod, n_handler **handlerp));
+int network_handler_destroy PROTO_LIST((proto_mod * mod, n_handler **handlerp));
+int network_process_packet PROTO_LIST((n_handler * handler,
+                                       struct timeval *timestamp,
+                                       UCHAR *data,
+                                       int length,
+                                       int af));
+int packet_copy PROTO_LIST((packet * in, packet **out));
+int packet_destroy PROTO_LIST((packet * p));
+int timestamp_diff PROTO_LIST((struct timeval * t1,
+                               struct timeval *t0,
+                               struct timeval *diff));
+int lookuphostname PROTO_LIST((struct sockaddr_storage * addr, char **name));
+int addrtotext PROTO_LIST((struct sockaddr_storage * addr, char **name));
 
 struct packet_ {
-     struct timeval ts;
-     UCHAR *base;	/*The base of the packet*/
-     int _len;
-     UCHAR *data;	/*The data ptr appropriate to this layer*/
-     int len;		/*The length of the data segment*/
-     
-     /*These just save us the effort of doing casts to the data
-       segments*/
-     struct ip *ip;	/*The IP header*/
-     int af;
-     union {
-         struct ip *ip;	/*The IP header*/
-         struct ip6_hdr *ip6;	/*The IP header*/
-     } l3_hdr;
-     struct tcphdr *tcp; /*The TCP header*/
-     union {
-         struct sockaddr_storage so_st;
-         struct sockaddr_in so_in;
-         struct sockaddr_in6 so_in6;
-     } i_addr;
-     union {
-         struct sockaddr_storage so_st;
-         struct sockaddr_in so_in;
-         struct sockaddr_in6 so_in6;
-     } r_addr;
+  struct timeval ts;
+  UCHAR *base; /*The base of the packet*/
+  int _len;
+  UCHAR *data; /*The data ptr appropriate to this layer*/
+  int len;     /*The length of the data segment*/
+
+  /*These just save us the effort of doing casts to the data
+    segments*/
+  struct ip *ip; /*The IP header*/
+  int af;
+  union {
+    struct ip *ip;       /*The IP header*/
+    struct ip6_hdr *ip6; /*The IP header*/
+  } l3_hdr;
+  struct tcphdr *tcp; /*The TCP header*/
+  union {
+    struct sockaddr_storage so_st;
+    struct sockaddr_in so_in;
+    struct sockaddr_in6 so_in6;
+  } i_addr;
+  union {
+    struct sockaddr_storage so_st;
+    struct sockaddr_in so_in;
+    struct sockaddr_in6 so_in6;
+  } r_addr;
 };
 
 #include "tcpconn.h"
@@ -119,11 +122,10 @@ struct packet_ {
 
 extern UINT4 NET_print_flags;
 
-#define NET_PRINT_TCP_HDR   1
-#define NET_PRINT_TYPESET   2
-#define NET_PRINT_ACKS	    4
-#define NET_PRINT_NO_RESOLVE  8
-#define NET_PRINT_JSON  16
-#define NET_PRINT_TS    32
+#define NET_PRINT_TCP_HDR 1
+#define NET_PRINT_TYPESET 2
+#define NET_PRINT_ACKS 4
+#define NET_PRINT_NO_RESOLVE 8
+#define NET_PRINT_JSON 16
+#define NET_PRINT_TS 32
 #endif
-

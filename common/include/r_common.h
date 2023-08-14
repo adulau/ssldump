@@ -18,7 +18,7 @@
       documentation and/or other materials provided with the distribution.
    3. All advertising materials mentioning features or use of this software
       must display the following acknowledgement:
-   
+
       This product includes software developed by Eric Rescorla for
       RTFM, Inc.
 
@@ -35,14 +35,14 @@
    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH
+   DAMAGE.
 
    $Id: r_common.h,v 1.2 2000/10/17 16:09:59 ekr Exp $
 
 
    ekr@rtfm.com  Tue Dec 22 10:40:07 1998
  */
-
 
 #ifndef _r_common_h
 #define _r_common_h
@@ -59,7 +59,7 @@
 #include "r_data.h"
 
 /*AAH*/
-int xdump PROTO_LIST((char *label,UCHAR *data,int len));
+int xdump PROTO_LIST((char *label, UCHAR *data, int len));
 
 /* defines for possibly replaced functions */
 #ifndef HAVE_STRDUP
@@ -67,4 +67,3 @@ char *strdup PROTO_LIST((char *in));
 #endif
 
 #endif
-

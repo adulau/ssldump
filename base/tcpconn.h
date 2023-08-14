@@ -18,7 +18,7 @@
       documentation and/or other materials provided with the distribution.
    3. All advertising materials mentioning features or use of this software
       must display the following acknowledgement:
-   
+
       This product includes software developed by Eric Rescorla for
       RTFM, Inc.
 
@@ -35,7 +35,8 @@
    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH
+   DAMAGE.
 
    $Id: tcpconn.h,v 1.4 2001/07/20 23:33:15 ekr Exp $
 
@@ -43,70 +44,72 @@
    ekr@rtfm.com  Tue Dec 29 13:00:52 1998
  */
 
-
 #ifndef _tcpconn_h
 #define _tcpconn_h
 
 typedef struct segment_ {
-     u_char *data;
-     u_int len;
-     tcp_seq s_seq;
-     packet *p;
-     struct segment_ *next;
+  u_char *data;
+  u_int len;
+  tcp_seq s_seq;
+  packet *p;
+  struct segment_ *next;
 } segment;
 
 typedef struct stream_data_ {
-     tcp_seq seq;
-     tcp_seq ack;
-     short close;
-     segment *oo_queue;
+  tcp_seq seq;
+  tcp_seq ack;
+  short close;
+  segment *oo_queue;
 } stream_data;
 
 typedef struct tcp_conn_ {
-     int conn_number;
-     int state;
-#define TCP_STATE_SYN1	1
-#define TCP_STATE_SYN2	2
-#define TCP_STATE_ACK	3
-#define TCP_STATE_ESTABLISHED	4
-#define TCP_STATE_FIN1	5
+  int conn_number;
+  int state;
+#define TCP_STATE_SYN1 1
+#define TCP_STATE_SYN2 2
+#define TCP_STATE_ACK 3
+#define TCP_STATE_ESTABLISHED 4
+#define TCP_STATE_FIN1 5
 #define TCP_STATE_CLOSED 6
-     /*The address which sent the first SYN*/
-     struct sockaddr_storage i_addr;
-     u_short i_port;
-     char *i_name;
-     char *i_num;
+  /*The address which sent the first SYN*/
+  struct sockaddr_storage i_addr;
+  u_short i_port;
+  char *i_name;
+  char *i_num;
 
-     /*The address which sent the second SYN*/
-     struct sockaddr_storage r_addr;
-     u_short r_port;
-     char *r_name;
-     char *r_num;
+  /*The address which sent the second SYN*/
+  struct sockaddr_storage r_addr;
+  u_short r_port;
+  char *r_name;
+  char *r_num;
 
-     stream_data i2r;   /*The stream from initiator to responder*/
-     stream_data r2i;   /*The stream from responder to initiator*/
-     
-     struct timeval start_time;
-     struct timeval last_seen_time;
-     proto_handler *analyzer;    /*The analyzer to call with new data*/
-     struct conn_struct_ *backptr;
+  stream_data i2r; /*The stream from initiator to responder*/
+  stream_data r2i; /*The stream from responder to initiator*/
+
+  struct timeval start_time;
+  struct timeval last_seen_time;
+  proto_handler *analyzer; /*The analyzer to call with new data*/
+  struct conn_struct_ *backptr;
 } tcp_conn;
 
-int tcp_find_conn PROTO_LIST((tcp_conn **connp,
-  int *directionp,
-  struct sockaddr_storage *src_addr, u_short src_port,
-  struct sockaddr_storage *dst_addr, u_short dst_port));
+int tcp_find_conn PROTO_LIST((tcp_conn * *connp,
+                              int *directionp,
+                              struct sockaddr_storage *src_addr,
+                              u_short src_port,
+                              struct sockaddr_storage *dst_addr,
+                              u_short dst_port));
 
-int tcp_create_conn PROTO_LIST((tcp_conn **connp,
-  struct sockaddr_storage *initiator_addr, u_short initiator_port,
-  struct sockaddr_storage *responder_addr, u_short responder_port));
+int tcp_create_conn PROTO_LIST((tcp_conn * *connp,
+                                struct sockaddr_storage *initiator_addr,
+                                u_short initiator_port,
+                                struct sockaddr_storage *responder_addr,
+                                u_short responder_port));
 
-int tcp_destroy_conn PROTO_LIST((tcp_conn *conn));
-int free_tcp_segment_queue PROTO_LIST((segment *seg));
-int copy_tcp_segment_queue PROTO_LIST((segment **out,segment *in));
+int tcp_destroy_conn PROTO_LIST((tcp_conn * conn));
+int free_tcp_segment_queue PROTO_LIST((segment * seg));
+int copy_tcp_segment_queue PROTO_LIST((segment * *out, segment *in));
 
 int clean_old_conn(void);
 int destroy_all_conn(void);
 
 #endif
-
