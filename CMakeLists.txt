@@ -3,7 +3,7 @@ include(CheckSymbolExists)
 
 project(
     ssldump
-    VERSION 1.9
+    VERSION 1.8
     DESCRIPTION 20230814
     LANGUAGES C
 )
