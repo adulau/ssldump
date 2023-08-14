@@ -29,8 +29,8 @@ int pcap_fd = -1;
 static uint8_t content_pcap_src_ether[ETHER_ADDR_LEN] = {0x02, 0x00, 0x00, 0x11, 0x11, 0x11};
 static uint8_t content_pcap_dst_ether[ETHER_ADDR_LEN] = {0x02, 0x00, 0x00, 0x22, 0x22, 0x22};
         
-static int init_pcap_logger(data)
-  void *data;
+static int 
+init_pcap_logger (void *data)
   {
   char *pcap_outfile = (char *) data;  
  	pcap_fd = open(pcap_outfile, O_RDWR|O_CREAT, DFLT_FILEMODE);
@@ -47,7 +47,8 @@ static int init_pcap_logger(data)
   return 0;
   }
 
-static int deinit_pcap_logger()
+static int 
+deinit_pcap_logger (void)
   {
     fdatasync(pcap_fd);
     close(pcap_fd);
@@ -85,8 +86,8 @@ static int create_pcap_logger(proto_obj **objp, struct sockaddr_storage *i_addr,
     return(_status);
   }
 
-static int destroy_pcap_logger(objp)
-  proto_obj **objp;
+static int 
+destroy_pcap_logger (proto_obj **objp)
   {
     logpkt_ctx_t *pcap_obj;
 
@@ -101,11 +102,8 @@ static int destroy_pcap_logger(objp)
     return(0);
   }
 
-static int data_pcap_logger(_obj,data,len,dir)
-  proto_obj *_obj;
-  unsigned char *data;
-  unsigned int len;
-  int dir;
+static int 
+data_pcap_logger (proto_obj *_obj, unsigned char *data, unsigned int len, int dir)
   {
     logpkt_ctx_t *pcap_obj = (logpkt_ctx_t *)_obj;
     int direction;
@@ -119,11 +117,8 @@ static int data_pcap_logger(_obj,data,len,dir)
     return status;
   }
 
-int close_pcap_logger(_obj,data,len,dir)
-  proto_obj *_obj;
-  unsigned char *data;
-  unsigned int len;
-  int dir;
+int 
+close_pcap_logger (proto_obj *_obj, unsigned char *data, unsigned int len, int dir)
   {
     logpkt_ctx_t *pcap_obj = (logpkt_ctx_t *)_obj;
     int direction;

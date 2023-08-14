@@ -104,12 +104,8 @@ static int tls_check_mac PROTO_LIST((ssl_rec_decoder *d,int ct,
   int ver,UCHAR *data,UINT4 datalen,UCHAR *iv,UINT4 ivlen,UCHAR *mac));
 static int fmt_seq PROTO_LIST((UINT4 num,UCHAR *buf));
 
-int ssl_create_rec_decoder(dp,ssl,mk,sk,iv)
-  ssl_rec_decoder **dp;
-  ssl_obj *ssl;
-  UCHAR *mk;
-  UCHAR *sk;
-  UCHAR *iv;
+int 
+ssl_create_rec_decoder (ssl_rec_decoder **dp, ssl_obj *ssl, UCHAR *mk, UCHAR *sk, UCHAR *iv)
   {
     int r,_status;
     ssl_rec_decoder *dec=0;
@@ -168,8 +164,8 @@ int ssl_create_rec_decoder(dp,ssl,mk,sk,iv)
     return(_status);
   }
 
-int ssl_destroy_rec_decoder(dp)
-  ssl_rec_decoder **dp;
+int 
+ssl_destroy_rec_decoder (ssl_rec_decoder **dp)
   {
     ssl_rec_decoder *d;
     
@@ -195,25 +191,16 @@ int ssl_destroy_rec_decoder(dp)
 #define MSB(a) ((a>>8)&0xff)
 #define LSB(a) (a&0xff)
 
-int tls13_update_rec_key(d,newkey,newiv)
-	ssl_rec_decoder *d;
-	UCHAR *newkey;
-	UCHAR *newiv;
+int 
+tls13_update_rec_key (ssl_rec_decoder *d, UCHAR *newkey, UCHAR *newiv)
 {
 	d->write_key->data = newkey;
 	d->implicit_iv->data = newiv;
 	d->seq = 0;
 }
 
-int tls13_decode_rec_data(ssl,d,ct,version,in,inl,out,outl)
-  ssl_obj *ssl;
-  ssl_rec_decoder *d;
-  int ct;
-  int version;
-  UCHAR *in;
-  int inl;
-  UCHAR *out;
-  int *outl;
+int 
+tls13_decode_rec_data (ssl_obj *ssl, ssl_rec_decoder *d, int ct, int version, UCHAR *in, int inl, UCHAR *out, int *outl)
   {
     int pad,i;
     int r,encpadl,x,_status=0;
@@ -284,15 +271,8 @@ abort:
     return _status;
 }
 
-int ssl_decode_rec_data(ssl,d,ct,version,in,inl,out,outl)
-  ssl_obj *ssl;
-  ssl_rec_decoder *d;
-  int ct;
-  int version;
-  UCHAR *in;
-  int inl;
-  UCHAR *out;
-  int *outl;
+int 
+ssl_decode_rec_data (ssl_obj *ssl, ssl_rec_decoder *d, int ct, int version, UCHAR *in, int inl, UCHAR *out, int *outl)
   {
 #ifdef OPENSSL
     int pad;
@@ -426,9 +406,8 @@ int ssl_decode_rec_data(ssl,d,ct,version,in,inl,out,outl)
 
 /* This should go to 2^128, but we're never really going to see
    more than 2^64, so we cheat*/
-static int fmt_seq(num,buf)
-  UINT4 num;
-  UCHAR *buf;
+static int 
+fmt_seq (UINT4 num, UCHAR *buf)
   {
     UINT4 netnum;
     
@@ -439,15 +418,8 @@ static int fmt_seq(num,buf)
     return(0);
   }
 
-static int tls_check_mac(d,ct,ver,data,datalen,iv,ivlen,mac)
-  ssl_rec_decoder *d;
-  int ct;
-  int ver;
-  UCHAR *data;
-  UINT4 datalen;
-  UCHAR *iv;
-  UINT4 ivlen;
-  UCHAR *mac;
+static int 
+tls_check_mac (ssl_rec_decoder *d, int ct, int ver, UCHAR *data, UINT4 datalen, UCHAR *iv, UINT4 ivlen, UCHAR *mac)
   {
     HMAC_CTX *hm = HMAC_CTX_new();
     if(!hm)
@@ -489,13 +461,8 @@ static int tls_check_mac(d,ct,ver,data,datalen,iv,ivlen,mac)
     return(0);
   }
 
-int ssl3_check_mac(d,ct,ver,data,datalen,mac)
-  ssl_rec_decoder *d;
-  int ct;
-  int ver;
-  UCHAR *data;
-  UINT4 datalen;
-  UCHAR *mac;
+int 
+ssl3_check_mac (ssl_rec_decoder *d, int ct, int ver, UCHAR *data, UINT4 datalen, UCHAR *mac)
   {
     EVP_MD_CTX *mc = EVP_MD_CTX_new();
     const EVP_MD *md;

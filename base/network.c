@@ -68,9 +68,8 @@ struct network_handler_ {
      proto_ctx *ctx;
 };
 
-int network_handler_create(mod,handlerp)
-  proto_mod *mod;
-  n_handler **handlerp;
+int 
+network_handler_create (proto_mod *mod, n_handler **handlerp)
   {
     int r,_status;
     n_handler *handler=0;
@@ -91,9 +90,8 @@ int network_handler_create(mod,handlerp)
     return(_status);
   }
 
-int network_handler_destroy(mod,handlerp)
-  proto_mod *mod;
-  n_handler **handlerp;
+int 
+network_handler_destroy (proto_mod *mod, n_handler **handlerp)
   {
     n_handler *handler=0;
     if(!handlerp || !*handlerp)
@@ -107,12 +105,8 @@ int network_handler_destroy(mod,handlerp)
     return(0);
   }
 
-int network_process_packet(handler,timestamp,data,length,af)
-  n_handler *handler;
-  struct timeval *timestamp;
-  UCHAR *data;
-  int length;
-  int af;
+int 
+network_process_packet (n_handler *handler, struct timeval *timestamp, UCHAR *data, int length, int af)
   {
     int r;
     int hlen;
@@ -208,9 +202,8 @@ int network_process_packet(handler,timestamp,data,length,af)
     return(0);
   }
 
-int packet_copy(in,out)
-  packet *in;
-  packet **out;
+int 
+packet_copy (packet *in, packet **out)
   {
     int _status;
     
@@ -240,8 +233,8 @@ int packet_copy(in,out)
     return(_status);
   }
 
-int packet_destroy(p)
-  packet *p;
+int 
+packet_destroy (packet *p)
   {
     if(!p)
       return(0);
@@ -251,10 +244,8 @@ int packet_destroy(p)
     return(0);
   }
     
-int timestamp_diff(t1,t0,diff)
-  struct timeval *t1;
-  struct timeval *t0;
-  struct timeval *diff;
+int 
+timestamp_diff (struct timeval *t1, struct timeval *t0, struct timeval *diff)
   {
     long d;
 
@@ -280,9 +271,8 @@ int timestamp_diff(t1,t0,diff)
 
       
 
-int lookuphostname(so_st,namep)
-  struct sockaddr_storage *so_st;
-  char **namep;
+int 
+lookuphostname (struct sockaddr_storage *so_st, char **namep)
   {
     int r = 1;
     *namep = calloc(1, NI_MAXHOST);
@@ -304,9 +294,8 @@ int lookuphostname(so_st,namep)
     return(0);
   }
         
-int addrtotext(so_st,namep)
-  struct sockaddr_storage *so_st;
-  char **namep;
+int 
+addrtotext (struct sockaddr_storage *so_st, char **namep)
   {
     *namep = calloc(1, NI_MAXHOST);
     void *addr = NULL;

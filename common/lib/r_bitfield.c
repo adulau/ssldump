@@ -12,9 +12,8 @@
 #include <r_common.h>
 #include "r_bitfield.h"
 
-int r_bitfield_create(setp,size)
-  r_bitfield **setp;
-  UINT4 size;
+int 
+r_bitfield_create (r_bitfield **setp, UINT4 size)
   {
     r_bitfield *set=0;
     int _status;
@@ -40,8 +39,8 @@ int r_bitfield_create(setp,size)
     return(_status);
   }
 
-int r_bitfield_destroy(setp)
-  r_bitfield **setp;
+int 
+r_bitfield_destroy (r_bitfield **setp)
   {
     r_bitfield *set;
     
@@ -57,9 +56,8 @@ int r_bitfield_destroy(setp)
     return(0);
   }
 
-int r_bitfield_set(set,bit)
-  r_bitfield *set;
-  int bit;
+int 
+r_bitfield_set (r_bitfield *set, int bit)
   {
     int word=(bit-set->base)/32;
     int bbit=(bit-set->base)%32;
@@ -90,9 +88,8 @@ int r_bitfield_set(set,bit)
     return(_status);
   }
 
-int r_bitfield_isset(set,bit)
-  r_bitfield *set;
-  int bit;
+int 
+r_bitfield_isset (r_bitfield *set, int bit)
   {
     int word=(bit-set->base)/32;
     int bbit=(bit-set->base)%32;

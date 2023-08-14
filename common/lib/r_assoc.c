@@ -83,8 +83,8 @@ UINT4 hash_compute PROTO_LIST((char *key,int len,int size));
 static int copy_assoc_chain PROTO_LIST((r_assoc_el **newp,
   r_assoc_el *old));
 
-int r_assoc_create(assocp)
-  r_assoc **assocp;
+int 
+r_assoc_create (r_assoc **assocp)
   {
     r_assoc *assoc=0;
     int _status;
@@ -108,8 +108,8 @@ int r_assoc_create(assocp)
     return(_status);
   }
 
-int r_assoc_destroy(assocp)
-  r_assoc **assocp;
+int 
+r_assoc_destroy (r_assoc **assocp)
   {
     r_assoc *assoc;
     int i;
@@ -127,8 +127,8 @@ int r_assoc_destroy(assocp)
     return(0);
   }
 
-static int destroy_assoc_chain(chain)
-  r_assoc_el *chain;
+static int 
+destroy_assoc_chain (r_assoc_el *chain)
   {
     r_assoc_el *nxt;
     
@@ -147,9 +147,8 @@ static int destroy_assoc_chain(chain)
     return(0);
   }
 
-static int copy_assoc_chain(newp,old)
-  r_assoc_el **newp;
-  r_assoc_el *old;
+static int 
+copy_assoc_chain (r_assoc_el **newp, r_assoc_el *old)
   {
     r_assoc_el *new=0,*ptr,*tmp;
     int r,_status;
@@ -197,11 +196,8 @@ static int copy_assoc_chain(newp,old)
     return(_status);
   }
 
-static int r_assoc_fetch_bucket(assoc,key,len,bucketp)
-  r_assoc *assoc;
-  char *key;
-  int len;
-  r_assoc_el **bucketp;
+static int 
+r_assoc_fetch_bucket (r_assoc *assoc, char *key, int len, r_assoc_el **bucketp)
   {
     UINT4 hash_value;
     r_assoc_el *bucket;
@@ -218,11 +214,8 @@ static int r_assoc_fetch_bucket(assoc,key,len,bucketp)
     return(R_NOT_FOUND);
   }
 
-int r_assoc_fetch(assoc,key,len,datap)
-  r_assoc *assoc;
-  char *key;
-  int len;
-  void **datap;
+int 
+r_assoc_fetch (r_assoc *assoc, char *key, int len, void **datap)
   {
     r_assoc_el *bucket;
     int r;
@@ -292,9 +285,8 @@ int r_assoc_insert(assoc,key,len,data,copy,destroy,how)
     return(_status);
   }
 
-int r_assoc_copy(newp,old)
-  r_assoc **newp;
-  r_assoc *old;
+int 
+r_assoc_copy (r_assoc **newp, r_assoc *old)
   {
     int r,_status,i;
     r_assoc *new;
@@ -320,9 +312,8 @@ int r_assoc_copy(newp,old)
     return(_status);
   }
 
-int r_assoc_init_iter(assoc,iter)
-  r_assoc *assoc;
-  r_assoc_iterator *iter;
+int 
+r_assoc_init_iter (r_assoc *assoc, r_assoc_iterator *iter)
   {
     int i;
     
@@ -344,11 +335,8 @@ int r_assoc_init_iter(assoc,iter)
     return(0);
   }
 
-int r_assoc_iter(iter,key,keyl,val)
-  r_assoc_iterator *iter;
-  void **key;
-  int *keyl;
-  void **val;
+int 
+r_assoc_iter (r_assoc_iterator *iter, void **key, int *keyl, void **val)
   {
     int i;
     r_assoc_el *ret;
@@ -386,8 +374,8 @@ int r_assoc_iter(iter,key,keyl,val)
   }
 
 /* Delete the last returned value*/
-int r_assoc_iter_delete(iter)
-  r_assoc_iterator *iter;
+int 
+r_assoc_iter_delete (r_assoc_iterator *iter)
   {
     /* First unhook it from the list*/
     if(!iter->prev->prev){
@@ -411,10 +399,8 @@ int r_assoc_iter_delete(iter)
     
 /*This is a hack from AMS. Supposedly, it's pretty good for strings, even
  though it doesn't take into account all the data*/
-UINT4 hash_compute(key,len,bits)
-  char *key;
-  int len;
-  int bits;
+UINT4 
+hash_compute (char *key, int len, int bits)
   {
     UINT4 h=0;
 

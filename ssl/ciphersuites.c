@@ -233,9 +233,8 @@ static SSL_CipherSuite CipherSuites[]={
      {-1}
 };
 
-int ssl_find_cipher(num,cs)
-  int num;
-  SSL_CipherSuite **cs;
+int 
+ssl_find_cipher (int num, SSL_CipherSuite **cs)
   {
     SSL_CipherSuite *c;
 

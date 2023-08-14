@@ -62,9 +62,8 @@ int verr_exit(char *fmt,...)
   }
 
 
-int main(argc,argv)
-  int argc;
-  char **argv;
+int 
+main (int argc, char **argv)
   {
     char name[100];
     FILE *in;
@@ -86,12 +85,13 @@ int main(argc,argv)
 
 extern int yylineno;
 
-int yywrap()
+int 
+yywrap (void)
 {
 ;}
 
-int yyerror(s)
-  char *s;
+int 
+yyerror (char *s)
   {
     printf("Parse error %s at line %d\n",s,yylineno);
     exit(1);

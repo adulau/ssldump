@@ -48,7 +48,8 @@
 #include <r_common.h>
 #include <r_assoc.h>
 
-int main()
+int 
+main (void)
   {
     char test_vector[1024],*v;
     int rnd,ct,r;
@@ -94,8 +95,8 @@ int main()
     exit(0);
   }
 
-int fetch_test(assoc)
-  r_assoc *assoc;
+int 
+fetch_test (r_assoc *assoc)
   {
     int ct;
     char vec[4],*v;

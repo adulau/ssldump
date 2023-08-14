@@ -71,10 +71,8 @@ static int new_connection PROTO_LIST((proto_mod *handler,proto_ctx *ctx,
 static int print_tcp_packet PROTO_LIST((packet *p));
 int STRIM PROTO_LIST((UINT4 _seq,segment *s));
 
-int process_tcp_packet(handler,ctx,p)
-  proto_mod *handler;
-  proto_ctx *ctx;
-  packet *p;
+int 
+process_tcp_packet (proto_mod *handler, proto_ctx *ctx, packet *p)
   {
     int r,_status;
     int direction;
@@ -165,11 +163,8 @@ int process_tcp_packet(handler,ctx,p)
     return(_status);
   }
 
-static int new_connection(handler,ctx,p,connp)
-  proto_mod *handler;
-  proto_ctx *ctx;
-  packet *p;
-  tcp_conn **connp;
+static int 
+new_connection (proto_mod *handler, proto_ctx *ctx, packet *p, tcp_conn **connp)
   {
     int r,_status;
     tcp_conn *conn=0;
@@ -227,12 +222,8 @@ static int new_connection(handler,ctx,p,connp)
   }
 */
 
-static int process_data_segment(conn,handler,p,stream,direction)
-  tcp_conn *conn;
-  proto_mod *handler;
-  packet *p;
-  stream_data *stream;
-  int direction;
+static int 
+process_data_segment (tcp_conn *conn, proto_mod *handler, packet *p, stream_data *stream, int direction)
   {
     int r,_status;
     tcp_seq seq,right_edge;
@@ -393,8 +384,8 @@ static int process_data_segment(conn,handler,p,stream,direction)
     return(_status);
   }
 
-static int print_tcp_packet(p)
-  packet *p;
+static int 
+print_tcp_packet (packet *p)
   {
     char *src=0,*dst=0;
 
@@ -441,9 +432,8 @@ static int print_tcp_packet(p)
     return(0);
   }
 
-int STRIM(_seq,s)
-  UINT4 _seq;
-  segment *s;
+int 
+STRIM (UINT4 _seq, segment *s)
   {
     int l;
     int off;

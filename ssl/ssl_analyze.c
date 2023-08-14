@@ -162,8 +162,8 @@ flag_struct flags[]={
      {0}
 };
 
-int parse_ssl_flag(flag)
-  int flag;
+int 
+parse_ssl_flag (int flag)
   {
     flag_struct *fl;
     
@@ -181,8 +181,8 @@ int parse_ssl_flag(flag)
     return(0);
   }
      
-static int parse_ssl_flags(str)
-  char *str;
+static int 
+parse_ssl_flags (char *str)
   {
     char *x,*y;
     flag_struct *fl;
@@ -214,9 +214,8 @@ static int parse_ssl_flags(str)
     return(0);
   }
             
-static int create_ssl_ctx(handle,ctxp)
-  void *handle;
-  proto_ctx **ctxp;
+static int 
+create_ssl_ctx (void *handle, proto_ctx **ctxp)
   {
     ssl_decode_ctx *ctx=0;
     int r,_status;
@@ -230,9 +229,8 @@ static int create_ssl_ctx(handle,ctxp)
     return(_status);
   }
 
-static int destroy_ssl_ctx(handle,ctxp)
-  void *handle;
-  proto_ctx **ctxp;
+static int 
+destroy_ssl_ctx (void *handle, proto_ctx **ctxp)
   {
         ssl_decode_ctx *ctx=0;
         ctx=(ssl_decode_ctx *) *ctxp;
@@ -292,8 +290,8 @@ static int create_ssl_analyzer(void *handle, proto_ctx *ctx, tcp_conn *conn,
     return(_status);
   }
 
-static int destroy_ssl_analyzer(objp)
-  proto_obj **objp;
+static int 
+destroy_ssl_analyzer (proto_obj **objp)
   {
     ssl_obj *obj;
     
@@ -321,8 +319,8 @@ static int destroy_ssl_analyzer(objp)
   }
 
 
-static int free_r_queue(q)
-  r_queue *q;
+static int 
+free_r_queue (r_queue *q)
   {
     FREE(q->data);
     if(q->q) free_tcp_segment_queue(q->q);
@@ -330,8 +328,8 @@ static int free_r_queue(q)
     return(0);
   }
 
-static int create_r_queue(qp)
-  r_queue **qp;
+static int 
+create_r_queue (r_queue **qp)
   {
     r_queue *q=0;
     int _status;
@@ -355,13 +353,8 @@ static int create_r_queue(qp)
     return(_status);
   }
 
-static int read_ssl_record(obj,q,seg,offset,lastp,offsetp)
-  ssl_obj *obj;
-  r_queue *q;
-  segment *seg;
-  int offset;
-  segment **lastp;
-  int *offsetp;
+static int 
+read_ssl_record (ssl_obj *obj, r_queue *q, segment *seg, int offset, segment **lastp, int *offsetp)
   
   {
     segment *last=seg;
@@ -422,12 +415,8 @@ static int read_ssl_record(obj,q,seg,offset,lastp,offsetp)
   }
 	
   
-static int read_data(q,seg,offset,lastp,offsetp)
-  r_queue *q;	
-  segment *seg;
-  int offset;
-  segment **lastp;
-  int *offsetp;
+static int 
+read_data (r_queue *q, segment *seg, int offset, segment **lastp, int *offsetp)
   {
     int tocpy=0,r,_status;
 #ifdef DEBUG
@@ -477,10 +466,8 @@ static int read_data(q,seg,offset,lastp,offsetp)
     return(_status);
   }
       
-static int data_ssl_analyzer(_obj,seg,direction)
-  proto_obj *_obj;
-  segment *seg;
-  int direction;
+static int 
+data_ssl_analyzer (proto_obj *_obj, segment *seg, int direction)
   {
     int _status,r;
     r_queue *q;
@@ -555,12 +542,8 @@ static int data_ssl_analyzer(_obj,seg,direction)
     return(_status);
   }
 
-static int print_ssl_header(obj,direction,q,data,len)
-  ssl_obj *obj;
-  int direction;
-  segment *q;
-  UCHAR *data;
-  int len;
+static int 
+print_ssl_header (ssl_obj *obj, int direction, segment *q, UCHAR *data, int len)
   {
     int ct=0;
     segment *s;
@@ -583,12 +566,8 @@ static int print_ssl_header(obj,direction,q,data,len)
     return(0);
   }
 
-static int print_ssl_record(obj,direction,q,data,len)
-  ssl_obj *obj;
-  int direction;
-  segment *q;
-  UCHAR *data;
-  int len;
+static int 
+print_ssl_record (ssl_obj *obj, int direction, segment *q, UCHAR *data, int len)
   {
     int r;
 
@@ -614,10 +593,8 @@ static int print_ssl_record(obj,direction,q,data,len)
     return(0);
   }
 
-int close_ssl_analyzer(_obj,p,dir)
-  proto_obj *_obj;
-  packet *p;
-  int dir;
+int 
+close_ssl_analyzer (proto_obj *_obj, packet *p, int dir)
   {
     ssl_obj *ssl=(ssl_obj *)_obj;
     char *what;

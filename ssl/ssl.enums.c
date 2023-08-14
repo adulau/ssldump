@@ -10,11 +10,8 @@
 #include "ssl.enums.h"
 static int decode_extension(ssl_obj *ssl, int dir, segment *seg, Data *data);
 static int decode_server_name(ssl_obj *ssl, int dir, segment *seg, Data *data);
-static int decode_ContentType_ChangeCipherSpec(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_ContentType_ChangeCipherSpec (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 
     struct json_object *jobj;
@@ -35,11 +32,8 @@ static int decode_ContentType_ChangeCipherSpec(ssl,dir,seg,data)
     return(0);
 
   }
-static int decode_ContentType_Alert(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_ContentType_Alert (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 
    int r;
@@ -74,11 +68,8 @@ static int decode_ContentType_Alert(ssl,dir,seg,data)
    return(0);
 
   }
-static int decode_ContentType_Handshake(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_ContentType_Handshake (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 
 
@@ -122,11 +113,8 @@ static int decode_ContentType_Handshake(ssl,dir,seg,data)
      return(0);
 
   }
-static int decode_ContentType_application_data(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_ContentType_application_data (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 
 
@@ -172,11 +160,8 @@ decoder ContentType_decoder[]={
 {-1}
 };
 
-static int decode_HandshakeType_HelloRequest(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_HandshakeType_HelloRequest (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
     struct json_object *jobj;
     jobj = ssl->cur_json_st;
@@ -187,11 +172,8 @@ static int decode_HandshakeType_HelloRequest(ssl,dir,seg,data)
   return(0);
 
   }
-static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_HandshakeType_ClientHello (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
     struct json_object *jobj;
     jobj = ssl->cur_json_st;
@@ -375,11 +357,8 @@ static int decode_HandshakeType_ClientHello(ssl,dir,seg,data)
     return(0);
 
   }
-static int decode_HandshakeType_ServerHello(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_HandshakeType_ServerHello (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 
     int r;
@@ -520,11 +499,8 @@ static int decode_HandshakeType_ServerHello(ssl,dir,seg,data)
     return(0);
 
   }
-static int decode_HandshakeType_Certificate(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_HandshakeType_Certificate (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
     UINT4 len,exlen,ex;
     Data cert;
@@ -569,11 +545,8 @@ static int decode_HandshakeType_Certificate(ssl,dir,seg,data)
 
   }
 
-static int decode_HandshakeType_SessionTicket(ssl,dir,seg,data)
-    ssl_obj *ssl;
-    int dir;
-    segment *seg;
-    Data *data;
+static int 
+decode_HandshakeType_SessionTicket (ssl_obj *ssl, int dir, segment *seg, Data *data)
 {
     int r;
     UINT4 exlen, ex, val;
@@ -601,11 +574,8 @@ static int decode_HandshakeType_SessionTicket(ssl,dir,seg,data)
 	}
 }
 
-static int decode_HandshakeType_EncryptedExtensions(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_HandshakeType_EncryptedExtensions (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
     int r;
     UINT4 exlen, ex;
@@ -626,11 +596,8 @@ static int decode_HandshakeType_EncryptedExtensions(ssl,dir,seg,data)
     }
   }
 
-static int decode_HandshakeType_ServerKeyExchange(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_HandshakeType_ServerKeyExchange (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 
 
@@ -666,11 +633,8 @@ static int decode_HandshakeType_ServerKeyExchange(ssl,dir,seg,data)
    return(0);
 
   }
-static int decode_HandshakeType_CertificateRequest(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_HandshakeType_CertificateRequest (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 
 
@@ -706,11 +670,8 @@ static int decode_HandshakeType_CertificateRequest(ssl,dir,seg,data)
     return(0);
 
   }
-static int decode_HandshakeType_ServerHelloDone(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_HandshakeType_ServerHelloDone (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 
     struct json_object *jobj;
@@ -722,11 +683,8 @@ static int decode_HandshakeType_ServerHelloDone(ssl,dir,seg,data)
   return(0);
 
   }
-static int decode_HandshakeType_CertificateVerify(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_HandshakeType_CertificateVerify (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 
 
@@ -746,11 +704,8 @@ static int decode_HandshakeType_CertificateVerify(ssl,dir,seg,data)
   return(0);
 
   }
-static int decode_HandshakeType_ClientKeyExchange(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_HandshakeType_ClientKeyExchange (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 
 
@@ -789,11 +744,8 @@ static int decode_HandshakeType_ClientKeyExchange(ssl,dir,seg,data)
    return(0);
 
   }
-static int decode_HandshakeType_Finished(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_HandshakeType_Finished (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 
 
@@ -822,11 +774,8 @@ static int decode_HandshakeType_Finished(ssl,dir,seg,data)
 
   }
 
-static int decode_HandshakeType_KeyUpdate(ssl,dir,seg,data)
-	ssl_obj *ssl;
-	int dir;
-	segment *seg;
-	Data *data;
+static int 
+decode_HandshakeType_KeyUpdate (ssl_obj *ssl, int dir, segment *seg, Data *data)
 {
     LF;
 	ssl_tls13_update_keying_material(ssl, ssl->decoder, dir);
@@ -2463,22 +2412,16 @@ decoder cipher_suite_decoder[]={
 {-1}
 };
 
-static int decode_AlertLevel_warning(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_AlertLevel_warning (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
     struct json_object *jobj;
     jobj = ssl->cur_json_st;
     json_object_object_add(jobj, "alert_level", json_object_new_string("warning"));
 	return(0);
   }
-static int decode_AlertLevel_fatal(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_AlertLevel_fatal (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
     struct json_object *jobj;
     jobj = ssl->cur_json_st;
@@ -2499,187 +2442,118 @@ decoder AlertLevel_decoder[]={
 {-1}
 };
 
-static int decode_AlertDescription_close_notify(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_AlertDescription_close_notify (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_AlertDescription_unexpected_message(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_AlertDescription_unexpected_message (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_AlertDescription_bad_record_mac(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_AlertDescription_bad_record_mac (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_AlertDescription_decryption_failed(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_AlertDescription_decryption_failed (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_AlertDescription_record_overflow(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_AlertDescription_record_overflow (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_AlertDescription_decompression_failure(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_AlertDescription_decompression_failure (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_AlertDescription_handshake_failure(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_AlertDescription_handshake_failure (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_AlertDescription_bad_certificate(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_AlertDescription_bad_certificate (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_AlertDescription_unsupported_certificate(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_AlertDescription_unsupported_certificate (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_AlertDescription_certificate_revoked(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_AlertDescription_certificate_revoked (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_AlertDescription_certificate_expired(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_AlertDescription_certificate_expired (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_AlertDescription_certificate_unknown(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_AlertDescription_certificate_unknown (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_AlertDescription_illegal_parameter(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_AlertDescription_illegal_parameter (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_AlertDescription_unknown_ca(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_AlertDescription_unknown_ca (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_AlertDescription_access_denied(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_AlertDescription_access_denied (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_AlertDescription_decode_error(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_AlertDescription_decode_error (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_AlertDescription_decrypt_error(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_AlertDescription_decrypt_error (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_AlertDescription_export_restriction(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_AlertDescription_export_restriction (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_AlertDescription_protocol_version(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_AlertDescription_protocol_version (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_AlertDescription_insufficient_security(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_AlertDescription_insufficient_security (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_AlertDescription_internal_error(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_AlertDescription_internal_error (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_AlertDescription_user_canceled(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_AlertDescription_user_canceled (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_AlertDescription_no_renegotiation(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_AlertDescription_no_renegotiation (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
@@ -2810,35 +2684,23 @@ decoder compression_method_decoder[]={
 {-1}
 };
 
-static int decode_client_certificate_type_rsa_sign(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_client_certificate_type_rsa_sign (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_client_certificate_type_dss_sign(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_client_certificate_type_dss_sign (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_client_certificate_type_rsa_fixed_dh(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_client_certificate_type_rsa_fixed_dh (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_client_certificate_type_dss_fixed_dh(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_client_certificate_type_dss_fixed_dh (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
@@ -2866,11 +2728,8 @@ decoder client_certificate_type_decoder[]={
 {-1}
 };
 
-static int decode_extension_server_name(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_extension_server_name (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
     UINT4 t,l;
     int r,p;
@@ -2902,11 +2761,8 @@ static int decode_extension_server_name(ssl,dir,seg,data)
     }
     return(0);
   }
-static int decode_extension_encrypt_then_mac(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_extension_encrypt_then_mac (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
     int r,*etm;
     UINT4 l;
@@ -2920,11 +2776,8 @@ static int decode_extension_encrypt_then_mac(ssl,dir,seg,data)
     dir==DIR_I2R?*etm=1:++*etm;
     return(0);
   }
-static int decode_extension_extended_master_secret(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_extension_extended_master_secret (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
     int r,*ems;
     UINT4 l;
@@ -2938,11 +2791,8 @@ static int decode_extension_extended_master_secret(ssl,dir,seg,data)
     dir==DIR_I2R?*ems=1:++*ems;
     return(0);
   }
-static int decode_extension(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_extension (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
     int r;
     UINT4 l;
@@ -2965,11 +2815,8 @@ decoder supported_groups_decoder[] = {
 	{0x0104,"ffdhe8192",0},
 };
 // Extension #10 supported_groups (renamed from "elliptic_curves")
-static int decode_extension_supported_groups(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_extension_supported_groups (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
     int r,p;
     UINT4 l,g;
@@ -3007,11 +2854,8 @@ decoder ec_point_formats_decoder[] = {
 	{2,"ansiX962_compressed_char2",0,}
 };
 // Extension #11 ec_point_formats
-static int decode_extension_ec_point_formats(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_extension_ec_point_formats (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
     int r,p;
     UINT4 l,f;
@@ -3044,11 +2888,8 @@ static int decode_extension_ec_point_formats(ssl,dir,seg,data)
     return(0);
   }
 
-static int decode_extension_supported_versions(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_extension_supported_versions (ssl_obj *ssl, int dir, segment *seg, Data *data)
 {
     int r;
     UINT4 len, version;
@@ -3070,11 +2911,8 @@ decoder tls13_certificate_types[] = {
 	{2,"raw public key",0},
 	{3,"1609 dot 2",0}
 };
-static int decode_extension_client_certificate_type(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_extension_client_certificate_type (ssl_obj *ssl, int dir, segment *seg, Data *data)
 {
     int r;
     UINT4 len, certificate_type;
@@ -3090,11 +2928,8 @@ static int decode_extension_client_certificate_type(ssl,dir,seg,data)
     if (dir == DIR_R2I) ssl->extensions->client_certificate_type = certificate_type; // Server sets the client_certificate_type
 }
 
-static int decode_extension_server_certificate_type(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_extension_server_certificate_type (ssl_obj *ssl, int dir, segment *seg, Data *data)
 {
     int r;
     UINT4 len, certificate_type;
@@ -3394,11 +3229,8 @@ decoder extension_decoder[] = {
 {-1}
 };
 
-static int decode_server_name_type_host_name(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_server_name_type_host_name (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
     int r;
     UINT4 l;
@@ -3424,11 +3256,8 @@ static int decode_server_name_type_host_name(ssl,dir,seg,data)
     data->data+=l;
     return(0);
   }
-static int decode_server_name(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_server_name (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
     int r;
     UINT4 l;

@@ -48,10 +48,8 @@
 #include <r_common.h>
 #include <r_data.h>
 
-int r_data_create(dp,d,l)
-  Data **dp;
-  UCHAR *d;
-  int l;
+int 
+r_data_create (Data **dp, UCHAR *d, int l)
   {
     Data *d_=0;
     int _status;
@@ -74,9 +72,8 @@ int r_data_create(dp,d,l)
     return(_status);
   }
 
-int r_data_alloc(dp,l)
-  Data **dp;
-  int l;
+int 
+r_data_alloc (Data **dp, int l)
   {
     Data *d_=0;
     int _status;
@@ -97,10 +94,8 @@ int r_data_alloc(dp,l)
     return(_status);
   }
 
-int r_data_make(dp,d,l)
-  Data *dp;
-  UCHAR *d;
-  int l;
+int 
+r_data_make (Data *dp, UCHAR *d, int l)
   {
     if(!(dp->data=(UCHAR *)malloc(l)))
       ERETURN(R_NO_MEMORY);
@@ -111,8 +106,8 @@ int r_data_make(dp,d,l)
     return(0);
   }
   
-int r_data_destroy(dp)
-  Data **dp;
+int 
+r_data_destroy (Data **dp)
   {
     if(!dp || !*dp)
       return(0);
@@ -126,9 +121,8 @@ int r_data_destroy(dp)
     return(0);
   }
     
-int r_data_copy(dst,src)
-  Data *dst;
-  Data *src;
+int 
+r_data_copy (Data *dst, Data *src)
   {
     if(!(dst->data=(UCHAR *)malloc(src->len)))
       ERETURN(R_NO_MEMORY);
@@ -136,8 +130,8 @@ int r_data_copy(dst,src)
     return(0);
   }
 
-int r_data_zfree(d)
-  Data *d;
+int 
+r_data_zfree (Data *d)
   {
     if(!d)
       return(0);
@@ -148,9 +142,8 @@ int r_data_zfree(d)
     return(0);
   }
 
-int r_data_compare(d1,d2)
-  Data *d1;
-  Data *d2;
+int 
+r_data_compare (Data *d1, Data *d2)
   {
     if(d1->len<d2->len)
       return(-1);

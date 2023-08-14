@@ -47,12 +47,8 @@
 
 #include "network.h"
 
-int create_proto_handler(mod,ctx,handlerp,conn,first_packet)
-  proto_mod *mod;
-  proto_ctx *ctx;
-  proto_handler **handlerp;
-  tcp_conn *conn;
-  struct timeval *first_packet;
+int 
+create_proto_handler (proto_mod *mod, proto_ctx *ctx, proto_handler **handlerp, tcp_conn *conn, struct timeval *first_packet)
   {
     int r,_status;
     proto_handler *handler=0;
@@ -74,8 +70,8 @@ int create_proto_handler(mod,ctx,handlerp,conn,first_packet)
     return(_status);
   }
 
-int destroy_proto_handler(handlerp)
-  proto_handler **handlerp;
+int 
+destroy_proto_handler (proto_handler **handlerp)
   {
     if(!handlerp || !*handlerp)
       return(0);

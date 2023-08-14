@@ -77,8 +77,8 @@ static int create_null_analyzer(void *handle, proto_ctx *ctx, tcp_conn *conn,
     return(0);
   }
 
-int destroy_null_analyzer(objp)
-  proto_obj **objp;
+int 
+destroy_null_analyzer (proto_obj **objp)
   {
     null_analyzer *obj;
     
@@ -94,10 +94,8 @@ int destroy_null_analyzer(objp)
     return(0);
   }
 
-int data_null_analyzer(_obj,seg,direction)
-  proto_obj *_obj;
-  segment *seg;
-  int direction;
+int 
+data_null_analyzer (proto_obj *_obj, segment *seg, int direction)
   {
 #ifdef DEBUG    
     null_analyzer *obj=(null_analyzer *)_obj;
@@ -124,10 +122,8 @@ int data_null_analyzer(_obj,seg,direction)
     return(0);
   }
 
-int fin_null_analyzer(_obj,p,direction)
-  proto_obj *_obj;
-  packet *p;
-  int direction;
+int 
+fin_null_analyzer (proto_obj *_obj, packet *p, int direction)
   {
 #ifdef DEBUG    
     null_analyzer *obj=(null_analyzer *)_obj;

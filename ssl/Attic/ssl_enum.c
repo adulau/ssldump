@@ -1,27 +1,18 @@
 #include "network.h"
 #include "ssl.h"
 #include "sslprint.h"
-static int decode_ContentType_change_cipher_spec(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_ContentType_change_cipher_spec (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_ContentType_alert(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_ContentType_alert (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_ContentType_handshake(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_ContentType_handshake (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 
 
@@ -41,11 +32,8 @@ static int decode_ContentType_handshake(ssl,dir,seg,data)
     ssl_decode_switch(ssl,HandshakeType_decoder,t,dir,seg,data);
 
   }
-static int decode_ContentType_application_data(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_ContentType_application_data (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
@@ -73,19 +61,13 @@ decoder ContentType_decoder[]={
 {-1}
 };
 
-static int decode_HandshakeType_hello_request(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_HandshakeType_hello_request (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_HandshakeType_client_hello(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_HandshakeType_client_hello (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 
 
@@ -128,11 +110,8 @@ static int decode_HandshakeType_client_hello(ssl,dir,seg,data)
     return(0);
 
   }
-static int decode_HandshakeType_server_hello(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_HandshakeType_server_hello (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 
 
@@ -153,59 +132,38 @@ static int decode_HandshakeType_server_hello(ssl,dir,seg,data)
     return(0);
 
   }
-static int decode_HandshakeType_certificate(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_HandshakeType_certificate (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_HandshakeType_server_key_exchange(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_HandshakeType_server_key_exchange (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_HandshakeType_certificate_request(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_HandshakeType_certificate_request (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_HandshakeType_server_hello_done(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_HandshakeType_server_hello_done (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_HandshakeType_certificate_verify(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_HandshakeType_certificate_verify (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_HandshakeType_client_key_exchange(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_HandshakeType_client_key_exchange (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }
-static int decode_HandshakeType_finished(ssl,dir,seg,data)
-  ssl_obj *ssl;
-  int dir;
-  segment *seg;
-  Data *data;
+static int 
+decode_HandshakeType_finished (ssl_obj *ssl, int dir, segment *seg, Data *data)
   {
 	return(0);
   }

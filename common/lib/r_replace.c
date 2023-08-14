@@ -49,8 +49,8 @@
 
 #ifndef HAVE_STRDUP
 
-char *strdup(str)
-  char *str;
+char *
+strdup (char *str)
   {
     int len=strlen(str);
     char *n;

@@ -139,11 +139,8 @@ static int password_cb(char *buf,int num,int rwflag,void *userdata)
     return(strlen(ssl_password));
   }
 
-int ssl_decode_ctx_create(dp,keyfile,pass,keylogfile)
-  ssl_decode_ctx **dp;
-  char *keyfile;
-  char *pass;
-  char *keylogfile;
+int 
+ssl_decode_ctx_create (ssl_decode_ctx **dp, char *keyfile, char *pass, char *keylogfile)
   {
 #ifdef OPENSSL    
     ssl_decode_ctx *d=0;
@@ -197,8 +194,8 @@ int ssl_decode_ctx_create(dp,keyfile,pass,keylogfile)
 #endif
   }
 
-int ssl_decode_ctx_destroy(dp)
-  ssl_decode_ctx **dp;
+int 
+ssl_decode_ctx_destroy (ssl_decode_ctx **dp)
   {
 #ifdef OPENSSL
     ssl_decode_ctx *d = *dp;
@@ -217,9 +214,8 @@ int ssl_decode_ctx_destroy(dp)
     return(0);
   }
 
-int ssl_decoder_create(dp,ctx)
-  ssl_decoder **dp;
-  ssl_decode_ctx *ctx;
+int 
+ssl_decoder_create (ssl_decoder **dp, ssl_decode_ctx *ctx)
   {
     int _status;
     
@@ -241,8 +237,8 @@ int ssl_decoder_create(dp,ctx)
 #endif
   }
 
-int ssl_decoder_destroy(dp)
-  ssl_decoder **dp;
+int 
+ssl_decoder_destroy (ssl_decoder **dp)
   {
 #ifdef OPENSSL    
     ssl_decoder *d;
@@ -267,10 +263,8 @@ int ssl_decoder_destroy(dp)
     return(0);
   }
 
-int ssl_set_client_random(d,msg,len)
-  ssl_decoder *d;
-  UCHAR *msg;
-  int len;
+int 
+ssl_set_client_random (ssl_decoder *d, UCHAR *msg, int len)
   {
 #ifdef OPENSSL    
     int r;
@@ -282,10 +276,8 @@ int ssl_set_client_random(d,msg,len)
     return(0);
   }
       
-int ssl_set_server_random(d,msg,len)
-  ssl_decoder *d;
-  UCHAR *msg;
-  int len;
+int 
+ssl_set_server_random (ssl_decoder *d, UCHAR *msg, int len)
   {
 #ifdef OPENSSL    
     int r;
@@ -297,10 +289,8 @@ int ssl_set_server_random(d,msg,len)
     return(0);
   }
 
-int ssl_set_client_session_id(d,msg,len)
-  ssl_decoder *d;
-  UCHAR *msg;
-  int len;
+int 
+ssl_set_client_session_id (ssl_decoder *d, UCHAR *msg, int len)
   {
 #ifdef OPENSSL    
     int r;
@@ -314,11 +304,8 @@ int ssl_set_client_session_id(d,msg,len)
     return(0);
   }
 
-int ssl_process_server_session_id(ssl,d,msg,len)
-  ssl_obj *ssl;
-  ssl_decoder *d;
-  UCHAR *msg;
-  int len;
+int 
+ssl_process_server_session_id (ssl_obj *ssl, ssl_decoder *d, UCHAR *msg, int len)
   {
 #ifdef OPENSSL    
     int r,_status;
@@ -359,11 +346,8 @@ int ssl_process_server_session_id(ssl,d,msg,len)
 #endif      
   }
 
-int ssl_process_client_session_id(ssl,d,msg,len)
-  ssl_obj *ssl;
-  ssl_decoder *d;
-  UCHAR *msg;
-  int len;
+int 
+ssl_process_client_session_id (ssl_obj *ssl, ssl_decoder *d, UCHAR *msg, int len)
   {
 #ifdef OPENSSL    
     int _status;
@@ -410,10 +394,8 @@ int ssl_process_handshake_finished(ssl_obj* ssl,ssl_decoder *dec, Data *data){
    }
 }
 
-int ssl_process_change_cipher_spec(ssl,d,direction)
-  ssl_obj *ssl;
-  ssl_decoder *d;
-  int direction;
+int 
+ssl_process_change_cipher_spec (ssl_obj *ssl, ssl_decoder *d, int direction)
   {
 #ifdef OPENSSL
     if (ssl->version!=TLSV13_VERSION){
@@ -431,13 +413,8 @@ int ssl_process_change_cipher_spec(ssl,d,direction)
 #endif  
     return(0);
   }
-int ssl_decode_record(ssl,dec,direction,ct,version,d)
-  ssl_obj *ssl;
-  ssl_decoder *dec;
-  int direction;
-  int ct;
-  int version;
-  Data *d;
+int 
+ssl_decode_record (ssl_obj *ssl, ssl_decoder *dec, int direction, int ct, int version, Data *d)
   {
     ssl_rec_decoder *rd;
     UCHAR *out;
@@ -493,9 +470,8 @@ int ssl_decode_record(ssl,dec,direction,ct,version,d)
 #endif    
   }
 
-int ssl_update_handshake_messages(ssl,data)
-  ssl_obj *ssl;
-  Data *data;
+int 
+ssl_update_handshake_messages (ssl_obj *ssl, Data *data)
   {
 #ifdef OPENSSL
     Data *hms;
@@ -523,12 +499,8 @@ int ssl_update_handshake_messages(ssl,data)
 
   }
 
-static int ssl_create_session_lookup_key(ssl,id,idlen,keyp,keyl)
-  ssl_obj *ssl;
-  UCHAR *id;
-  UINT4 idlen;
-  UCHAR **keyp;
-  UINT4 *keyl;
+static int 
+ssl_create_session_lookup_key (ssl_obj *ssl, UCHAR *id, UINT4 idlen, UCHAR **keyp, UINT4 *keyl)
   {
     UCHAR *key=0;
     UINT4 l;
@@ -554,9 +526,8 @@ static int ssl_create_session_lookup_key(ssl,id,idlen,keyp,keyl)
   
 /* Look up the session id in the session cache and generate
    the appropriate keying material */
-int ssl_restore_session(ssl,d)
-  ssl_obj *ssl;
-  ssl_decoder *d;
+int 
+ssl_restore_session (ssl_obj *ssl, ssl_decoder *d)
   {
     UCHAR *lookup_key=0;
     void *msv;
@@ -599,9 +570,8 @@ int ssl_restore_session(ssl,d)
 
 /* Look up the session id in the session cache and generate
    the appropriate keying material */
-int ssl_save_session(ssl,d)
-  ssl_obj *ssl;
-  ssl_decoder *d;
+int 
+ssl_save_session (ssl_obj *ssl, ssl_decoder *d)
   {
 #ifdef OPENSSL    
     UCHAR *lookup_key=0;
@@ -634,11 +604,8 @@ int ssl_save_session(ssl,d)
 
 /* This only works with RSA because the other cipher suites
    offer PFS. Yuck. */
-int ssl_process_client_key_exchange(ssl,d,msg,len)
-  ssl_obj *ssl;
-  ssl_decoder *d;
-  UCHAR *msg;
-  int len;
+int 
+ssl_process_client_key_exchange (ssl_obj *ssl, ssl_decoder *d, UCHAR *msg, int len)
   {
 #ifdef OPENSSL
     int r,_status;
@@ -755,13 +722,8 @@ static int tls_P_hash(ssl,secret,seed,md,out)
   }    
 
 
-static int tls_prf(ssl,secret,usage,rnd1,rnd2,out)
-  ssl_obj *ssl;
-  Data *secret;
-  char *usage;
-  Data *rnd1;
-  Data *rnd2;
-  Data *out;
+static int 
+tls_prf (ssl_obj *ssl, Data *secret, char *usage, Data *rnd1, Data *rnd2, Data *out)
   {
     int r,_status;
     Data *md5_out=0,*sha_out=0;
@@ -813,13 +775,8 @@ static int tls_prf(ssl,secret,usage,rnd1,rnd2,out)
 
   }
 
-static int tls12_prf(ssl,secret,usage,rnd1,rnd2,out)
-  ssl_obj *ssl;
-  Data *secret;
-  char *usage;
-  Data *rnd1;
-  Data *rnd2;
-  Data *out;
+static int 
+tls12_prf (ssl_obj *ssl, Data *secret, char *usage, Data *rnd1, Data *rnd2, Data *out)
 
   {
     const EVP_MD *md;
@@ -861,11 +818,8 @@ static int tls12_prf(ssl,secret,usage,rnd1,rnd2,out)
 
   }
 
-static int ssl3_generate_export_iv(ssl,r1,r2,out)
-  ssl_obj *ssl;
-  Data *r1;
-  Data *r2;
-  Data *out;
+static int 
+ssl3_generate_export_iv (ssl_obj *ssl, Data *r1, Data *r2, Data *out)
   {
     MD5_CTX md5;
     UCHAR tmp[16];
@@ -880,13 +834,8 @@ static int ssl3_generate_export_iv(ssl,r1,r2,out)
     return(0);
   }
 
-static int ssl3_prf(ssl,secret,usage,r1,r2,out)
-  ssl_obj *ssl;
-  Data *secret;
-  char *usage;
-  Data *r1;
-  Data *r2;
-  Data *out;
+static int 
+ssl3_prf (ssl_obj *ssl, Data *secret, char *usage, Data *r1, Data *r2, Data *out)
   {
     MD5_CTX md5;
     SHA_CTX sha;
@@ -951,9 +900,8 @@ static int ssl3_prf(ssl,secret,usage,r1,r2,out)
     return(0);
   }
   
-static int ssl_generate_keying_material(ssl,d)
-  ssl_obj *ssl;
-  ssl_decoder *d;
+static int 
+ssl_generate_keying_material (ssl_obj *ssl, ssl_decoder *d)
   {
     Data *key_block=0,temp;
     UCHAR _iv_c[8],_iv_s[8];
@@ -1189,10 +1137,8 @@ abort:
   }
 
 // Will update the keys for the particular direction
-int ssl_tls13_update_keying_material(ssl,d,direction)
-	ssl_obj *ssl;
-	ssl_decoder *d;
-	int direction;
+int 
+ssl_tls13_update_keying_material (ssl_obj *ssl, ssl_decoder *d, int direction)
 {
 	Data *secret;
 	ssl_rec_decoder *decoder;
@@ -1216,9 +1162,8 @@ int ssl_tls13_update_keying_material(ssl,d,direction)
 	return 0;
 }
 
-int ssl_tls13_generate_keying_material(ssl,d)
-  ssl_obj* ssl;
-  ssl_decoder *d;
+int 
+ssl_tls13_generate_keying_material (ssl_obj *ssl, ssl_decoder *d)
 {
   int r,_status;
   Data out;
@@ -1287,9 +1232,8 @@ abort:
   return r;
 }
 
-static int ssl_generate_session_hash(ssl,d)
-  ssl_obj *ssl;
-  ssl_decoder *d;
+static int 
+ssl_generate_session_hash (ssl_obj *ssl, ssl_decoder *d)
   {
     int r,_status,dgi;
     unsigned int len;
@@ -1345,9 +1289,8 @@ static int read_hex_string(char *str, UCHAR *buf, int n) {
   }
   return 0;
 }
-static int ssl_read_key_log_file(ssl,d)
-  ssl_obj *ssl;
-  ssl_decoder *d;
+static int 
+ssl_read_key_log_file (ssl_obj *ssl, ssl_decoder *d)
   {
     int r,_status,n,i;
     unsigned int t;

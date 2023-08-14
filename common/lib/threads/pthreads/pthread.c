@@ -23,8 +23,8 @@ typedef struct {
 
 static void *r_thread_real_create PROTO_LIST((void *arg));
 
-static void *r_thread_real_create(arg)
-  void *arg;
+static void *
+r_thread_real_create (void *arg)
   {
     helper *h;
 
@@ -61,19 +61,22 @@ int r_thread_fork(func,arg,id)
     return(_status);
   }
 
-int r_thread_yield()
+int 
+r_thread_yield (void)
   {
     pthread_yield();
   }
 
-int r_thread_exit()
+int 
+r_thread_exit (void)
   {
     thread_count--;
     pthread_exit(0);
     return(0);
   }
 
-int r_thread_wait_last()
+int 
+r_thread_wait_last (void)
   {
     do {
       pthread_yield();
@@ -84,8 +87,8 @@ int r_thread_wait_last()
     return(0);
   }
 
-int r_rwlock_create(lockp)
-  r_rwlock **lockp;
+int 
+r_rwlock_create (r_rwlock **lockp)
   {
     pthread_rwlock_t *lock;
     int r;
@@ -100,8 +103,8 @@ int r_rwlock_create(lockp)
     return(0);
   }
 
-int r_rwlock_destroy(lock)
-  r_rwlock **lock;
+int 
+r_rwlock_destroy (r_rwlock **lock)
   {
     pthread_rwlock_t *plock;
 
@@ -115,9 +118,8 @@ int r_rwlock_destroy(lock)
     return(0);
   }
 
-int r_rwlock_lock(lock,action)
-  r_rwlock *lock;
-  int action;
+int 
+r_rwlock_lock (r_rwlock *lock, int action)
   {
     pthread_rwlock_t *plock;
     int r,_status;

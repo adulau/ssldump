@@ -62,10 +62,8 @@ int debug(int class,char *format,...)
     return(0);
   }
 
-int xdump(name,data,len)
-  char *name;
-  UCHAR *data;
-  int len;
+int 
+xdump (char *name, UCHAR *data, int len)
   {
     int i;
 

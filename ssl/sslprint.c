@@ -59,10 +59,8 @@ extern decoder HandshakeType_decoder[];
 
 #define BYTES_NEEDED(x)  (x<=255)?1:((x<=(1<<16))?2:(x<=(1<<24)?3:4))
 
-int process_beginning_plaintext(ssl,seg,direction)
-  ssl_obj *ssl;
-  segment *seg;
-  int direction;
+int 
+process_beginning_plaintext (ssl_obj *ssl, segment *seg, int direction)
   {
     Data d;
     if(seg->len==0)
@@ -89,9 +87,8 @@ int process_beginning_plaintext(ssl,seg,direction)
     return(0);
   }
 
-int process_v2_hello(ssl,seg)
-  ssl_obj *ssl;
-  segment *seg;
+int 
+process_v2_hello (ssl_obj *ssl, segment *seg)
   {
     int r;
     int rec_len;
@@ -213,13 +210,8 @@ int process_v2_hello(ssl,seg)
     return(_status);
   }
 
-int ssl_decode_switch(ssl,dtable,value,dir,seg,data)
-  ssl_obj *ssl;
-  decoder *dtable;
-  int value;
-  int dir;
-  segment *seg;
-  Data *data;
+int 
+ssl_decode_switch (ssl_obj *ssl, decoder *dtable, int value, int dir, segment *seg, Data *data)
   {
     while(dtable && dtable->type!=-1  && dtable->name!=NULL){
       if(dtable->type == value){
@@ -239,12 +231,8 @@ int ssl_decode_switch(ssl,dtable,value,dir,seg,data)
     ERETURN(R_NOT_FOUND);
   }
 
-int ssl_expand_record(ssl,q,direction,data,len)
-  ssl_obj *ssl;
-  segment *q;
-  int direction;
-  UCHAR *data;
-  int len;
+int 
+ssl_expand_record (ssl_obj *ssl, segment *q, int direction, UCHAR *data, int len)
   {
     int r;
     Data d;
@@ -319,13 +307,8 @@ int ssl_expand_record(ssl,q,direction,data,len)
     return(0);
   }
 
-int ssl_decode_uintX(ssl,name,size,p,data,x)
-  ssl_obj *ssl;
-  char *name;
-  int size;
-  UINT4 p;
-  Data *data;
-  UINT4 *x;
+int 
+ssl_decode_uintX (ssl_obj *ssl, char *name, int size, UINT4 p, Data *data, UINT4 *x)
   {
     UINT4 v=0;
     UINT4 _x;
@@ -351,13 +334,8 @@ int ssl_decode_uintX(ssl,name,size,p,data,x)
     return(0);
   }
 
-int ssl_decode_opaque_array(ssl,name,size,p,data,x)
-  ssl_obj *ssl;
-  char *name;
-  int size;
-  UINT4 p;
-  Data *data;
-  Data *x;
+int 
+ssl_decode_opaque_array (ssl_obj *ssl, char *name, int size, UINT4 p, Data *data, Data *x)
   {
     UINT4 len;
     char n[1000];
@@ -394,11 +372,8 @@ int ssl_decode_opaque_array(ssl,name,size,p,data,x)
     return(0);
   }
 
-int ssl_lookup_enum(ssl,dtable,val,ptr)
-  ssl_obj *ssl;
-  decoder *dtable;
-  UINT4 val;
-  char **ptr;
+int 
+ssl_lookup_enum (ssl_obj *ssl, decoder *dtable, UINT4 val, char **ptr)
   {
     while(dtable && dtable->type!=-1){
       if(dtable->type == val){
@@ -411,14 +386,8 @@ int ssl_lookup_enum(ssl,dtable,val,ptr)
     return(R_NOT_FOUND);
   }
   
-int ssl_decode_enum(ssl,name,size,dtable,p,data,x)
-  ssl_obj *ssl;
-  char *name;
-  int size;
-  decoder *dtable;  
-  UINT4 p;
-  Data *data;
-  UINT4 *x;
+int 
+ssl_decode_enum (ssl_obj *ssl, char *name, int size, decoder *dtable, UINT4 p, Data *data, UINT4 *x)
   {
     int r;
     UINT4 _x;
@@ -437,11 +406,8 @@ int ssl_decode_enum(ssl,name,size,dtable,p,data,x)
     return(0);
   }
 
-int ssl_print_enum(ssl,name,dtable,value)
-  ssl_obj *ssl;
-  char *name;
-  decoder *dtable;
-  UINT4 value;
+int 
+ssl_print_enum (ssl_obj *ssl, char *name, decoder *dtable, UINT4 value)
   {
 
     if(name) explain(ssl,"%s ",name);    
@@ -460,11 +426,8 @@ int ssl_print_enum(ssl,name,dtable,value)
     return(R_NOT_FOUND);
   }
 
-int ssl_get_enum_str(ssl,outstr,dtable,value)
-  ssl_obj *ssl;
-  char *outstr;
-  decoder *dtable;
-  UINT4 value;
+int 
+ssl_get_enum_str (ssl_obj *ssl, char *outstr, decoder *dtable, UINT4 value)
   {
     while(dtable && dtable->type!=-1){
       if(dtable->type == value){
@@ -496,10 +459,8 @@ int explain(ssl_obj *ssl,char *format,...)
     return(0);
   }
 
-int exdump(ssl,name,data)
-  ssl_obj *ssl;
-  char *name;
-  Data *data;
+int 
+exdump (ssl_obj *ssl, char *name, Data *data)
   {
     int i;
     if(!(SSL_print_flags & SSL_PRINT_JSON)) {
@@ -528,10 +489,8 @@ int exdump(ssl,name,data)
     return(0);
   }
 
-int exstr(ssl,outstr,data)
-  ssl_obj *ssl;
-  char *outstr;
-  Data *data;
+int 
+exstr (ssl_obj *ssl, char *outstr, Data *data)
   {
     int i;
 
@@ -548,10 +507,8 @@ int exstr(ssl,outstr,data)
     return(0);
   }
 
-int combodump(ssl,name,data)
-  ssl_obj *ssl;
-  char *name;
-  Data *data;
+int 
+combodump (ssl_obj *ssl, char *name, Data *data)
   {
     UCHAR *ptr=data->data;
     int len=data->len;    
@@ -605,9 +562,8 @@ int combodump(ssl,name,data)
     return(0);
   }
 
-int print_data(ssl,d)
-  ssl_obj *ssl;
-  Data *d;
+int 
+print_data (ssl_obj *ssl, Data *d)
   {
     int i,bit8=0;
 
@@ -661,9 +617,8 @@ int print_data(ssl,d)
     
     return(0);
   }
-int ssl_print_direction_indicator(ssl,dir)
-  ssl_obj *ssl;
-  int dir;
+int 
+ssl_print_direction_indicator (ssl_obj *ssl, int dir)
   {
     struct json_object *jobj;
 #if 0    
@@ -706,9 +661,8 @@ int ssl_print_direction_indicator(ssl,dir)
     return(0);
   }
 
-int ssl_print_timestamp(ssl,ts)
-  ssl_obj *ssl;
-  struct timeval *ts;
+int 
+ssl_print_timestamp (ssl_obj *ssl, struct timeval *ts)
   {
     struct timeval dt;
     int r;
@@ -745,8 +699,8 @@ int ssl_print_timestamp(ssl,ts)
   }
 
 
-int ssl_print_record_num(ssl)
-  ssl_obj *ssl;
+int 
+ssl_print_record_num (ssl_obj *ssl)
   {
     struct json_object *jobj;
     jobj = ssl->cur_json_st;
@@ -769,11 +723,8 @@ int ssl_print_record_num(ssl)
     return(0);
   }
 
-int ssl_print_cipher_suite(ssl,version,p,val)
-  ssl_obj *ssl;
-  int version;
-  int p;
-  UINT4 val;
+int 
+ssl_print_cipher_suite (ssl_obj *ssl, int version, int p, UINT4 val)
   {
     char *str;
     char *prefix=version<=0x300?"SSL_":"TLS_";

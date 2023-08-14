@@ -63,8 +63,8 @@ extern int conn_ttl;
 
 static int zero_conn PROTO_LIST((tcp_conn *conn));
 
-static int zero_conn(conn)
-  tcp_conn *conn;
+static int 
+zero_conn (tcp_conn *conn)
   {
     memset(conn,0,sizeof(tcp_conn));
     return(0);
@@ -131,8 +131,8 @@ int tcp_create_conn(tcp_conn **connp,struct sockaddr_storage *i_addr,
     return(0);
   }
 
-int tcp_destroy_conn(conn)
-  tcp_conn *conn;
+int 
+tcp_destroy_conn (tcp_conn *conn)
   {
     conn_struct *c=conn->backptr;
 
@@ -161,7 +161,8 @@ int tcp_destroy_conn(conn)
     return(0);
   }
 
-int clean_old_conn() {
+int 
+clean_old_conn (void) {
     conn_struct *conn;
     tcp_conn *tcpconn;
     struct timeval dt;
@@ -184,7 +185,8 @@ int clean_old_conn() {
     return i;
 }
 
-int destroy_all_conn() {
+int 
+destroy_all_conn (void) {
     int i = 0;
     while(first_conn) {
         i++;
@@ -193,8 +195,8 @@ int destroy_all_conn() {
     return i;
 }
 
-int free_tcp_segment_queue(seg)
-  segment *seg;
+int 
+free_tcp_segment_queue (segment *seg)
   {
     segment *tmp;
 
@@ -208,9 +210,8 @@ int free_tcp_segment_queue(seg)
     return(0);
   }
 
-int copy_tcp_segment_queue(out,in)
-  segment **out;
-  segment *in;
+int 
+copy_tcp_segment_queue (segment **out, segment *in)
   {
     int r,_status;
     segment *base=0;

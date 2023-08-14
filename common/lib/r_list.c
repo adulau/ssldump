@@ -61,8 +61,8 @@ struct r_list_ {
      struct r_list_el_ *last;
 };
 
-int r_list_create(listp)
-  r_list **listp;
+int 
+r_list_create (r_list **listp)
   {
     r_list *list=0;
     int _status;
@@ -79,8 +79,8 @@ int r_list_create(listp)
     return(_status);
   }
 
-int r_list_destroy(listp)
-  r_list **listp;
+int 
+r_list_destroy (r_list **listp)
   {
     r_list *list;
     r_list_el *el;
@@ -107,9 +107,8 @@ int r_list_destroy(listp)
     return(0);
   }
     
-int r_list_copy(outp,in)
-  r_list**outp;
-  r_list *in;
+int 
+r_list_copy (r_list **outp, r_list *in)
   {
     r_list *out=0;
     r_list_el *el,*el2,*last=0;
@@ -204,9 +203,8 @@ int r_list_append(list,value,copy,destroy)
     return(_status);
   }
 
-int r_list_init_iter(list,iter)
-  r_list *list;
-  r_list_iterator *iter;
+int 
+r_list_init_iter (r_list *list, r_list_iterator *iter)
   {
     iter->list=list;
     iter->ptr=list->first;
@@ -214,9 +212,8 @@ int r_list_init_iter(list,iter)
     return(0);
   }
 
-int r_list_iter(iter,val)
-  r_list_iterator *iter;
-  void **val;
+int 
+r_list_iter (r_list_iterator *iter, void **val)
   {
     if(!iter->ptr)
       return(R_EOD);

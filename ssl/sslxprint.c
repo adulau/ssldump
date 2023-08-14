@@ -62,10 +62,8 @@ static int sslx__print_dn PROTO_LIST((ssl_obj *ssl,char *x));
 static int sslx__print_serial PROTO_LIST((ssl_obj *ssl,ASN1_INTEGER *a));
 #endif
 
-int sslx_print_certificate(ssl,data,pf)
-  ssl_obj *ssl;
-  Data *data;
-  int pf;
+int 
+sslx_print_certificate (ssl_obj *ssl, Data *data, int pf)
   {
 #ifdef OPENSSL    
     X509 *x=0;
@@ -188,10 +186,8 @@ int sslx_print_certificate(ssl,data,pf)
     return(_status);
   }  
 
-int sslx_print_dn(ssl,data,pf)
-  ssl_obj *ssl;
-  Data *data;
-  int pf;
+int 
+sslx_print_dn (ssl_obj *ssl, Data *data, int pf)
   {
     UCHAR buf[BUFSIZE];
     int _status;
@@ -224,9 +220,8 @@ int sslx_print_dn(ssl,data,pf)
     return(_status);
   }
 
-static int sslx__print_dn(ssl,x)
-  ssl_obj *ssl;
-  char *x;
+static int 
+sslx__print_dn (ssl_obj *ssl, char *x)
   {
     char *slash;
 
@@ -246,9 +241,8 @@ static int sslx__print_dn(ssl,x)
   }
 
 #ifdef OPENSSL
-static int sslx__print_serial(ssl,a)
-  ssl_obj *ssl;
-  ASN1_INTEGER *a;
+static int 
+sslx__print_serial (ssl_obj *ssl, ASN1_INTEGER *a)
   {
     Data d;
     
