@@ -5,7 +5,7 @@
 
 # Release and tagging
 
-- Current version of ssldump is [v1.7](https://github.com/adulau/ssldump/releases/tag/v1.7) (released: 2023-04-09) - [ChangeLog](https://raw.githubusercontent.com/adulau/ssldump/master/ChangeLog)
+- Current version of ssldump is [v1.8](https://github.com/adulau/ssldump/releases/tag/v1.8) (released: 2023-08-14) - [ChangeLog](https://raw.githubusercontent.com/adulau/ssldump/master/ChangeLog)
 
 # What about the original ssldump?
 
