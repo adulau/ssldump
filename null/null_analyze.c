@@ -144,6 +144,7 @@ static struct proto_mod_vtbl_ null_vtbl ={
      0,
      0,
      create_null_analyzer,
+     0,
      destroy_null_analyzer,
      data_null_analyzer,
      fin_null_analyzer,
