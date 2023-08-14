@@ -18,7 +18,7 @@
       documentation and/or other materials provided with the distribution.
    3. All advertising materials mentioning features or use of this software
       must display the following acknowledgement:
-   
+
       This product includes software developed by Eric Rescorla for
       RTFM, Inc.
 
@@ -35,7 +35,8 @@
    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH
+   DAMAGE.
 
    $Id: ssldecode.h,v 1.3 2001/07/20 23:33:16 ekr Exp $
 
@@ -43,40 +44,56 @@
    ekr@rtfm.com  Thu Apr  1 15:02:02 1999
  */
 
-
 #ifndef _ssldecode_h
 #define _ssldecode_h
 
-#define CRDUMP(a,b,c) P_(P_CR) {Data d; d.data=b; d.len=c; exdump(ssl,a,&d); LF;}
-#define CRDUMPD(a,b) P_(P_CR) {exdump(ssl,a,b);LF;}
+#define CRDUMP(a, b, c) \
+  P_(P_CR) {            \
+    Data d;             \
+    d.data = b;         \
+    d.len = c;          \
+    exdump(ssl, a, &d); \
+    LF;                 \
+  }
+#define CRDUMPD(a, b)  \
+  P_(P_CR) {           \
+    exdump(ssl, a, b); \
+    LF;                \
+  }
 
-int ssl_decode_ctx_create PROTO_LIST((ssl_decode_ctx **ctx,
-  char *keyfile,char *password,char *keylogfile));
+int ssl_decode_ctx_create PROTO_LIST(
+    (ssl_decode_ctx * *ctx, char *keyfile, char *password, char *keylogfile));
 int ssl_decode_ctx_destroy(ssl_decode_ctx **dp);
-int ssl_decoder_destroy PROTO_LIST((ssl_decoder **dp));
-int ssl_decoder_create PROTO_LIST((ssl_decoder **dp,ssl_decode_ctx *ctx));
-int ssl_set_client_random PROTO_LIST((ssl_decoder *dp,
-  UCHAR *msg,int len));
-int ssl_set_server_random PROTO_LIST((ssl_decoder *dp,
-  UCHAR *msg,int len));
-int ssl_set_client_session_id PROTO_LIST((ssl_decoder *dp,
-  UCHAR *msg,int len));
-int ssl_process_server_session_id PROTO_LIST((ssl_obj *obj,ssl_decoder *dp,
-  UCHAR *msg,int len));
-int ssl_process_client_session_id PROTO_LIST((ssl_obj *obj,ssl_decoder *dp,
-  UCHAR *msg,int len));
-int ssl_process_client_key_exchange PROTO_LIST((struct ssl_obj_ *,
-  ssl_decoder *d,UCHAR *msg,int len));
-int ssl_process_change_cipher_spec PROTO_LIST((ssl_obj *ssl,
-  ssl_decoder *d,int direction));
-int ssl_update_handshake_messages PROTO_LIST((ssl_obj *ssl,
-  Data *data));
-int ssl_decode_record PROTO_LIST((ssl_obj *ssl,ssl_decoder *dec,int direction,
-  int ct,int version,Data *d));
-int ssl_tls13_generate_keying_material PROTO_LIST((ssl_obj *obj,ssl_decoder *dec));
-int ssl_process_handshake_finished PROTO_LIST((ssl_obj* ssl,ssl_decoder *dec, Data *data));
-int ssl_tls13_update_keying_material PROTO_LIST((ssl_obj *ssl,ssl_decoder *dec,int dir));
-
+int ssl_decoder_destroy PROTO_LIST((ssl_decoder * *dp));
+int ssl_decoder_create PROTO_LIST((ssl_decoder * *dp, ssl_decode_ctx *ctx));
+int ssl_set_client_random PROTO_LIST((ssl_decoder * dp, UCHAR *msg, int len));
+int ssl_set_server_random PROTO_LIST((ssl_decoder * dp, UCHAR *msg, int len));
+int ssl_set_client_session_id PROTO_LIST((ssl_decoder * dp,
+                                          UCHAR *msg,
+                                          int len));
+int ssl_process_server_session_id
+    PROTO_LIST((ssl_obj * obj, ssl_decoder *dp, UCHAR *msg, int len));
+int ssl_process_client_session_id
+    PROTO_LIST((ssl_obj * obj, ssl_decoder *dp, UCHAR *msg, int len));
+int ssl_process_client_key_exchange
+    PROTO_LIST((struct ssl_obj_ *, ssl_decoder *d, UCHAR *msg, int len));
+int ssl_process_change_cipher_spec PROTO_LIST((ssl_obj * ssl,
+                                               ssl_decoder *d,
+                                               int direction));
+int ssl_update_handshake_messages PROTO_LIST((ssl_obj * ssl, Data *data));
+int ssl_decode_record PROTO_LIST((ssl_obj * ssl,
+                                  ssl_decoder *dec,
+                                  int direction,
+                                  int ct,
+                                  int version,
+                                  Data *d));
+int ssl_tls13_generate_keying_material PROTO_LIST((ssl_obj * obj,
+                                                   ssl_decoder *dec));
+int ssl_process_handshake_finished PROTO_LIST((ssl_obj * ssl,
+                                               ssl_decoder *dec,
+                                               Data *data));
+int ssl_tls13_update_keying_material PROTO_LIST((ssl_obj * ssl,
+                                                 ssl_decoder *dec,
+                                                 int dir));
 
 #endif
-

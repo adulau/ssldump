@@ -18,7 +18,7 @@
       documentation and/or other materials provided with the distribution.
    3. All advertising materials mentioning features or use of this software
       must display the following acknowledgement:
-   
+
       This product includes software developed by Eric Rescorla for
       RTFM, Inc.
 
@@ -35,7 +35,8 @@
    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH
+   DAMAGE.
 
    $Id: r_errors.c,v 1.3 2001/12/24 06:06:27 ekr Exp $
 
@@ -43,18 +44,15 @@
    ekr@rtfm.com  Tue Feb 16 16:37:05 1999
  */
 
-
-
 #include <stdio.h>
 #include <stdarg.h>
 #include "r_common.h"
 #include "r_errors.h"
 
-int verr_exit(char *fmt,...)
-  {
-    va_list ap;
+int verr_exit(char *fmt, ...) {
+  va_list ap;
 
-    va_start(ap,fmt);
-    vfprintf(stderr,fmt,ap);
-    exit(1);
-  }
+  va_start(ap, fmt);
+  vfprintf(stderr, fmt, ap);
+  exit(1);
+}

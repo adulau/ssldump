@@ -18,7 +18,7 @@
       documentation and/or other materials provided with the distribution.
    3. All advertising materials mentioning features or use of this software
       must display the following acknowledgement:
-   
+
       This product includes software developed by Eric Rescorla for
       RTFM, Inc.
 
@@ -35,14 +35,14 @@
    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH
+   DAMAGE.
 
    $Id: r_time.h,v 1.4 2001/12/24 06:06:26 ekr Exp $
 
 
    ekr@rtfm.com  Thu Mar  4 08:45:41 1999
  */
-
 
 #ifndef _r_time_h
 #define _r_time_h
@@ -52,28 +52,29 @@
 #endif
 
 #ifdef _WIN32
-# include <winsock2.h>
+#include <winsock2.h>
 #else
 /* Cribbed from the autoconf doc */
-# if TIME_WITH_SYS_TIME
-#  include <sys/time.h>
-#  include <time.h>
-# else
-#  if HAVE_SYS_TIME_H
-#   include <sys/time.h>
-#  else
-#   include <time.h>
-#  endif
-# endif
+#if TIME_WITH_SYS_TIME
+#include <sys/time.h>
+#include <time.h>
+#else
+#if HAVE_SYS_TIME_H
+#include <sys/time.h>
+#else
+#include <time.h>
+#endif
+#endif
 #endif
 
-int r_timeval_diff PROTO_LIST((struct timeval *t1,struct timeval *t0,
-  struct timeval *diff));
-int r_timeval_add PROTO_LIST((struct timeval *t1,struct timeval *t2,
-  struct timeval *sum));
+int r_timeval_diff PROTO_LIST((struct timeval * t1,
+                               struct timeval *t0,
+                               struct timeval *diff));
+int r_timeval_add PROTO_LIST((struct timeval * t1,
+                              struct timeval *t2,
+                              struct timeval *sum));
 
-UINT8 r_timeval2int PROTO_LIST((struct timeval *tv));
+UINT8 r_timeval2int PROTO_LIST((struct timeval * tv));
 UINT8 r_gettimeint PROTO_LIST((void));
 
 #endif
-

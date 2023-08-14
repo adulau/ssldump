@@ -18,7 +18,7 @@
       documentation and/or other materials provided with the distribution.
    3. All advertising materials mentioning features or use of this software
       must display the following acknowledgement:
-   
+
       This product includes software developed by Eric Rescorla for
       RTFM, Inc.
 
@@ -35,7 +35,8 @@
    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH
+   DAMAGE.
 
    $Id: r_replace.c,v 1.2 2000/10/17 16:10:00 ekr Exp $
 
@@ -43,24 +44,19 @@
    ekr@rtfm.com  Sun Oct  1 11:18:49 2000
  */
 
-
-
-#include  "r_common.h"
+#include "r_common.h"
 
 #ifndef HAVE_STRDUP
 
-char *strdup(str)
-  char *str;
-  {
-    int len=strlen(str);
-    char *n;
-    
-    if(!(n=(char *)malloc(len+1)))
-      return(0);
+char *strdup(char *str) {
+  int len = strlen(str);
+  char *n;
 
-    memcpy(n,str,len+1);
+  if(!(n = (char *)malloc(len + 1)))
+    return (0);
 
-    return(n);
-  }
-#endif  
-  
+  memcpy(n, str, len + 1);
+
+  return (n);
+}
+#endif

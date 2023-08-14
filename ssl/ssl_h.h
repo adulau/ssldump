@@ -18,7 +18,7 @@
       documentation and/or other materials provided with the distribution.
    3. All advertising materials mentioning features or use of this software
       must display the following acknowledgement:
-   
+
       This product includes software developed by Eric Rescorla for
       RTFM, Inc.
 
@@ -35,14 +35,14 @@
    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH
+   DAMAGE.
 
    $Id: ssl_h.h,v 1.6 2002/08/17 01:33:17 ekr Exp $
 
 
    ekr@rtfm.com  Fri Jan  8 14:09:37 1999
  */
-
 
 #ifndef _ssl_h
 #define _ssl_h
@@ -52,19 +52,18 @@
 typedef struct ssl_decode_ctx_ ssl_decode_ctx;
 typedef struct ssl_decoder_ ssl_decoder;
 
-
 typedef struct d_queue_ {
-     short state;	/*What state we're in*/
-#define SSL_READ_NONE	1
-#define SSL_READ_HEADER 2		   
-     int read_left;	/*How many more bytes to read in this state*/
-     int len;		/*The length of the total record, including header*/
-     UCHAR *data;	/*The data for this record*/
-     UCHAR *ptr;	/*The data ptr*/
-     int _allocated;	/*The number of data bytes allocated for this record*/
-     segment *q;	/*The segments that match this record*/
-     segment *q_last;	/*The last segment*/
-     int offset;	/*How far into the first segment this record starts*/
+  short state; /*What state we're in*/
+#define SSL_READ_NONE 1
+#define SSL_READ_HEADER 2
+  int read_left;   /*How many more bytes to read in this state*/
+  int len;         /*The length of the total record, including header*/
+  UCHAR *data;     /*The data for this record*/
+  UCHAR *ptr;      /*The data ptr*/
+  int _allocated;  /*The number of data bytes allocated for this record*/
+  segment *q;      /*The segments that match this record*/
+  segment *q_last; /*The last segment*/
+  int offset;      /*How far into the first segment this record starts*/
 } r_queue;
 
 typedef struct ssl_extensions_ {
@@ -75,77 +74,75 @@ typedef struct ssl_extensions_ {
 } ssl_extensions;
 
 typedef struct ssl_obj_ {
-     tcp_conn *conn;
-     proto_obj *logger_obj;
-     int r_state;
-     int i_state;
-     int version;
-     UINT4 cipher_suite;
+  tcp_conn *conn;
+  proto_obj *logger_obj;
+  int r_state;
+  int i_state;
+  int version;
+  UINT4 cipher_suite;
 
-     char *client_name;
-     char *client_ip;
-     int client_port;
-     char *server_name;
-     char *server_ip;
-     int server_port;
+  char *client_name;
+  char *client_ip;
+  int client_port;
+  char *server_name;
+  char *server_ip;
+  int server_port;
 
-     struct SSL_CipherSuite_ *cs;
-     r_queue *i2r_queue;
-     r_queue *r2i_queue;
-     struct timeval time_start;
-     struct timeval time_last;
-     ssl_decode_ctx *ssl_ctx;
-     ssl_decoder *decoder;
-     ssl_extensions *extensions;
+  struct SSL_CipherSuite_ *cs;
+  r_queue *i2r_queue;
+  r_queue *r2i_queue;
+  struct timeval time_start;
+  struct timeval time_last;
+  ssl_decode_ctx *ssl_ctx;
+  ssl_decoder *decoder;
+  ssl_extensions *extensions;
 
-     int process_ciphertext;
+  int process_ciphertext;
 
-     /*Printing bookkeeping*/
-     #define REC_PLAINTEXT                1
-     #define REC_DECRYPTED_CIPHERTEXT     2
-     #define REC_CIPHERTEXT               3
-     int record_encryption;
+/*Printing bookkeeping*/
+#define REC_PLAINTEXT 1
+#define REC_DECRYPTED_CIPHERTEXT 2
+#define REC_CIPHERTEXT 3
+  int record_encryption;
 
-     int direction; /* The direction we're currently working in*/     
-     int record_count;
-     int indent_depth;
-     int indent_name_len;
-     struct json_object *cur_json_st;
-     char *cur_ja3_ec_str;
-     char *cur_ja3_ecp_str;
+  int direction; /* The direction we're currently working in*/
+  int record_count;
+  int indent_depth;
+  int indent_name_len;
+  struct json_object *cur_json_st;
+  char *cur_ja3_ec_str;
+  char *cur_ja3_ecp_str;
 } ssl_obj;
 
 typedef struct decoder_ {
-     int type;
-     char *name;
-     int (*print) PROTO_LIST((ssl_obj *,int direction,segment *seg,Data *data));
+  int type;
+  char *name;
+  int(*print) PROTO_LIST((ssl_obj *, int direction, segment *seg, Data *data));
 } decoder;
 
-#define SSL_NO_DATA	1
+#define SSL_NO_DATA 1
 #define SSL_BAD_CONTENT_TYPE 2
-#define SSL_BAD_PMS	     3
-#define SSL_CANT_DO_CIPHER   4
-#define SSL_NO_DECRYPT       5
-#define SSL_BAD_MAC          6
-#define SSL_BAD_DATA         7
+#define SSL_BAD_PMS 3
+#define SSL_CANT_DO_CIPHER 4
+#define SSL_NO_DECRYPT 5
+#define SSL_BAD_MAC 6
+#define SSL_BAD_DATA 7
 
 /*SSL defines*/
-#define COMBINE(a,b) ((a<<8) | b)
+#define COMBINE(a, b) ((a << 8) | b)
 #define SSL_HEADER_SIZE 5
 
-#define SSLV3_VERSION	       0x300
-#define TLSV1_VERSION	       0x301
-#define TLSV11_VERSION	       0x302
-#define TLSV12_VERSION	       0x303
-#define TLSV13_VERSION	       0x304
+#define SSLV3_VERSION 0x300
+#define TLSV1_VERSION 0x301
+#define TLSV11_VERSION 0x302
+#define TLSV12_VERSION 0x303
+#define TLSV13_VERSION 0x304
 
 /*State defines*/
-#define SSL_ST_SENT_NOTHING             0
-#define SSL_ST_HANDSHAKE                1
-#define SSL_ST_SENT_CHANGE_CIPHER_SPEC  2
+#define SSL_ST_SENT_NOTHING 0
+#define SSL_ST_HANDSHAKE 1
+#define SSL_ST_SENT_CHANGE_CIPHER_SPEC 2
 
 #include "ssldecode.h"
 
-
 #endif
-

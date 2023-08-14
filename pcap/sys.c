@@ -53,47 +53,41 @@
 /*
  * Determine address family of addr
  */
-int
-sys_get_af(const char *addr)
-{
-	if (strstr(addr, ":"))
-		return AF_INET6;
-	else if (!strpbrk(addr, "abcdefghijklmnopqrstu"
-							"vwxyzABCDEFGHIJKLMNOP"
-							"QRSTUVWXYZ-"))
-		return AF_INET;
-	else
-		return AF_UNSPEC;
+int sys_get_af(const char *addr) {
+  if(strstr(addr, ":"))
+    return AF_INET6;
+  else if(!strpbrk(addr,
+                   "abcdefghijklmnopqrstu"
+                   "vwxyzABCDEFGHIJKLMNOP"
+                   "QRSTUVWXYZ-"))
+    return AF_INET;
+  else
+    return AF_UNSPEC;
 }
-
 
 static int sys_rand_seeded = 0;
 
-static void
-sys_rand_seed(void) {
-	struct timeval seed;
+static void sys_rand_seed(void) {
+  struct timeval seed;
 
-	if (gettimeofday(&seed, NULL) == -1) {
-		srandom((unsigned)time(NULL));
-	} else {
-		srandom((unsigned)(seed.tv_sec ^ seed.tv_usec));
-	}
-	sys_rand_seeded = 1;
+  if(gettimeofday(&seed, NULL) == -1) {
+    srandom((unsigned)time(NULL));
+  } else {
+    srandom((unsigned)(seed.tv_sec ^ seed.tv_usec));
+  }
+  sys_rand_seeded = 1;
 }
 
-uint16_t
-sys_rand16(void) {
-	if (unlikely(!sys_rand_seeded))
-		sys_rand_seed();
-	return random();
+uint16_t sys_rand16(void) {
+  if(unlikely(!sys_rand_seeded))
+    sys_rand_seed();
+  return random();
 }
 
-uint32_t
-sys_rand32(void) {
-	if (unlikely(!sys_rand_seeded))
-		sys_rand_seed();
-	return random();
+uint32_t sys_rand32(void) {
+  if(unlikely(!sys_rand_seeded))
+    sys_rand_seed();
+  return random();
 }
 
 /* vim: set noet ft=c: */
-

@@ -18,7 +18,7 @@
       documentation and/or other materials provided with the distribution.
    3. All advertising materials mentioning features or use of this software
       must display the following acknowledgement:
-   
+
       This product includes software developed by Eric Rescorla for
       RTFM, Inc.
 
@@ -35,14 +35,14 @@
    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH
+   DAMAGE.
 
    $Id: debug.h,v 1.3 2001/12/24 06:06:26 ekr Exp $
 
 
    ekr@rtfm.com  Wed Jan  6 17:13:00 1999
  */
-
 
 #ifndef _debug_h
 #define _debug_h
@@ -53,9 +53,7 @@
 #define DBG(a)
 #endif
 
-int debug(int class,char *format,...);
-int xdump PROTO_LIST((char *name,UCHAR *data,
-  int len));
+int debug(int class, char *format, ...);
+int xdump PROTO_LIST((char *name, UCHAR *data, int len));
 
 #endif
-

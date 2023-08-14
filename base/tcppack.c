@@ -18,7 +18,7 @@
       documentation and/or other materials provided with the distribution.
    3. All advertising materials mentioning features or use of this software
       must display the following acknowledgement:
-   
+
       This product includes software developed by Eric Rescorla for
       RTFM, Inc.
 
@@ -35,7 +35,8 @@
    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH
+   DAMAGE.
 
    $Id: tcppack.c,v 1.11 2002/09/09 21:02:58 ekr Exp $
 
@@ -43,168 +44,158 @@
    ekr@rtfm.com  Tue Dec 29 12:43:39 1998
  */
 
-
-
 #include "network.h"
 #ifndef _WIN32
-# include <sys/socket.h>
-# include <arpa/inet.h>
-# ifndef LINUX
-#  include <netinet/tcp_seq.h>
-# else
-#  define SEQ_LT(x,y) ((int)((x)-(y))<0)
-# endif
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#ifndef LINUX
+#include <netinet/tcp_seq.h>
 #else
-# include <winsock2.h>
-# define SEQ_LT(x,y) ((int)((x)-(y))<0)
+#define SEQ_LT(x, y) ((int)((x) - (y)) < 0)
+#endif
+#else
+#include <winsock2.h>
+#define SEQ_LT(x, y) ((int)((x) - (y)) < 0)
 #endif
 #include <ctype.h>
 #include "debug.h"
 #include "tcpconn.h"
 #include "tcppack.h"
 
+static int process_data_segment PROTO_LIST((tcp_conn * conn,
+                                            proto_mod *handler,
+                                            packet *p,
+                                            stream_data *stream,
+                                            int direction));
+static int new_connection PROTO_LIST(
+    (proto_mod * handler, proto_ctx *ctx, packet *p, tcp_conn **connp));
+static int print_tcp_packet PROTO_LIST((packet * p));
+int STRIM PROTO_LIST((UINT4 _seq, segment *s));
 
-static int process_data_segment PROTO_LIST((tcp_conn *conn,
-  proto_mod *handler,packet *p,stream_data *stream,int direction));
-static int new_connection PROTO_LIST((proto_mod *handler,proto_ctx *ctx,
-  packet *p,tcp_conn **connp));
-static int print_tcp_packet PROTO_LIST((packet *p));
-int STRIM PROTO_LIST((UINT4 _seq,segment *s));
+int process_tcp_packet(proto_mod *handler, proto_ctx *ctx, packet *p) {
+  int r, _status;
+  int direction;
+  stream_data *stream;
+  tcp_conn *conn;
 
-int process_tcp_packet(handler,ctx,p)
-  proto_mod *handler;
-  proto_ctx *ctx;
-  packet *p;
-  {
-    int r,_status;
-    int direction;
-    stream_data *stream;
-    tcp_conn *conn;
+  if(p->len < 20)
+    ABORT(1);
 
-    if(p->len < 20)
-      ABORT(1);
+  p->tcp = (struct tcphdr *)p->data;
 
-    p->tcp=(struct tcphdr *)p->data;
+  print_tcp_packet(p);
 
-    print_tcp_packet(p);
-
-    if((r=tcp_find_conn(&conn,&direction,&p->i_addr.so_st,
-      ntohs(p->tcp->th_sport),&p->r_addr.so_st,ntohs(p->tcp->th_dport)))){
-      if(r!=R_NOT_FOUND)
-	ABORT(r);
-
-      if((p->tcp->th_flags & TH_SYN)!=TH_SYN){
-	DBG((0,"TCP: rejecting packet from unknown connection, seq: %u\n",ntohl(p->tcp->th_seq)));
-	return(0);
-      }
-
-      if((r=new_connection(handler,ctx,p,&conn)))
-	ABORT(r);
-      return(0);
-    }
-
-    stream=direction==DIR_R2I?&conn->r2i:&conn->i2r;
-
-    memcpy(&conn->last_seen_time,&p->ts,sizeof(struct timeval));
-
-    switch(conn->state){
-      case TCP_STATE_SYN1:
-      	if(direction == DIR_R2I && (p->tcp->th_flags & TH_SYN)) {
-         	DBG((0,"SYN2 seq: %u",ntohl(p->tcp->th_seq)));
-        	conn->r2i.seq=ntohl(p->tcp->th_seq)+1;
-        	conn->r2i.ack=ntohl(p->tcp->th_ack)+1;
-        	conn->state=TCP_STATE_ACK;
-        }
-      	break;
-      case TCP_STATE_SYN2:
-        if(direction == DIR_I2R && (p->tcp->th_flags & TH_SYN)) {
-         	DBG((0,"SYN1 seq: %u",ntohl(p->tcp->th_seq)));
-        	conn->i2r.seq=ntohl(p->tcp->th_seq)+1;
-        	conn->i2r.ack=ntohl(p->tcp->th_ack)+1;
-        	conn->state=TCP_STATE_ACK;
-        }
-        break;
-      case TCP_STATE_ACK:
-        {
-	if(direction != DIR_I2R)
-	  break;
-	DBG((0,"ACK seq: %u",ntohl(p->tcp->th_seq)));
-	conn->i2r.ack=ntohl(p->tcp->th_ack)+1;
-        if(!(NET_print_flags & NET_PRINT_JSON)) {
-          if(NET_print_flags & NET_PRINT_TYPESET)
-            printf("\\fC");
-          printf("New TCP connection #%d: %s(%d) <-> %s(%d)\n",
-            conn->conn_number,
-            conn->i_name,conn->i_port,
-            conn->r_name,conn->r_port);
-          if(NET_print_flags & NET_PRINT_TYPESET)
-            printf("\\fR");
-        }
-	conn->state=TCP_STATE_ESTABLISHED;
-        }
-      case TCP_STATE_ESTABLISHED:
-      case TCP_STATE_FIN1:
-	{
-	  if(p->tcp->th_flags & TH_SYN)
-	    break;
-	  if((r=process_data_segment(conn,handler,p,stream,direction)))
-	    ABORT(r);
-	}
-	break;
-      default:
-	break;
-    }
-
-    if(conn->state==TCP_STATE_CLOSED)
-      tcp_destroy_conn(conn);
-      
-    
-    _status=0;
-  abort:
-    
-    return(_status);
-  }
-
-static int new_connection(handler,ctx,p,connp)
-  proto_mod *handler;
-  proto_ctx *ctx;
-  packet *p;
-  tcp_conn **connp;
-  {
-    int r,_status;
-    tcp_conn *conn=0;
-
-    if ((p->tcp->th_flags & (TH_SYN|TH_ACK))==TH_SYN) {
-      if((r=tcp_create_conn(&conn,&p->i_addr.so_st,ntohs(p->tcp->th_sport),
-        &p->r_addr.so_st,ntohs(p->tcp->th_dport))))
-        ABORT(r);
-      DBG((0,"SYN1 seq: %u",ntohl(p->tcp->th_seq)));
-      conn->i2r.seq=ntohl(p->tcp->th_seq)+1;
-      conn->i2r.ack=ntohl(p->tcp->th_ack)+1;
-      conn->state=TCP_STATE_SYN1;
-    } else { // SYN&ACK comes first somehow
-      if((r=tcp_create_conn(&conn,&p->r_addr.so_st,ntohs(p->tcp->th_dport),
-        &p->i_addr.so_st,ntohs(p->tcp->th_sport))))
-        ABORT(r);
-      DBG((0,"SYN2 seq: %u",ntohl(p->tcp->th_seq)));
-      conn->r2i.seq=ntohl(p->tcp->th_seq)+1;
-      conn->r2i.ack=ntohl(p->tcp->th_ack)+1;
-      conn->state=TCP_STATE_SYN2;
-    }
-    memcpy(&conn->start_time,&p->ts,sizeof(struct timeval));
-    memcpy(&conn->last_seen_time,&p->ts,sizeof(struct timeval));
-    lookuphostname(&conn->i_addr,&conn->i_name);
-    lookuphostname(&conn->r_addr,&conn->r_name);
-    addrtotext(&conn->i_addr,&conn->i_num);
-    addrtotext(&conn->r_addr,&conn->r_num);
-    if((r=create_proto_handler(handler,ctx,&conn->analyzer,conn,&p->ts)))
+  if((r = tcp_find_conn(&conn, &direction, &p->i_addr.so_st,
+                        ntohs(p->tcp->th_sport), &p->r_addr.so_st,
+                        ntohs(p->tcp->th_dport)))) {
+    if(r != R_NOT_FOUND)
       ABORT(r);
-    
-    *connp=conn;
-    _status=0;
-  abort:
-    return(_status);
+
+    if((p->tcp->th_flags & TH_SYN) != TH_SYN) {
+      DBG((0, "TCP: rejecting packet from unknown connection, seq: %u\n",
+           ntohl(p->tcp->th_seq)));
+      return (0);
+    }
+
+    if((r = new_connection(handler, ctx, p, &conn)))
+      ABORT(r);
+    return (0);
   }
+
+  stream = direction == DIR_R2I ? &conn->r2i : &conn->i2r;
+
+  memcpy(&conn->last_seen_time, &p->ts, sizeof(struct timeval));
+
+  switch(conn->state) {
+    case TCP_STATE_SYN1:
+      if(direction == DIR_R2I && (p->tcp->th_flags & TH_SYN)) {
+        DBG((0, "SYN2 seq: %u", ntohl(p->tcp->th_seq)));
+        conn->r2i.seq = ntohl(p->tcp->th_seq) + 1;
+        conn->r2i.ack = ntohl(p->tcp->th_ack) + 1;
+        conn->state = TCP_STATE_ACK;
+      }
+      break;
+    case TCP_STATE_SYN2:
+      if(direction == DIR_I2R && (p->tcp->th_flags & TH_SYN)) {
+        DBG((0, "SYN1 seq: %u", ntohl(p->tcp->th_seq)));
+        conn->i2r.seq = ntohl(p->tcp->th_seq) + 1;
+        conn->i2r.ack = ntohl(p->tcp->th_ack) + 1;
+        conn->state = TCP_STATE_ACK;
+      }
+      break;
+    case TCP_STATE_ACK: {
+      if(direction != DIR_I2R)
+        break;
+      DBG((0, "ACK seq: %u", ntohl(p->tcp->th_seq)));
+      conn->i2r.ack = ntohl(p->tcp->th_ack) + 1;
+      if(!(NET_print_flags & NET_PRINT_JSON)) {
+        if(NET_print_flags & NET_PRINT_TYPESET)
+          printf("\\fC");
+        printf("New TCP connection #%d: %s(%d) <-> %s(%d)\n", conn->conn_number,
+               conn->i_name, conn->i_port, conn->r_name, conn->r_port);
+        if(NET_print_flags & NET_PRINT_TYPESET)
+          printf("\\fR");
+      }
+      conn->state = TCP_STATE_ESTABLISHED;
+    }
+    case TCP_STATE_ESTABLISHED:
+    case TCP_STATE_FIN1: {
+      if(p->tcp->th_flags & TH_SYN)
+        break;
+      if((r = process_data_segment(conn, handler, p, stream, direction)))
+        ABORT(r);
+    } break;
+    default:
+      break;
+  }
+
+  if(conn->state == TCP_STATE_CLOSED)
+    tcp_destroy_conn(conn);
+
+  _status = 0;
+abort:
+
+  return (_status);
+}
+
+static int new_connection(proto_mod *handler,
+                          proto_ctx *ctx,
+                          packet *p,
+                          tcp_conn **connp) {
+  int r, _status;
+  tcp_conn *conn = 0;
+
+  if((p->tcp->th_flags & (TH_SYN | TH_ACK)) == TH_SYN) {
+    if((r = tcp_create_conn(&conn, &p->i_addr.so_st, ntohs(p->tcp->th_sport),
+                            &p->r_addr.so_st, ntohs(p->tcp->th_dport))))
+      ABORT(r);
+    DBG((0, "SYN1 seq: %u", ntohl(p->tcp->th_seq)));
+    conn->i2r.seq = ntohl(p->tcp->th_seq) + 1;
+    conn->i2r.ack = ntohl(p->tcp->th_ack) + 1;
+    conn->state = TCP_STATE_SYN1;
+  } else {  // SYN&ACK comes first somehow
+    if((r = tcp_create_conn(&conn, &p->r_addr.so_st, ntohs(p->tcp->th_dport),
+                            &p->i_addr.so_st, ntohs(p->tcp->th_sport))))
+      ABORT(r);
+    DBG((0, "SYN2 seq: %u", ntohl(p->tcp->th_seq)));
+    conn->r2i.seq = ntohl(p->tcp->th_seq) + 1;
+    conn->r2i.ack = ntohl(p->tcp->th_ack) + 1;
+    conn->state = TCP_STATE_SYN2;
+  }
+  memcpy(&conn->start_time, &p->ts, sizeof(struct timeval));
+  memcpy(&conn->last_seen_time, &p->ts, sizeof(struct timeval));
+  lookuphostname(&conn->i_addr, &conn->i_name);
+  lookuphostname(&conn->r_addr, &conn->r_name);
+  addrtotext(&conn->i_addr, &conn->i_num);
+  addrtotext(&conn->r_addr, &conn->r_num);
+  if((r = create_proto_handler(handler, ctx, &conn->analyzer, conn, &p->ts)))
+    ABORT(r);
+
+  *connp = conn;
+  _status = 0;
+abort:
+  return (_status);
+}
 
 /*#define STRIM(_seq,s) { \
     int l;\
@@ -218,263 +209,253 @@ static int new_connection(handler,ctx,p,connp)
     if((s)->next) { \
       if((s)->s_seq >= (s)->next->s_seq) {\
         l=(s)->next->s_seq - (s)->s_seq; \
-	if((s)->len){\
-	  (s)->len-=(l+1); \
-	  (s)->s_seq-=(l+1);\
-	}\
+        if((s)->len){\
+          (s)->len-=(l+1); \
+          (s)->s_seq-=(l+1);\
+        }\
       }\
     }\
   }
 */
 
-static int process_data_segment(conn,handler,p,stream,direction)
-  tcp_conn *conn;
-  proto_mod *handler;
-  packet *p;
-  stream_data *stream;
-  int direction;
-  {
-    int r,_status;
-    tcp_seq seq,right_edge;
-    segment _seg;
-    segment *seg,*nseg=0;
-    long l;
+static int process_data_segment(tcp_conn *conn,
+                                proto_mod *handler,
+                                packet *p,
+                                stream_data *stream,
+                                int direction) {
+  int r, _status;
+  tcp_seq seq, right_edge;
+  segment _seg;
+  segment *seg, *nseg = 0;
+  long l;
 
-    l=p->len - p->tcp->th_off * 4;
+  l = p->len - p->tcp->th_off * 4;
 
-    if(l < 0) {
-	fprintf(stderr,"Malformed packet, computed TCP segment size is negative, skipping ...\n");
-	return(0);
-    }
-
-    if(stream->close){
-      DBG((0,"Rejecting packet received after FIN: %u:%u(%u)",
-             ntohl(p->tcp->th_seq),ntohl(p->tcp->th_seq+l),l));
-      return(0);
-    }
-
-    /*The idea here is to pass all available segments
-      to the analyzer at once. Since we want to preserve
-      the segment packet data, we pass the data as a linked list of
-      segments*/
-    seq=ntohl(p->tcp->th_seq);
-
-    /*Add ACK processing logic here <TODO>*/
-    if(p->tcp->th_flags & TH_ACK){
-      long acknum,acked;
-
-	
-      acknum=ntohl(p->tcp->th_ack);
-      acked=acknum-stream->ack;
-      
-      if(acked && !l){
-        /*
-	if((r=timestamp_diff(&p->ts,&conn->start_time,&dt)))
-	  ERETURN(r);
-          	printf("%d%c%4.4d ",dt.tv_sec,'.',dt.tv_usec/100);
-	if(direction == DIR_R2I)
-	  printf("S>C ");
-	else
-	  printf("C>S ");
-
-          printf("ACK (%d)\n",acked); */
-      }
-      
-      stream->ack=acknum;
-    }
-    
-    
-    DBG((0,"Stream Seq %u ",stream->seq));
-
-    /* Check to see if this packet has been processed already */
-    right_edge=seq + (p->len - (p->tcp->th_off)*4);
-    if(!(p->tcp->th_flags & (TH_RST)) && SEQ_LT(right_edge,stream->seq))
-      return(0);
-    
-    if(SEQ_LT(stream->seq,seq)){
-      /* Out of order segment */
-      tcp_seq left_edge;
-
-      for(seg=0;seg;seg=seg?seg->next:stream->oo_queue){
-	if(seg->next->s_seq > seq)
-	  break;
-      }
-
-      if(!(nseg=(segment *)calloc(1,sizeof(segment))))
-	ABORT(R_NO_MEMORY);
-      if((r=packet_copy(p,&nseg->p)))
-	ABORT(r);
-      nseg->s_seq=seq;
-      
-      /*Insert this segment into the reassembly queue*/
-      if(seg){
-	nseg->next=seg->next;
-	seg->next=nseg;
-      }
-      else{
-	nseg->next=stream->oo_queue;	
-	stream->oo_queue=nseg;
-      }
-
-      left_edge=seg?seg->s_seq:stream->seq;
-      STRIM(left_edge,nseg);
-    }
-    else{
-      /*First segment -- just thread the unallocated data on the
-       list so we can pass to the analyzer*/
-      _seg.next=0;
-      _seg.p=p;
-      _seg.s_seq=seq;
-
-      /*Now split the queue. Assemble as many packets as possible
-	and pass them to the analyzer. But process anything with a
-        RST in it immediately and ignore any data that might be in it
-      */
-      if(_seg.p->tcp->th_flags & (TH_RST)){
-        stream->close=_seg.p->tcp->th_flags & (TH_RST);
-	seg=&_seg;
-
-        conn->state=TCP_STATE_CLOSED;
-      }
-      else{
-        STRIM(stream->seq,&_seg);
-        
-        if(_seg.p->tcp->th_flags & (TH_FIN)){
-          stream->close=_seg.p->tcp->th_flags & (TH_FIN);
-	  seg=&_seg;
-        }
-        else {
-          for(seg=&_seg;seg->next;seg=seg->next){
-            if(seg->p->tcp->th_flags & (TH_FIN)){   
-              stream->close=_seg.p->tcp->th_flags & (TH_FIN);
-              break;
-            }
-            if(seg->len + seg->s_seq != seg->next->s_seq)
-              break;
-          }
-        }
-        
-        /*Note that this logic is broken because it doesn't
-          do the CLOSE_WAIT/FIN_WAIT stuff, but it's probably
-          close enough, since this is a higher level protocol analyzer,
-          not a TCP analyzer*/
-        if(seg->p->tcp->th_flags & (TH_FIN) ){
-          if(conn->state == TCP_STATE_ESTABLISHED)
-            conn->state=TCP_STATE_FIN1;
-          else
-	    conn->state=TCP_STATE_CLOSED;
-        }
-
-	free_tcp_segment_queue(stream->oo_queue);
-        stream->oo_queue=seg->next;
-        seg->next=0;
-        stream->seq=seg->s_seq + seg->len;
-
-        DBG((0,"Analyzing segment: %u:%u(%u)", seg->s_seq, seg->s_seq+seg->len, seg->len));
-        if((r=conn->analyzer->vtbl->data(conn->analyzer->obj,&_seg,direction))) {
-          DBG((0,"ABORT due to segment: %u:%u(%u)", seg->s_seq, seg->s_seq+seg->len, seg->len));
-          ABORT(r);
-        }
-      }
-
-      if(stream->close){
-        DBG((0,"Closing with segment: %u:%u(%u)", seg->s_seq, stream->seq, seg->len));
-        if((r=conn->analyzer->vtbl->close(conn->analyzer->obj,p,direction))) {
-          DBG((0,"ABORT due to segment: %u:%u(%u)", seg->s_seq, stream->seq, seg->len));
-          ABORT(r);
-        }
-      }
-      
-      free_tcp_segment_queue(_seg.next);
-    }
-
-    _status=0;
-  abort:
-    return(_status);
+  if(l < 0) {
+    fprintf(stderr,
+            "Malformed packet, computed TCP segment size is negative, skipping "
+            "...\n");
+    return (0);
   }
 
-static int print_tcp_packet(p)
-  packet *p;
-  {
-    char *src=0,*dst=0;
-
-    struct timeval *ts = &p->ts;
-
-    if(!(NET_print_flags & NET_PRINT_TCP_HDR))
-      return(0);
-
-    lookuphostname(&p->i_addr.so_st,&src);
-    lookuphostname(&p->r_addr.so_st,&dst);
-    
-    if(!(NET_print_flags & NET_PRINT_JSON)) {
-        if(NET_print_flags & NET_PRINT_TS) {
-            printf("%lld%c%4.4lld ", (long long)ts->tv_sec,'.',(long long)ts->tv_usec/100);
-        }
-      printf("TCP: %s(%d) -> %s(%d) ",
-        src,
-        ntohs(p->tcp->th_sport),
-        dst,
-        ntohs(p->tcp->th_dport));
-
-      printf("Seq %u.(%d) ",
-        ntohl(p->tcp->th_seq),
-        p->len - p->tcp->th_off *4);
-
-      if(p->tcp->th_flags & TH_ACK)
-        printf("ACK %u ",ntohl(p->tcp->th_ack));
-
-      if(p->tcp->th_flags & TH_FIN)
-        printf("FIN ");
-      if(p->tcp->th_flags & TH_SYN)
-        printf("SYN ");
-      if(p->tcp->th_flags & TH_RST)
-        printf("RST ");
-      if(p->tcp->th_flags & TH_PUSH)
-        printf("PUSH ");
-      if(p->tcp->th_flags & TH_URG)
-        printf("URG ");
-
-      printf("\n");
-    }
-    free(src);
-    free(dst);
-    return(0);
+  if(stream->close) {
+    DBG((0, "Rejecting packet received after FIN: %u:%u(%u)",
+         ntohl(p->tcp->th_seq), ntohl(p->tcp->th_seq + l), l));
+    return (0);
   }
 
-int STRIM(_seq,s)
-  UINT4 _seq;
-  segment *s;
-  {
-    int l;
-    int off;
+  /*The idea here is to pass all available segments
+    to the analyzer at once. Since we want to preserve
+    the segment packet data, we pass the data as a linked list of
+    segments*/
+  seq = ntohl(p->tcp->th_seq);
 
-    /* Test: this shouldn't damage things at all
-    s->p->data-=4; 
-    s->p->len+=4;
-    s->s_seq-=4;
+  /*Add ACK processing logic here <TODO>*/
+  if(p->tcp->th_flags & TH_ACK) {
+    long acknum, acked;
+
+    acknum = ntohl(p->tcp->th_ack);
+    acked = acknum - stream->ack;
+
+    if(acked && !l) {
+      /*
+      if((r=timestamp_diff(&p->ts,&conn->start_time,&dt)))
+        ERETURN(r);
+              printf("%d%c%4.4d ",dt.tv_sec,'.',dt.tv_usec/100);
+      if(direction == DIR_R2I)
+        printf("S>C ");
+      else
+        printf("C>S ");
+
+        printf("ACK (%d)\n",acked); */
+    }
+
+    stream->ack = acknum;
+  }
+
+  DBG((0, "Stream Seq %u ", stream->seq));
+
+  /* Check to see if this packet has been processed already */
+  right_edge = seq + (p->len - (p->tcp->th_off) * 4);
+  if(!(p->tcp->th_flags & (TH_RST)) && SEQ_LT(right_edge, stream->seq))
+    return (0);
+
+  if(SEQ_LT(stream->seq, seq)) {
+    /* Out of order segment */
+    tcp_seq left_edge;
+
+    for(seg = 0; seg; seg = seg ? seg->next : stream->oo_queue) {
+      if(seg->next->s_seq > seq)
+        break;
+    }
+
+    if(!(nseg = (segment *)calloc(1, sizeof(segment))))
+      ABORT(R_NO_MEMORY);
+    if((r = packet_copy(p, &nseg->p)))
+      ABORT(r);
+    nseg->s_seq = seq;
+
+    /*Insert this segment into the reassembly queue*/
+    if(seg) {
+      nseg->next = seg->next;
+      seg->next = nseg;
+    } else {
+      nseg->next = stream->oo_queue;
+      stream->oo_queue = nseg;
+    }
+
+    left_edge = seg ? seg->s_seq : stream->seq;
+    STRIM(left_edge, nseg);
+  } else {
+    /*First segment -- just thread the unallocated data on the
+     list so we can pass to the analyzer*/
+    _seg.next = 0;
+    _seg.p = p;
+    _seg.s_seq = seq;
+
+    /*Now split the queue. Assemble as many packets as possible
+      and pass them to the analyzer. But process anything with a
+      RST in it immediately and ignore any data that might be in it
     */
-    
-    l=_seq - (s)->s_seq; /* number of bytes to trim
-                            from the left of s */ 
-    off=(s)->p->tcp->th_off*4; 
-    if(l>((s)->p->len-off)) ERETURN(R_BAD_DATA);
+    if(_seg.p->tcp->th_flags & (TH_RST)) {
+      stream->close = _seg.p->tcp->th_flags & (TH_RST);
+      seg = &_seg;
 
-    /* Now remove the leading l bytes */
-    (s)->data=(s)->p->data + off  + (l) ; 
-    (s)->len=(s)->p->len - (off + l); 
-    (s)->s_seq += (l);
+      conn->state = TCP_STATE_CLOSED;
+    } else {
+      STRIM(stream->seq, &_seg);
 
-    /* Now trim to the right if necessary */
-    if((s)->next) { 
-      if((s)->s_seq >= (s)->next->s_seq) {
-        l=(s)->s_seq - (s)->next->s_seq;
-        
-	if((s)->len){
-	  (s)->len-=(l+1); 
-	}
+      if(_seg.p->tcp->th_flags & (TH_FIN)) {
+        stream->close = _seg.p->tcp->th_flags & (TH_FIN);
+        seg = &_seg;
+      } else {
+        for(seg = &_seg; seg->next; seg = seg->next) {
+          if(seg->p->tcp->th_flags & (TH_FIN)) {
+            stream->close = _seg.p->tcp->th_flags & (TH_FIN);
+            break;
+          }
+          if(seg->len + seg->s_seq != seg->next->s_seq)
+            break;
+        }
+      }
+
+      /*Note that this logic is broken because it doesn't
+        do the CLOSE_WAIT/FIN_WAIT stuff, but it's probably
+        close enough, since this is a higher level protocol analyzer,
+        not a TCP analyzer*/
+      if(seg->p->tcp->th_flags & (TH_FIN)) {
+        if(conn->state == TCP_STATE_ESTABLISHED)
+          conn->state = TCP_STATE_FIN1;
+        else
+          conn->state = TCP_STATE_CLOSED;
+      }
+
+      free_tcp_segment_queue(stream->oo_queue);
+      stream->oo_queue = seg->next;
+      seg->next = 0;
+      stream->seq = seg->s_seq + seg->len;
+
+      DBG((0, "Analyzing segment: %u:%u(%u)", seg->s_seq, seg->s_seq + seg->len,
+           seg->len));
+      if((r = conn->analyzer->vtbl->data(conn->analyzer->obj, &_seg,
+                                         direction))) {
+        DBG((0, "ABORT due to segment: %u:%u(%u)", seg->s_seq,
+             seg->s_seq + seg->len, seg->len));
+        ABORT(r);
       }
     }
-    
-    return(0);
+
+    if(stream->close) {
+      DBG((0, "Closing with segment: %u:%u(%u)", seg->s_seq, stream->seq,
+           seg->len));
+      if((r = conn->analyzer->vtbl->close(conn->analyzer->obj, p, direction))) {
+        DBG((0, "ABORT due to segment: %u:%u(%u)", seg->s_seq, stream->seq,
+             seg->len));
+        ABORT(r);
+      }
+    }
+
+    free_tcp_segment_queue(_seg.next);
   }
 
+  _status = 0;
+abort:
+  return (_status);
+}
+
+static int print_tcp_packet(packet *p) {
+  char *src = 0, *dst = 0;
+
+  struct timeval *ts = &p->ts;
+
+  if(!(NET_print_flags & NET_PRINT_TCP_HDR))
+    return (0);
+
+  lookuphostname(&p->i_addr.so_st, &src);
+  lookuphostname(&p->r_addr.so_st, &dst);
+
+  if(!(NET_print_flags & NET_PRINT_JSON)) {
+    if(NET_print_flags & NET_PRINT_TS) {
+      printf("%lld%c%4.4lld ", (long long)ts->tv_sec, '.',
+             (long long)ts->tv_usec / 100);
+    }
+    printf("TCP: %s(%d) -> %s(%d) ", src, ntohs(p->tcp->th_sport), dst,
+           ntohs(p->tcp->th_dport));
+
+    printf("Seq %u.(%d) ", ntohl(p->tcp->th_seq), p->len - p->tcp->th_off * 4);
+
+    if(p->tcp->th_flags & TH_ACK)
+      printf("ACK %u ", ntohl(p->tcp->th_ack));
+
+    if(p->tcp->th_flags & TH_FIN)
+      printf("FIN ");
+    if(p->tcp->th_flags & TH_SYN)
+      printf("SYN ");
+    if(p->tcp->th_flags & TH_RST)
+      printf("RST ");
+    if(p->tcp->th_flags & TH_PUSH)
+      printf("PUSH ");
+    if(p->tcp->th_flags & TH_URG)
+      printf("URG ");
+
+    printf("\n");
+  }
+  free(src);
+  free(dst);
+  return (0);
+}
+
+int STRIM(UINT4 _seq, segment *s) {
+  int l;
+  int off;
+
+  /* Test: this shouldn't damage things at all
+  s->p->data-=4;
+  s->p->len+=4;
+  s->s_seq-=4;
+  */
+
+  l = _seq - (s)->s_seq; /* number of bytes to trim
+                            from the left of s */
+  off = (s)->p->tcp->th_off * 4;
+  if(l > ((s)->p->len - off))
+    ERETURN(R_BAD_DATA);
+
+  /* Now remove the leading l bytes */
+  (s)->data = (s)->p->data + off + (l);
+  (s)->len = (s)->p->len - (off + l);
+  (s)->s_seq += (l);
+
+  /* Now trim to the right if necessary */
+  if((s)->next) {
+    if((s)->s_seq >= (s)->next->s_seq) {
+      l = (s)->s_seq - (s)->next->s_seq;
+
+      if((s)->len) {
+        (s)->len -= (l + 1);
+      }
+    }
+  }
+
+  return (0);
+}

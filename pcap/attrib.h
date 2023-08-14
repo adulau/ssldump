@@ -43,17 +43,17 @@
  */
 
 #if !defined(__GNUC__) && !defined(__clang__)
-#define __attribute__(x) 
+#define __attribute__(x)
 #endif
 
-#define UNUSED          __attribute__((unused))
-#define NORET           __attribute__((noreturn))
-#define PRINTF(f,a)     __attribute__((format(printf,(f),(a))))
-#define SCANF(f,a)      __attribute__((format(scanf,(f),(a))))
-#define WUNRES          __attribute__((warn_unused_result))
-#define MALLOC          __attribute__((malloc)) WUNRES
-#define NONNULL(...)    __attribute__((nonnull(__VA_ARGS__)))
-#define PURE            __attribute__((pure))
+#define UNUSED __attribute__((unused))
+#define NORET __attribute__((noreturn))
+#define PRINTF(f, a) __attribute__((format(printf, (f), (a))))
+#define SCANF(f, a) __attribute__((format(scanf, (f), (a))))
+#define WUNRES __attribute__((warn_unused_result))
+#define MALLOC __attribute__((malloc)) WUNRES
+#define NONNULL(...) __attribute__((nonnull(__VA_ARGS__)))
+#define PURE __attribute__((pure))
 
 /*
  * Branch prediction macros.
@@ -61,11 +61,11 @@
  */
 
 #if !defined(__GNUC__) && !defined(__clang__)
-#define likely(expr)    (expr)
-#define unlikely(expr)  (expr)
+#define likely(expr) (expr)
+#define unlikely(expr) (expr)
 #else
-#define likely(expr)    __builtin_expect((expr), 1)
-#define unlikely(expr)  __builtin_expect((expr), 0)
+#define likely(expr) __builtin_expect((expr), 1)
+#define unlikely(expr) __builtin_expect((expr), 0)
 #endif
 
 #endif /* !ATTRIB_H */

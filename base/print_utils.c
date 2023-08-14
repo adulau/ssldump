@@ -18,7 +18,7 @@
       documentation and/or other materials provided with the distribution.
    3. All advertising materials mentioning features or use of this software
       must display the following acknowledgement:
-   
+
       This product includes software developed by Eric Rescorla for
       RTFM, Inc.
 
@@ -35,7 +35,8 @@
    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH
+   DAMAGE.
 
    $Id: print_utils.c,v 1.2 2000/10/17 16:09:58 ekr Exp $
 
@@ -43,45 +44,43 @@
    ekr@rtfm.com  Mon Feb 15 17:23:36 1999
  */
 
+int explain(char *format, ...) {
+  va_list ap;
 
-int explain(char *format,...)
-  {
-    va_list ap;
+  va_start(ap, format);
 
-    va_start(ap,format);
+  INDENT;
 
-    INDENT;
+  vprintf(format, ap);
+  va_end(ap);
+  return (0);
+}
 
-    vprintf(format,ap);
-    va_end(ap);
-    return(0);
+int exdump(name, data) char *name;
+Data *data;
+{
+  int i, j;
+  char prefix[100];
+
+  INDENT;
+
+  if(name) {
+    sprintf(prefix, "%s[%d]=\n", name, data->len);
+    printf("%s", prefix);
+    INDENT_INCR;
   }
-
-int exdump(name,data)
-  char *name;
-  Data *data;
-  {
-    int i,j;
-    char prefix[100];
-
-    INDENT;
-
-    if(name){
-      sprintf(prefix,"%s[%d]=\n",name,data->len);
-      printf("%s",prefix);
-      INDENT_INCR;
-    }
-    for(i=0;i<data->len;i++){
-      if(!i && (data->len>8)) INDENT;
-      if((data->len>8) && i && !(i%12)){
-        LF;INDENT;
-      }
-      printf("%.2x ",data->data[i]&255);
-    }
-    if(name) INDENT_POP;
-    if(data->len>8 && i%12)
+  for(i = 0; i < data->len; i++) {
+    if(!i && (data->len > 8))
+      INDENT;
+    if((data->len > 8) && i && !(i % 12)) {
       LF;
-    return(0);
+      INDENT;
+    }
+    printf("%.2x ", data->data[i] & 255);
   }
-      
-
+  if(name)
+    INDENT_POP;
+  if(data->len > 8 && i % 12)
+    LF;
+  return (0);
+}

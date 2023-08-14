@@ -18,7 +18,7 @@
       documentation and/or other materials provided with the distribution.
    3. All advertising materials mentioning features or use of this software
       must display the following acknowledgement:
-   
+
       This product includes software developed by Eric Rescorla for
       RTFM, Inc.
 
@@ -35,7 +35,8 @@
    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH
+   DAMAGE.
 
    $Id: tcppack.h,v 1.3 2001/07/20 23:33:15 ekr Exp $
 
@@ -43,12 +44,9 @@
    ekr@rtfm.com  Wed Jan  6 15:08:30 1999
  */
 
-
 #ifndef _tcppack_h
 #define _tcppack_h
 
-int process_tcp_packet PROTO_LIST((proto_mod *mod,proto_ctx *ctx,
-  packet *p));
+int process_tcp_packet PROTO_LIST((proto_mod * mod, proto_ctx *ctx, packet *p));
 
 #endif
-

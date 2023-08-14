@@ -4,4 +4,3 @@
 extern logger_mod pcap_mod;
 
 #endif
-

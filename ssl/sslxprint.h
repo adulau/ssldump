@@ -18,7 +18,7 @@
       documentation and/or other materials provided with the distribution.
    3. All advertising materials mentioning features or use of this software
       must display the following acknowledgement:
-   
+
       This product includes software developed by Eric Rescorla for
       RTFM, Inc.
 
@@ -35,7 +35,8 @@
    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH
+   DAMAGE.
 
    $Id: sslxprint.h,v 1.2 2000/10/17 16:10:02 ekr Exp $
 
@@ -43,12 +44,10 @@
    ekr@rtfm.com  Thu Mar 25 21:23:34 1999
  */
 
-
 #ifndef _sslxprint_h
 #define _sslxprint_h
 
-int sslx_print_certificate PROTO_LIST((ssl_obj *ssl,Data *data,int pf));
-int sslx_print_dn PROTO_LIST((ssl_obj *ssl,Data *data,int pf));
+int sslx_print_certificate PROTO_LIST((ssl_obj * ssl, Data *data, int pf));
+int sslx_print_dn PROTO_LIST((ssl_obj * ssl, Data *data, int pf));
 
 #endif
-

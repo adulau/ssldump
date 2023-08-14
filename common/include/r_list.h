@@ -18,7 +18,7 @@
       documentation and/or other materials provided with the distribution.
    3. All advertising materials mentioning features or use of this software
       must display the following acknowledgement:
-   
+
       This product includes software developed by Eric Rescorla for
       RTFM, Inc.
 
@@ -35,7 +35,8 @@
    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH
+   DAMAGE.
 
    $Id: r_list.h,v 1.2 2000/10/17 16:09:59 ekr Exp $
 
@@ -43,27 +44,28 @@
    ekr@rtfm.com  Tue Jan 19 08:36:48 1999
  */
 
-
 #ifndef _r_list_h
 #define _r_list_h
 
 typedef struct r_list_ r_list;
 
 typedef struct r_list_iterator_ {
-     r_list *list;
-     struct r_list_el_ *ptr;
+  r_list *list;
+  struct r_list_el_ *ptr;
 } r_list_iterator;
 
-int r_list_create PROTO_LIST((r_list **listp));
-int r_list_destroy PROTO_LIST((r_list **listp));
-int r_list_copy PROTO_LIST((r_list **out,r_list *in));
-int r_list_insert PROTO_LIST((r_list *list,void *value,
-  int (*copy)(void **new,void *old),
-  int (*destroy)(void **ptr)));  
-int r_list_append PROTO_LIST((r_list *list,void *value,
-  int (*copy)(void **new,void *old),
-  int (*destroy)(void **ptr)));
-int r_list_init_iter PROTO_LIST((r_list *list,r_list_iterator *iter));
-int r_list_iter PROTO_LIST((r_list_iterator *iter,void **val));
+int r_list_create PROTO_LIST((r_list * *listp));
+int r_list_destroy PROTO_LIST((r_list * *listp));
+int r_list_copy PROTO_LIST((r_list * *out, r_list *in));
+int r_list_insert PROTO_LIST((r_list * list,
+                              void *value,
+                              int (*copy)(void **new, void *old),
+                              int (*destroy)(void **ptr)));
+int r_list_append PROTO_LIST((r_list * list,
+                              void *value,
+                              int (*copy)(void **new, void *old),
+                              int (*destroy)(void **ptr)));
+int r_list_init_iter PROTO_LIST((r_list * list, r_list_iterator *iter));
+int r_list_iter PROTO_LIST((r_list_iterator * iter, void **val));
 
 #endif

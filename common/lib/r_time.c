@@ -18,7 +18,7 @@
       documentation and/or other materials provided with the distribution.
    3. All advertising materials mentioning features or use of this software
       must display the following acknowledgement:
-   
+
       This product includes software developed by Eric Rescorla for
       RTFM, Inc.
 
@@ -35,15 +35,14 @@
    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH
+   DAMAGE.
 
    $Id: r_time.c,v 1.6 2002/09/09 21:02:58 ekr Exp $
 
 
    ekr@rtfm.com  Thu Mar  4 08:43:46 1999
  */
-
-
 
 #include <r_common.h>
 #include <r_time.h>
@@ -52,106 +51,97 @@
 
 #include <windows.h>
 
-int gettimeofday(struct timeval *tv, struct timezone *tzp)
-{
-	/* JAN1_1970_OFFSET is the number of 100-nanoseconds ticks
-	   between midnight jan 1, 1970 and jan 1, 1601.
-	*/
+int gettimeofday(struct timeval *tv, struct timezone *tzp) {
+  /* JAN1_1970_OFFSET is the number of 100-nanoseconds ticks
+     between midnight jan 1, 1970 and jan 1, 1601.
+  */
 
-	const ULARGE_INTEGER JAN1_1970_OFFSET = {0xd53e8000, 0x019db1de};
-	ULARGE_INTEGER currentTimeSinceJan_1_1970;
-	FILETIME currentTime;
+  const ULARGE_INTEGER JAN1_1970_OFFSET = {0xd53e8000, 0x019db1de};
+  ULARGE_INTEGER currentTimeSinceJan_1_1970;
+  FILETIME currentTime;
 
-	GetSystemTimeAsFileTime( &currentTime );
-	currentTimeSinceJan_1_1970.LowPart = currentTime.dwLowDateTime;
-	currentTimeSinceJan_1_1970.HighPart = currentTime.dwHighDateTime;
-	currentTimeSinceJan_1_1970.QuadPart -= JAN1_1970_OFFSET.QuadPart;
+  GetSystemTimeAsFileTime(&currentTime);
+  currentTimeSinceJan_1_1970.LowPart = currentTime.dwLowDateTime;
+  currentTimeSinceJan_1_1970.HighPart = currentTime.dwHighDateTime;
+  currentTimeSinceJan_1_1970.QuadPart -= JAN1_1970_OFFSET.QuadPart;
 
-	/* At this point, currentTimeSinceJan_1_1970 contains the
-	   number of 100-nanosecond 'ticks' since midnight, Jan. 1,
-	   1970. This is equivalent to 10 * the number of microseconds
-	   elapsed since this time. The BSD man pages for gettimeofday()
-	   suggest that we should return the whole number of seconds in
-	   the tv_sec field, and the fractional number of seconds in units
-	   of microseconds in the tv_usec field.
+  /* At this point, currentTimeSinceJan_1_1970 contains the
+     number of 100-nanosecond 'ticks' since midnight, Jan. 1,
+     1970. This is equivalent to 10 * the number of microseconds
+     elapsed since this time. The BSD man pages for gettimeofday()
+     suggest that we should return the whole number of seconds in
+     the tv_sec field, and the fractional number of seconds in units
+     of microseconds in the tv_usec field.
 
-		sec = time / 10000000, usec = (time % 10000000) / 10;
-	 */
+          sec = time / 10000000, usec = (time % 10000000) / 10;
+   */
 
-	tv->tv_sec = currentTimeSinceJan_1_1970.QuadPart / 10000000;
-	tv->tv_usec = (currentTimeSinceJan_1_1970.QuadPart % 10000000) / 10;
-	return 0;
+  tv->tv_sec = currentTimeSinceJan_1_1970.QuadPart / 10000000;
+  tv->tv_usec = (currentTimeSinceJan_1_1970.QuadPart % 10000000) / 10;
+  return 0;
 }
 #endif
 /*Note that t1 must be > t0 */
-int r_timeval_diff(t1,t0,diff)
-  struct timeval *t1;
-  struct timeval *t0;
-  struct timeval *diff;
-  {
-    long d;
+int r_timeval_diff(struct timeval *t1,
+                   struct timeval *t0,
+                   struct timeval *diff) {
+  long d;
 
-    if(t0->tv_sec > t1->tv_sec)
-      ERETURN(R_BAD_ARGS);
+  if(t0->tv_sec > t1->tv_sec)
+    ERETURN(R_BAD_ARGS);
 
-    /*Easy case*/
-    if(t0->tv_usec <= t1->tv_usec){
-      diff->tv_sec=t1->tv_sec - t0->tv_sec;
-      diff->tv_usec=t1->tv_usec - t0->tv_usec;      
-      return(0);
-    }
-
-    /*Hard case*/
-    d=t0->tv_usec - t1->tv_usec;
-    if(t1->tv_sec < (t0->tv_sec + 1))
-      ERETURN(R_BAD_ARGS);
-    diff->tv_sec=t1->tv_sec - (t0->tv_sec + 1);
-    diff->tv_usec=1000000 - d;
-
-    return(0);
+  /*Easy case*/
+  if(t0->tv_usec <= t1->tv_usec) {
+    diff->tv_sec = t1->tv_sec - t0->tv_sec;
+    diff->tv_usec = t1->tv_usec - t0->tv_usec;
+    return (0);
   }
 
-int r_timeval_add(t1,t2,sum)
-  struct timeval *t1;
-  struct timeval *t2;
-  struct timeval *sum;
-  {
-    long tv_sec,tv_usec,d;
+  /*Hard case*/
+  d = t0->tv_usec - t1->tv_usec;
+  if(t1->tv_sec < (t0->tv_sec + 1))
+    ERETURN(R_BAD_ARGS);
+  diff->tv_sec = t1->tv_sec - (t0->tv_sec + 1);
+  diff->tv_usec = 1000000 - d;
 
-    tv_sec=t1->tv_sec + t2->tv_sec;
+  return (0);
+}
 
-    d=t1->tv_usec + t2->tv_usec;
-    if(d>1000000){
-      tv_sec++;
-      tv_usec=d-1000000;
-    }
-    else{
-      tv_usec=d;
-    }
+int r_timeval_add(struct timeval *t1, struct timeval *t2, struct timeval *sum) {
+  long tv_sec, tv_usec, d;
 
-    sum->tv_sec=tv_sec;
-    sum->tv_usec=tv_usec;
-    
-    return(0);
+  tv_sec = t1->tv_sec + t2->tv_sec;
+
+  d = t1->tv_usec + t2->tv_usec;
+  if(d > 1000000) {
+    tv_sec++;
+    tv_usec = d - 1000000;
+  } else {
+    tv_usec = d;
   }
 
-UINT8 r_timeval2int(tv)
-  struct timeval *tv;
-  {
-    UINT8 r=0;
-    
-    r=(tv->tv_sec);
-    r*=1000000;
-    r+=tv->tv_usec;
-        
-    return r;
-  }
+  sum->tv_sec = tv_sec;
+  sum->tv_usec = tv_usec;
 
-UINT8 r_gettimeint()
-  {
-    struct timeval tv;
+  return (0);
+}
 
-    gettimeofday(&tv,0);
+UINT8
+r_timeval2int(struct timeval *tv) {
+  UINT8 r = 0;
 
-    return r_timeval2int(&tv);
-  }
+  r = (tv->tv_sec);
+  r *= 1000000;
+  r += tv->tv_usec;
+
+  return r;
+}
+
+UINT8
+r_gettimeint(void) {
+  struct timeval tv;
+
+  gettimeofday(&tv, 0);
+
+  return r_timeval2int(&tv);
+}

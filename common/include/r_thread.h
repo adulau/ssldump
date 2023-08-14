@@ -18,7 +18,7 @@
       documentation and/or other materials provided with the distribution.
    3. All advertising materials mentioning features or use of this software
       must display the following acknowledgement:
-   
+
       This product includes software developed by Eric Rescorla for
       RTFM, Inc.
 
@@ -35,7 +35,8 @@
    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH DAMAGE.
+   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY SUCH
+   DAMAGE.
 
    $Id: r_thread.h,v 1.2 2000/10/17 16:09:59 ekr Exp $
 
@@ -43,27 +44,24 @@
    ekr@rtfm.com  Tue Feb 23 14:58:36 1999
  */
 
-
 #ifndef _r_thread_h
 #define _r_thread_h
 
 typedef void *r_thread;
 typedef void *r_rwlock;
 
-int r_thread_fork PROTO_LIST((void (*func)(void *),void *arg,
-  r_thread *tid));
+int r_thread_fork PROTO_LIST((void (*func)(void *), void *arg, r_thread *tid));
 int r_thread_destroy PROTO_LIST((r_thread tid));
 int r_thread_yield PROTO_LIST((void));
 int r_thread_exit PROTO_LIST((void));
 int r_thread_wait_last PROTO_LIST((void));
 
-int r_rwlock_create PROTO_LIST((r_rwlock **lockp));
-int r_rwlock_destroy PROTO_LIST((r_rwlock **lock));
-int r_rwlock_lock PROTO_LIST((r_rwlock *lock,int action));
+int r_rwlock_create PROTO_LIST((r_rwlock * *lockp));
+int r_rwlock_destroy PROTO_LIST((r_rwlock * *lock));
+int r_rwlock_lock PROTO_LIST((r_rwlock * lock, int action));
 
 #define R_RWLOCK_UNLOCK 0
 #define R_RWLOCK_RLOCK 1
 #define R_RWLOCK_WLOCK 2
 
 #endif
-
