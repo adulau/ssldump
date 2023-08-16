@@ -53,10 +53,10 @@ char *strdup(char *str) {
   char *n;
 
   if(!(n = (char *)malloc(len + 1)))
-    return (0);
+    return 0;
 
   memcpy(n, str, len + 1);
 
-  return (n);
+  return n;
 }
 #endif

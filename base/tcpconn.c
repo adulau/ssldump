@@ -64,7 +64,7 @@ static int zero_conn PROTO_LIST((tcp_conn * conn));
 
 static int zero_conn(tcp_conn *conn) {
   memset(conn, 0, sizeof(tcp_conn));
-  return (0);
+  return 0;
 }
 
 int tcp_find_conn(tcp_conn **connp,
@@ -81,7 +81,7 @@ int tcp_find_conn(tcp_conn **connp,
          !memcmp(daddr, &conn->conn.r_addr, sizeof(struct sockaddr_storage))) {
         *directionp = DIR_I2R;
         *connp = &(conn->conn);
-        return (0);
+        return 0;
       }
     }
 
@@ -90,12 +90,12 @@ int tcp_find_conn(tcp_conn **connp,
          !memcmp(daddr, &conn->conn.i_addr, sizeof(struct sockaddr_storage))) {
         *directionp = DIR_R2I;
         *connp = &(conn->conn);
-        return (0);
+        return 0;
       }
     }
   }
 
-  return (R_NOT_FOUND);
+  return R_NOT_FOUND;
 }
 
 int tcp_create_conn(tcp_conn **connp,
@@ -106,7 +106,7 @@ int tcp_create_conn(tcp_conn **connp,
   conn_struct *conn = 0;
 
   if(!(conn = (conn_struct *)malloc(sizeof(conn_struct))))
-    return (R_NO_MEMORY);
+    return R_NO_MEMORY;
 
   conn->prev = 0;
 
@@ -126,7 +126,7 @@ int tcp_create_conn(tcp_conn **connp,
     first_conn->prev = conn;
   first_conn = conn;
 
-  return (0);
+  return 0;
 }
 
 int tcp_destroy_conn(tcp_conn *conn) {
@@ -153,7 +153,7 @@ int tcp_destroy_conn(tcp_conn *conn) {
   free(conn->backptr);
   free(conn);
 
-  return (0);
+  return 0;
 }
 
 int clean_old_conn(void) {
@@ -198,7 +198,7 @@ int free_tcp_segment_queue(segment *seg) {
     seg = tmp;
   }
 
-  return (0);
+  return 0;
 }
 
 int copy_tcp_segment_queue(segment **out, segment *in) {
@@ -221,5 +221,5 @@ abort:
   if(_status) {
     free_tcp_segment_queue(base);
   }
-  return (_status);
+  return _status;
 }

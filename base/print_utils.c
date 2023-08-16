@@ -53,7 +53,7 @@ int explain(char *format, ...) {
 
   vprintf(format, ap);
   va_end(ap);
-  return (0);
+  return 0;
 }
 
 int exdump(name, data) char *name;
@@ -82,5 +82,5 @@ Data *data;
     INDENT_POP;
   if(data->len > 8 && i % 12)
     LF;
-  return (0);
+  return 0;
 }

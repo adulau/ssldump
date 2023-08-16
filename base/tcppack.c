@@ -94,12 +94,12 @@ int process_tcp_packet(proto_mod *handler, proto_ctx *ctx, packet *p) {
     if((p->tcp->th_flags & TH_SYN) != TH_SYN) {
       DBG((0, "TCP: rejecting packet from unknown connection, seq: %u\n",
            ntohl(p->tcp->th_seq)));
-      return (0);
+      return 0;
     }
 
     if((r = new_connection(handler, ctx, p, &conn)))
       ABORT(r);
-    return (0);
+    return 0;
   }
 
   stream = direction == DIR_R2I ? &conn->r2i : &conn->i2r;
@@ -155,7 +155,7 @@ int process_tcp_packet(proto_mod *handler, proto_ctx *ctx, packet *p) {
   _status = 0;
 abort:
 
-  return (_status);
+  return _status;
 }
 
 static int new_connection(proto_mod *handler,
@@ -194,7 +194,7 @@ static int new_connection(proto_mod *handler,
   *connp = conn;
   _status = 0;
 abort:
-  return (_status);
+  return _status;
 }
 
 /*#define STRIM(_seq,s) { \
@@ -235,13 +235,13 @@ static int process_data_segment(tcp_conn *conn,
     fprintf(stderr,
             "Malformed packet, computed TCP segment size is negative, skipping "
             "...\n");
-    return (0);
+    return 0;
   }
 
   if(stream->close) {
     DBG((0, "Rejecting packet received after FIN: %u:%u(%u)",
          ntohl(p->tcp->th_seq), ntohl(p->tcp->th_seq + l), l));
-    return (0);
+    return 0;
   }
 
   /*The idea here is to pass all available segments
@@ -278,7 +278,7 @@ static int process_data_segment(tcp_conn *conn,
   /* Check to see if this packet has been processed already */
   right_edge = seq + (p->len - (p->tcp->th_off) * 4);
   if(!(p->tcp->th_flags & (TH_RST)) && SEQ_LT(right_edge, stream->seq))
-    return (0);
+    return 0;
 
   if(SEQ_LT(stream->seq, seq)) {
     /* Out of order segment */
@@ -380,7 +380,7 @@ static int process_data_segment(tcp_conn *conn,
 
   _status = 0;
 abort:
-  return (_status);
+  return _status;
 }
 
 static int print_tcp_packet(packet *p) {
@@ -389,7 +389,7 @@ static int print_tcp_packet(packet *p) {
   struct timeval *ts = &p->ts;
 
   if(!(NET_print_flags & NET_PRINT_TCP_HDR))
-    return (0);
+    return 0;
 
   lookuphostname(&p->i_addr.so_st, &src);
   lookuphostname(&p->r_addr.so_st, &dst);
@@ -422,7 +422,7 @@ static int print_tcp_packet(packet *p) {
   }
   free(src);
   free(dst);
-  return (0);
+  return 0;
 }
 
 int STRIM(UINT4 _seq, segment *s) {
@@ -457,5 +457,5 @@ int STRIM(UINT4 _seq, segment *s) {
     }
   }
 
-  return (0);
+  return 0;
 }

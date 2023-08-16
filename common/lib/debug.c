@@ -56,7 +56,7 @@ int debug(int class, char *format, ...) {
   vfprintf(stderr, format, ap);
   fprintf(stderr, "\n");
   va_end(ap);
-  return (0);
+  return 0;
 }
 
 int xdump(char *name, UCHAR *data, int len) {
@@ -73,5 +73,5 @@ int xdump(char *name, UCHAR *data, int len) {
   }
   if(i % 12)
     printf("\n");
-  return (0);
+  return 0;
 }

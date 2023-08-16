@@ -546,7 +546,7 @@ char *collapse_args(int argc, char **argv) {
   char *ret;
 
   if(!argc)
-    return (0);
+    return 0;
 
   for(i = 0; i < argc; i++) {
     len += strlen(argv[i]) + 1;
@@ -564,5 +564,5 @@ char *collapse_args(int argc, char **argv) {
       ret[len++] = ' ';
   }
 
-  return (ret);
+  return ret;
 }

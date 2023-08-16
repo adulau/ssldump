@@ -149,14 +149,14 @@ abort:
   if(_status) {
     ssl_destroy_rec_decoder(&dec);
   }
-  return (_status);
+  return _status;
 }
 
 int ssl_destroy_rec_decoder(ssl_rec_decoder **dp) {
   ssl_rec_decoder *d;
 
   if(!dp || !*dp)
-    return (0);
+    return 0;
   d = *dp;
 
   r_data_destroy(&d->mac_key);
@@ -170,7 +170,7 @@ int ssl_destroy_rec_decoder(ssl_rec_decoder **dp) {
 #endif
 
   *dp = 0;
-  return (0);
+  return 0;
 }
 
 #define MSB(a) ((a >> 8) & 0xff)
@@ -387,7 +387,7 @@ int ssl_decode_rec_data(ssl_obj *ssl,
     }
   }
 #endif
-  return (0);
+  return 0;
 }
 
 #ifdef OPENSSL
@@ -401,7 +401,7 @@ static int fmt_seq(UINT4 num, UCHAR *buf) {
   netnum = htonl(num);
   memcpy(buf + 4, &netnum, 4);
 
-  return (0);
+  return 0;
 }
 
 static int tls_check_mac(ssl_rec_decoder *d,
@@ -448,7 +448,7 @@ static int tls_check_mac(ssl_rec_decoder *d,
     ERETURN(SSL_BAD_MAC);
 
   HMAC_CTX_free(hm);
-  return (0);
+  return 0;
 }
 
 int ssl3_check_mac(ssl_rec_decoder *d,
@@ -504,7 +504,7 @@ int ssl3_check_mac(ssl_rec_decoder *d,
 
   EVP_MD_CTX_free(mc);
 
-  return (0);
+  return 0;
 }
 
 #endif

@@ -66,7 +66,7 @@ abort:
   if(_status)
     r_data_destroy(&d_);
 
-  return (_status);
+  return _status;
 }
 
 int r_data_alloc(Data **dp, int l) {
@@ -86,7 +86,7 @@ abort:
   if(_status)
     r_data_destroy(&d_);
 
-  return (_status);
+  return _status;
 }
 
 int r_data_make(Data *dp, UCHAR *d, int l) {
@@ -96,12 +96,12 @@ int r_data_make(Data *dp, UCHAR *d, int l) {
   memcpy(dp->data, d, l);
   dp->len = l;
 
-  return (0);
+  return 0;
 }
 
 int r_data_destroy(Data **dp) {
   if(!dp || !*dp)
-    return (0);
+    return 0;
 
   if((*dp)->data)
     free((*dp)->data);
@@ -109,30 +109,30 @@ int r_data_destroy(Data **dp) {
   free(*dp);
   *dp = 0;
 
-  return (0);
+  return 0;
 }
 
 int r_data_copy(Data *dst, Data *src) {
   if(!(dst->data = (UCHAR *)malloc(src->len)))
     ERETURN(R_NO_MEMORY);
   memcpy(dst->data, src->data, dst->len = src->len);
-  return (0);
+  return 0;
 }
 
 int r_data_zfree(Data *d) {
   if(!d)
-    return (0);
+    return 0;
   if(!d->data)
-    return (0);
+    return 0;
   memset(d->data, 0, d->len);
   free(d->data);
-  return (0);
+  return 0;
 }
 
 int r_data_compare(Data *d1, Data *d2) {
   if(d1->len < d2->len)
-    return (-1);
+    return -1;
   if(d2->len < d1->len)
-    return (-1);
-  return (memcmp(d1->data, d2->data, d1->len));
+    return -1;
+  return memcmp(d1->data, d2->data, d1->len);
 }

@@ -183,7 +183,7 @@ abort:
 #endif
   if(_status && cert_obj)
     json_object_put(cert_obj);
-  return (_status);
+  return _status;
 }
 
 int sslx_print_dn(ssl_obj *ssl, Data *data, int pf) {
@@ -214,7 +214,7 @@ abort :
 #ifdef OPENSSL
     if(n) X509_NAME_free(n);
 #endif
-return (_status);
+return _status;
 }
 
 static int sslx__print_dn(ssl_obj *ssl, char *x) {
@@ -233,7 +233,7 @@ static int sslx__print_dn(ssl_obj *ssl, char *x) {
     x = slash ? slash + 1 : 0;
   };
 
-  return (0);
+  return 0;
 }
 
 #ifdef OPENSSL
@@ -246,6 +246,6 @@ static int sslx__print_serial(ssl_obj *ssl, ASN1_INTEGER *a) {
   INIT_DATA(d, a->data, a->length);
   exdump(ssl, 0, &d);
 
-  return (0);
+  return 0;
 }
 #endif

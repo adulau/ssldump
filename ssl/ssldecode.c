@@ -144,10 +144,10 @@ int ssl_restore_session PROTO_LIST((ssl_obj * ssl, ssl_decoder *d));
 /*The password code is not thread safe*/
 static int password_cb(char *buf, int num, int rwflag, void *userdata) {
   if(num < strlen(ssl_password) + 1)
-    return (0);
+    return 0;
 
   strcpy(buf, ssl_password);
-  return (strlen(ssl_password));
+  return strlen(ssl_password);
 }
 
 int ssl_decode_ctx_create(ssl_decode_ctx **dp,
@@ -201,9 +201,9 @@ int ssl_decode_ctx_create(ssl_decode_ctx **dp,
   *dp = d;
   _status = 0;
 abort:
-  return (_status);
+  return _status;
 #else
-  return (0);
+  return 0;
 #endif
 }
 
@@ -222,7 +222,7 @@ int ssl_decode_ctx_destroy(ssl_decode_ctx **dp) {
   SSL_free(d->ssl);
   free(d);
 #endif
-  return (0);
+  return 0;
 }
 
 int ssl_decoder_create(ssl_decoder **dp, ssl_decode_ctx *ctx) {
@@ -240,7 +240,7 @@ int ssl_decoder_create(ssl_decoder **dp, ssl_decode_ctx *ctx) {
 abort:
   if(_status)
     ssl_decoder_destroy(&d);
-  return (_status);
+  return _status;
 #else
   return 0;
 #endif
@@ -251,7 +251,7 @@ int ssl_decoder_destroy(ssl_decoder **dp) {
   ssl_decoder *d;
 
   if(!dp || !*dp)
-    return (0);
+    return 0;
   d = *dp;
   r_data_destroy(&d->client_random);
   r_data_destroy(&d->server_random);
@@ -267,7 +267,7 @@ int ssl_decoder_destroy(ssl_decoder **dp) {
   free(d);
   *dp = 0;
 #endif
-  return (0);
+  return 0;
 }
 
 int ssl_set_client_random(ssl_decoder *d, UCHAR *msg, int len) {
@@ -278,7 +278,7 @@ int ssl_set_client_random(ssl_decoder *d, UCHAR *msg, int len) {
   if((r = r_data_create(&d->client_random, msg, len)))
     ERETURN(r);
 #endif
-  return (0);
+  return 0;
 }
 
 int ssl_set_server_random(ssl_decoder *d, UCHAR *msg, int len) {
@@ -289,7 +289,7 @@ int ssl_set_server_random(ssl_decoder *d, UCHAR *msg, int len) {
   if((r = r_data_create(&d->server_random, msg, len)))
     ERETURN(r);
 #endif
-  return (0);
+  return 0;
 }
 
 int ssl_set_client_session_id(ssl_decoder *d, UCHAR *msg, int len) {
@@ -302,7 +302,7 @@ int ssl_set_client_session_id(ssl_decoder *d, UCHAR *msg, int len) {
       ERETURN(r);
   }
 #endif
-  return (0);
+  return 0;
 }
 
 int ssl_process_server_session_id(ssl_obj *ssl,
@@ -343,9 +343,9 @@ abort:
     r_data_destroy(&d->session_id);
     r_data_create(&d->session_id, msg, len);
   }
-  return (_status);
+  return _status;
 #else
-  return (0);
+  return 0;
 #endif
 }
 
@@ -376,9 +376,9 @@ int ssl_process_client_session_id(ssl_obj *ssl,
   } else {
     _status = -1;
   }
-  return (_status);
+  return _status;
 #else
-  return (0);
+  return 0;
 #endif
 }
 
@@ -414,7 +414,7 @@ int ssl_process_change_cipher_spec(ssl_obj *ssl,
     }
   }
 #endif
-  return (0);
+  return 0;
 }
 int ssl_decode_record(ssl_obj *ssl,
                       ssl_decoder *dec,
@@ -441,10 +441,10 @@ int ssl_decode_record(ssl_obj *ssl,
   } else if(!rd) {
     if(state & SSL_ST_SENT_CHANGE_CIPHER_SPEC) {
       ssl->record_encryption = REC_CIPHERTEXT;
-      return (SSL_NO_DECRYPT);
+      return SSL_NO_DECRYPT;
     } else {
       ssl->record_encryption = REC_PLAINTEXT;
-      return (0);
+      return 0;
     }
   }
 
@@ -471,9 +471,9 @@ int ssl_decode_record(ssl_obj *ssl,
   _status = 0;
 abort:
   FREE(out);
-  return (_status);
+  return _status;
 #else
-  return (0);
+  return 0;
 #endif
 }
 
@@ -499,7 +499,7 @@ int ssl_update_handshake_messages(ssl_obj *ssl, Data *data) {
     ssl->decoder->handshake_messages = hms;
   }
 #endif
-  return (0);
+  return 0;
 }
 
 static int ssl_create_session_lookup_key(ssl_obj *ssl,
@@ -526,7 +526,7 @@ static int ssl_create_session_lookup_key(ssl_obj *ssl,
 
   _status = 0;
 abort:
-  return (_status);
+  return _status;
 }
 
 /* Look up the session id in the session cache and generate
@@ -565,9 +565,9 @@ int ssl_restore_session(ssl_obj *ssl, ssl_decoder *d) {
   _status = 0;
 abort:
   FREE(lookup_key);
-  return (_status);
+  return _status;
 #else
-  return (0);
+  return 0;
 #endif
 }
 
@@ -598,9 +598,9 @@ abort:
     r_data_zfree(msd);
   }
   FREE(lookup_key);
-  return (_status);
+  return _status;
 #else
-  return (0);
+  return 0;
 #endif
 }
 
@@ -623,17 +623,17 @@ int ssl_process_client_key_exchange(ssl_obj *ssl,
 
   if(!d->ctx->ssl_key_log_file || ssl_read_key_log_file(ssl, d) || !d->MS) {
     if(ssl->cs->kex != KEX_RSA)
-      return (-1);
+      return -1;
 
     if(d->ephemeral_rsa)
-      return (-1);
+      return -1;
 
     pk = SSL_get_privatekey(d->ctx->ssl);
     if(!pk)
-      return (-1);
+      return -1;
 
     if(EVP_PKEY_id(pk) != EVP_PKEY_RSA)
-      return (-1);
+      return -1;
 
     RSA_get0_key(EVP_PKEY_get0_RSA(pk), &n, NULL, NULL);
     if((r = r_data_alloc(&d->PMS, BN_num_bytes(n))))
@@ -668,7 +668,7 @@ int ssl_process_client_key_exchange(ssl_obj *ssl,
 
   _status = 0;
 abort:
-  return (_status);
+  return _status;
 #else
   return 0;
 #endif
@@ -714,7 +714,7 @@ static int tls_P_hash(ssl_obj *ssl,
   HMAC_CTX_free(hm);
   CRDUMPD("P_hash out", out);
 
-  return (0);
+  return 0;
 }
 
 static int tls_prf(ssl_obj *ssl,
@@ -770,7 +770,7 @@ abort:
   r_data_destroy(&seed);
   r_data_destroy(&S1);
   r_data_destroy(&S2);
-  return (_status);
+  return _status;
 }
 
 static int tls12_prf(ssl_obj *ssl,
@@ -819,7 +819,7 @@ static int tls12_prf(ssl_obj *ssl,
 abort:
   r_data_destroy(&sha_out);
   r_data_destroy(&seed);
-  return (_status);
+  return _status;
 }
 
 static int ssl3_generate_export_iv(ssl_obj *ssl,
@@ -836,7 +836,7 @@ static int ssl3_generate_export_iv(ssl_obj *ssl,
 
   memcpy(out->data, tmp, out->len);
 
-  return (0);
+  return 0;
 }
 
 static int ssl3_prf(ssl_obj *ssl,
@@ -907,7 +907,7 @@ static int ssl3_prf(ssl_obj *ssl,
     MD5_Init(&md5);
   }
 
-  return (0);
+  return 0;
 }
 
 static int ssl_generate_keying_material(ssl_obj *ssl, ssl_decoder *d) {
@@ -1071,7 +1071,7 @@ abort:
     r_data_zfree(key_block);
     free(key_block);
   }
-  return (_status);
+  return _status;
 }
 
 static int hkdf_expand_label(ssl_obj *ssl,
@@ -1285,7 +1285,7 @@ static int ssl_generate_session_hash(ssl_obj *ssl, ssl_decoder *d) {
 
   _status = 0;
 abort:
-  return (_status);
+  return _status;
 }
 
 static int read_hex_string(char *str, UCHAR *buf, int n) {
@@ -1364,6 +1364,6 @@ static int ssl_read_key_log_file(ssl_obj *ssl, ssl_decoder *d) {
 abort:
   if(d->ctx->ssl_key_log_file != NULL)
     fseek(d->ctx->ssl_key_log_file, 0, SEEK_SET);
-  return (_status);
+  return _status;
 }
 #endif

@@ -32,14 +32,14 @@ abort:
   if(_status) {
     r_bitfield_destroy(&set);
   }
-  return (_status);
+  return _status;
 }
 
 int r_bitfield_destroy(r_bitfield **setp) {
   r_bitfield *set;
 
   if(!setp || !*setp)
-    return (0);
+    return 0;
 
   set = *setp;
 
@@ -47,7 +47,7 @@ int r_bitfield_destroy(r_bitfield **setp) {
   RFREE(set);
 
   *setp = 0;
-  return (0);
+  return 0;
 }
 
 int r_bitfield_set(r_bitfield *set, int bit) {
@@ -77,7 +77,7 @@ int r_bitfield_set(r_bitfield *set, int bit) {
 
   _status = 0;
 abort:
-  return (_status);
+  return _status;
 }
 
 int r_bitfield_isset(r_bitfield *set, int bit) {
@@ -86,11 +86,11 @@ int r_bitfield_isset(r_bitfield *set, int bit) {
   int _status;
 
   if(bit < set->base)
-    return (0);
+    return 0;
 
   /* Resize? */
   if(word > set->len)
-    return (0);
+    return 0;
 
-  return (set->data[word] & (1 << bbit));
+  return set->data[word] & (1 << bbit);
 }

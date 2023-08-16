@@ -83,7 +83,7 @@ static int create_null_analyzer(void *handle,
   DBG((0, "Creating analyzer for connection %d\n", obj->num));
 
   *objp = (proto_obj *)obj;
-  return (0);
+  return 0;
 }
 
 int destroy_null_analyzer(proto_obj **objp) {
@@ -92,7 +92,7 @@ int destroy_null_analyzer(proto_obj **objp) {
 #endif
 
   if(!objp || !*objp)
-    return (0);
+    return 0;
 
 #ifdef DEBUG
   obj = (null_analyzer *)*objp;
@@ -102,7 +102,7 @@ int destroy_null_analyzer(proto_obj **objp) {
   free(*objp);
   *objp = 0;
 
-  return (0);
+  return 0;
 }
 
 int data_null_analyzer(proto_obj *_obj, segment *seg, int direction) {
@@ -127,7 +127,7 @@ int data_null_analyzer(proto_obj *_obj, segment *seg, int direction) {
     printf("====\n");
   }
 
-  return (0);
+  return 0;
 }
 
 int fin_null_analyzer(proto_obj *_obj, packet *p, int direction) {
@@ -135,7 +135,7 @@ int fin_null_analyzer(proto_obj *_obj, packet *p, int direction) {
   null_analyzer *obj = (null_analyzer *)_obj;
 #endif
   DBG((0, "Received FIN on connection %d\n", obj->num));
-  return (0);
+  return 0;
 }
 
 static struct proto_mod_vtbl_ null_vtbl = {

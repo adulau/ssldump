@@ -94,7 +94,7 @@ int r_timeval_diff(struct timeval *t1,
   if(t0->tv_usec <= t1->tv_usec) {
     diff->tv_sec = t1->tv_sec - t0->tv_sec;
     diff->tv_usec = t1->tv_usec - t0->tv_usec;
-    return (0);
+    return 0;
   }
 
   /*Hard case*/
@@ -104,7 +104,7 @@ int r_timeval_diff(struct timeval *t1,
   diff->tv_sec = t1->tv_sec - (t0->tv_sec + 1);
   diff->tv_usec = 1000000 - d;
 
-  return (0);
+  return 0;
 }
 
 int r_timeval_add(struct timeval *t1, struct timeval *t2, struct timeval *sum) {
@@ -123,7 +123,7 @@ int r_timeval_add(struct timeval *t1, struct timeval *t2, struct timeval *sum) {
   sum->tv_sec = tv_sec;
   sum->tv_usec = tv_usec;
 
-  return (0);
+  return 0;
 }
 
 UINT8

@@ -72,7 +72,7 @@
     if(!_r)                       \
       _r = -1;                    \
     REPORT_ERROR_("ERETURN", _r); \
-    return (_r);                  \
+    return _r;                    \
   } while(0)
 #endif
 
