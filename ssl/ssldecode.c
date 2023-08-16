@@ -1184,38 +1184,38 @@ int ssl_tls13_generate_keying_material(ssl_obj *ssl, ssl_decoder *d) {
   if(hkdf_expand_label(ssl, d, d->SHTS, "key", NULL, ssl->cs->eff_bits / 8,
                        &s_wk_h)) {
     fprintf(stderr, "s_wk_h hkdf_expand_label failed\n");
-    goto abort;
+    ABORT(-1);
   }
   if(hkdf_expand_label(ssl, d, d->SHTS, "iv", NULL, 12, &s_iv_h)) {
     fprintf(stderr, "s_iv_h hkdf_expand_label failed\n");
-    goto abort;
+    ABORT(-1);
   }
   if(hkdf_expand_label(ssl, d, d->CHTS, "key", NULL, ssl->cs->eff_bits / 8,
                        &c_wk_h)) {
     fprintf(stderr, "c_wk_h hkdf_expand_label failed\n");
-    goto abort;
+    ABORT(-1);
   }
   if(hkdf_expand_label(ssl, d, d->CHTS, "iv", NULL, 12, &c_iv_h)) {
     fprintf(stderr, "c_iv_h hkdf_expand_label failed\n");
-    goto abort;
+    ABORT(-1);
   }
   if(hkdf_expand_label(ssl, d, d->STS, "key", NULL, ssl->cs->eff_bits / 8,
                        &s_wk)) {
     fprintf(stderr, "s_wk hkdf_expand_label failed\n");
-    goto abort;
+    ABORT(-1);
   }
   if(hkdf_expand_label(ssl, d, d->STS, "iv", NULL, 12, &s_iv)) {
     fprintf(stderr, "s_iv hkdf_expand_label failed\n");
-    goto abort;
+    ABORT(-1);
   }
   if(hkdf_expand_label(ssl, d, d->CTS, "key", NULL, ssl->cs->eff_bits / 8,
                        &c_wk)) {
     fprintf(stderr, "c_wk hkdf_expand_label failed\n");
-    goto abort;
+    ABORT(-1);
   }
   if(hkdf_expand_label(ssl, d, d->CTS, "iv", NULL, 12, &c_iv)) {
     fprintf(stderr, "c_iv hkdf_expand_label failed\n");
-    goto abort;
+    ABORT(-1);
   }
   CRDUMP("Server Handshake Write key", s_wk_h, ssl->cs->eff_bits / 8);
   CRDUMP("Server Handshake IV", s_iv_h, 12);
@@ -1236,7 +1236,7 @@ int ssl_tls13_generate_keying_material(ssl_obj *ssl, ssl_decoder *d) {
     ABORT(r);
   return 0;
 abort:
-  return r;
+  return _status;
 }
 
 static int ssl_generate_session_hash(ssl_obj *ssl, ssl_decoder *d) {

@@ -87,12 +87,16 @@ static int create_null_analyzer(void *handle,
 }
 
 int destroy_null_analyzer(proto_obj **objp) {
+#ifdef DEBUG
   null_analyzer *obj;
+#endif
 
   if(!objp || !*objp)
     return (0);
 
+#ifdef DEBUG
   obj = (null_analyzer *)*objp;
+#endif
   DBG((0, "Destroying analyzer for connection %d\n", obj->num));
 
   free(*objp);
