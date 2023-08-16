@@ -31,7 +31,7 @@ static void *r_thread_real_create(void *arg) {
 
   thread_count--;
   free(h);
-  return (0);
+  return 0;
 }
 
 int r_thread_fork(func, arg, id) void(*func) PROTO_LIST((void *));
@@ -52,7 +52,7 @@ r_thread *id;
 
   _status = 0;
 abort:
-  return (_status);
+  return _status;
 }
 
 int r_thread_yield(void) {
@@ -62,7 +62,7 @@ int r_thread_yield(void) {
 int r_thread_exit(void) {
   thread_count--;
   pthread_exit(0);
-  return (0);
+  return 0;
 }
 
 int r_thread_wait_last(void) {
@@ -72,7 +72,7 @@ int r_thread_wait_last(void) {
     DBG((0, "%d threads left", thread_count));
   } while(thread_count);
 
-  return (0);
+  return 0;
 }
 
 int r_rwlock_create(r_rwlock **lockp) {
@@ -86,20 +86,20 @@ int r_rwlock_create(r_rwlock **lockp) {
     ERETURN(R_INTERNAL);
 
   *lockp = (void *)lock;
-  return (0);
+  return 0;
 }
 
 int r_rwlock_destroy(r_rwlock **lock) {
   pthread_rwlock_t *plock;
 
   if(!lock || !*lock)
-    return (0);
+    return 0;
 
   plock = (pthread_rwlock_t *)(*lock);
 
   pthread_rwlock_destroy(plock);
 
-  return (0);
+  return 0;
 }
 
 int r_rwlock_lock(r_rwlock *lock, int action) {
@@ -127,5 +127,5 @@ int r_rwlock_lock(r_rwlock *lock, int action) {
 
   _status = 0;
 abort:
-  return (_status);
+  return _status;
 }

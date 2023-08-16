@@ -69,15 +69,15 @@ abort:
   if(_status) {
     destroy_proto_handler(&handler);
   }
-  return (_status);
+  return _status;
 }
 
 int destroy_proto_handler(proto_handler **handlerp) {
   if(!handlerp || !*handlerp)
-    return (0);
+    return 0;
 
   (*handlerp)->vtbl->destroy(&(*handlerp)->obj);
   free(*handlerp);
   *handlerp = 0;
-  return (0);
+  return 0;
 }

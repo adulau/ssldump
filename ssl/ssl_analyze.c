@@ -133,7 +133,7 @@ int parse_ssl_flag(int flag) {
     }
   }
 
-  return (0);
+  return 0;
 }
 
 static int parse_ssl_flags(char *str) {
@@ -165,7 +165,7 @@ static int parse_ssl_flags(char *str) {
     }
   }
 
-  return (0);
+  return 0;
 }
 
 static int create_ssl_ctx(void *handle, proto_ctx **ctxp) {
@@ -179,7 +179,7 @@ static int create_ssl_ctx(void *handle, proto_ctx **ctxp) {
   *ctxp = (proto_ctx *)ctx;
   _status = 0;
 abort:
-  return (_status);
+  return _status;
 }
 
 static int destroy_ssl_ctx(void *handle, proto_ctx **ctxp) {
@@ -245,14 +245,14 @@ abort:
   if(_status) {
     destroy_ssl_analyzer((proto_obj **)&obj);
   }
-  return (_status);
+  return _status;
 }
 
 static int destroy_ssl_analyzer(proto_obj **objp) {
   ssl_obj *obj;
 
   if(!objp || !*objp)
-    return (0);
+    return 0;
 
   obj = (ssl_obj *)*objp;
   DBG((0, "Destroying SSL analyzer"));
@@ -272,7 +272,7 @@ static int destroy_ssl_analyzer(proto_obj **objp) {
   free(*objp);
   *objp = 0;
 
-  return (0);
+  return 0;
 }
 
 static int free_r_queue(r_queue *q) {
@@ -280,7 +280,7 @@ static int free_r_queue(r_queue *q) {
   if(q->q)
     free_tcp_segment_queue(q->q);
   free(q);
-  return (0);
+  return 0;
 }
 
 static int create_r_queue(r_queue **qp) {
@@ -303,7 +303,7 @@ abort:
   if(_status) {
     free_r_queue(q);
   }
-  return (_status);
+  return _status;
 }
 
 static int read_ssl_record(ssl_obj *obj,
@@ -368,7 +368,7 @@ static int read_ssl_record(ssl_obj *obj,
 
   _status = 0;
 abort:
-  return (_status);
+  return _status;
 }
 
 static int read_data(r_queue *q,
@@ -403,7 +403,7 @@ static int read_data(r_queue *q,
   if(q->read_left) {
     if((r = copy_tcp_segment_queue(&q->q, seg)))
       ABORT(r);
-    return (SSL_NO_DATA);
+    return SSL_NO_DATA;
   }
 
   if(seg && tocpy == (seg->len - offset)) {
@@ -422,7 +422,7 @@ static int read_data(r_queue *q,
 
   _status = 0;
 abort:
-  return (_status);
+  return _status;
 }
 
 static int data_ssl_analyzer(proto_obj *_obj, segment *seg, int direction) {
@@ -443,19 +443,19 @@ static int data_ssl_analyzer(proto_obj *_obj, segment *seg, int direction) {
     r = process_v2_hello(ssl, seg);
 
     if(r == SSL_NO_DATA)
-      return (0);
+      return 0;
 
     if(r == 0)
-      return (0);
+      return 0;
   }
 
   if(ssl->i_state == SSL_ST_SENT_NOTHING) {
     r = process_beginning_plaintext(ssl, seg, direction);
     if(r == SSL_NO_DATA)
-      return (0);
+      return 0;
 
     if(r == 0)
-      return (0);
+      return 0;
   }
 
   while(!(r = read_ssl_record(ssl, q, seg, offset, &last, &offset))) {
@@ -499,7 +499,7 @@ static int data_ssl_analyzer(proto_obj *_obj, segment *seg, int direction) {
 
   _status = 0;
 abort:
-  return (_status);
+  return _status;
 }
 
 static int print_ssl_header(ssl_obj *obj,
@@ -526,7 +526,7 @@ static int print_ssl_header(ssl_obj *obj,
 
   ssl_print_direction_indicator(obj, direction);
 
-  return (0);
+  return 0;
 }
 
 static int print_ssl_record(ssl_obj *obj,
@@ -556,7 +556,7 @@ static int print_ssl_record(ssl_obj *obj,
   json_object_put(obj->cur_json_st);
   obj->cur_json_st = NULL;
 
-  return (0);
+  return 0;
 }
 
 int close_ssl_analyzer(proto_obj *_obj, packet *p, int dir) {
@@ -577,7 +577,7 @@ int close_ssl_analyzer(proto_obj *_obj, packet *p, int dir) {
   ssl_print_direction_indicator(ssl, dir);
   explain(ssl, "  TCP %s", what);
   LF;
-  return (0);
+  return 0;
 }
 
 static struct proto_mod_vtbl_ ssl_vtbl = {

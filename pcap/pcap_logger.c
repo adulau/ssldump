@@ -65,7 +65,7 @@ static int create_pcap_logger(proto_obj **objp,
                               struct sockaddr_storage *r_addr,
                               u_short r_port,
                               struct timeval *base_time) {
-  int r, _status;
+  int _status;
   logpkt_ctx_t *pcap_obj = 0;
   struct sockaddr_in src_addr, dst_addr;
 
@@ -92,21 +92,21 @@ abort:
   if(_status) {
     destroy_pcap_logger((proto_obj **)&pcap_obj);
   }
-  return (_status);
+  return _status;
 }
 
 static int destroy_pcap_logger(proto_obj **objp) {
   logpkt_ctx_t *pcap_obj;
 
   if(!objp || !*objp)
-    return (0);
+    return 0;
 
   pcap_obj = (logpkt_ctx_t *)*objp;
 
   free(pcap_obj);
   *objp = 0;
 
-  return (0);
+  return 0;
 }
 
 static int data_pcap_logger(proto_obj *_obj,

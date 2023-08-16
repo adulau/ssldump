@@ -29,7 +29,7 @@ static int decode_ContentType_ChangeCipherSpec(ssl_obj *ssl,
   }
 
   LF;
-  return (0);
+  return 0;
 }
 static int decode_ContentType_Alert(ssl_obj *ssl,
                                     int dir,
@@ -40,7 +40,7 @@ static int decode_ContentType_Alert(ssl_obj *ssl,
 
   if(ssl->record_encryption == REC_CIPHERTEXT) {
     LF;
-    return (0);
+    return 0;
   }
 
   if(data->len != 2) {
@@ -64,7 +64,7 @@ static int decode_ContentType_Alert(ssl_obj *ssl,
                     0);
     LF;
   }
-  return (0);
+  return 0;
 }
 static int decode_ContentType_Handshake(ssl_obj *ssl,
                                         int dir,
@@ -79,7 +79,7 @@ static int decode_ContentType_Handshake(ssl_obj *ssl,
 
   if(ssl->record_encryption == REC_CIPHERTEXT) {
     LF;
-    return (0);
+    return 0;
   }
 
   while(data->len > 0) {
@@ -108,7 +108,7 @@ static int decode_ContentType_Handshake(ssl_obj *ssl,
     }
     ssl_decode_switch(ssl, HandshakeType_decoder, t, dir, seg, &d);
   }
-  return (0);
+  return 0;
 }
 static int decode_ContentType_application_data(ssl_obj *ssl,
                                                int dir,
@@ -125,13 +125,13 @@ static int decode_ContentType_application_data(ssl_obj *ssl,
 
   if(NET_print_flags & NET_PRINT_JSON) {
     json_object_object_add(jobj, "msg_data",
-                           json_object_new_string_len(d.data, d.len));
+                           json_object_new_string_len((char *) d.data, d.len));
   } else
     P_(P_AD) { print_data(ssl, &d); }
   else {
     LF;
   }
-  return (0);
+  return 0;
 }
 decoder ContentType_decoder[] = {
     {20, "ChangeCipherSpec", decode_ContentType_ChangeCipherSpec},
@@ -150,7 +150,7 @@ static int decode_HandshakeType_HelloRequest(ssl_obj *ssl,
                          json_object_new_string("HelloRequest"));
 
   LF;
-  return (0);
+  return 0;
 }
 static int decode_HandshakeType_ClientHello(ssl_obj *ssl,
                                             int dir,
@@ -218,7 +218,7 @@ static int decode_HandshakeType_ClientHello(ssl_obj *ssl,
 
     for(; cslen; cslen -= 2) {
       if(ssl_decode_enum(ssl, 0, 2, cipher_suite_decoder, 0, data, &cs))
-        return (1);
+        return 1;
       ssl_print_cipher_suite(ssl, (vj << 8) | vn, P_HL, cs);
       if(!ja3_cs_str)
         ja3_cs_str = calloc(7, 1);
@@ -335,7 +335,7 @@ static int decode_HandshakeType_ClientHello(ssl_obj *ssl,
   free(ja3_ec_str);
   free(ja3_ecp_str);
 
-  return (0);
+  return 0;
 }
 static int decode_HandshakeType_ServerHello(ssl_obj *ssl,
                                             int dir,
@@ -477,7 +477,7 @@ static int decode_HandshakeType_ServerHello(ssl_obj *ssl,
   free(ja3s_c_str);
   free(ja3s_ex_str);
 
-  return (0);
+  return 0;
 }
 static int decode_HandshakeType_Certificate(ssl_obj *ssl,
                                             int dir,
@@ -528,7 +528,7 @@ static int decode_HandshakeType_Certificate(ssl_obj *ssl,
     }
   }
 
-  return (0);
+  return 0;
 }
 
 static int decode_HandshakeType_SessionTicket(ssl_obj *ssl,
@@ -565,6 +565,7 @@ static int decode_HandshakeType_SessionTicket(ssl_obj *ssl,
       }
     }
   }
+  return 0;
 }
 
 static int decode_HandshakeType_EncryptedExtensions(ssl_obj *ssl,
@@ -592,6 +593,7 @@ static int decode_HandshakeType_EncryptedExtensions(ssl_obj *ssl,
       LF;
     }
   }
+  return 0;
 }
 
 static int decode_HandshakeType_ServerKeyExchange(ssl_obj *ssl,
@@ -628,7 +630,7 @@ static int decode_HandshakeType_ServerKeyExchange(ssl_obj *ssl,
     SSL_DECODE_OPAQUE_ARRAY(ssl, "signature", -((1 << 15) - 1), P_ND, data, 0);
   }
 
-  return (0);
+  return 0;
 }
 static int decode_HandshakeType_CertificateRequest(ssl_obj *ssl,
                                                    int dir,
@@ -662,7 +664,7 @@ static int decode_HandshakeType_CertificateRequest(ssl_obj *ssl,
     INDENT_POP;
     len -= (ca.len + 2);
   }
-  return (0);
+  return 0;
 }
 static int decode_HandshakeType_ServerHelloDone(ssl_obj *ssl,
                                                 int dir,
@@ -675,7 +677,7 @@ static int decode_HandshakeType_ServerHelloDone(ssl_obj *ssl,
 
   LF;
   ssl_update_handshake_messages(ssl, data);
-  return (0);
+  return 0;
 }
 static int decode_HandshakeType_CertificateVerify(ssl_obj *ssl,
                                                   int dir,
@@ -695,7 +697,7 @@ static int decode_HandshakeType_CertificateVerify(ssl_obj *ssl,
     SSL_DECODE_UINT16(ssl, "signature_type", P_HL, data, &signature_type);
   }
   SSL_DECODE_OPAQUE_ARRAY(ssl, "Signature", -((1 << 15) - 1), P_HL, data, 0);
-  return (0);
+  return 0;
 }
 static int decode_HandshakeType_ClientKeyExchange(ssl_obj *ssl,
                                                   int dir,
@@ -731,7 +733,7 @@ static int decode_HandshakeType_ClientKeyExchange(ssl_obj *ssl,
         ssl_process_client_key_exchange(ssl, ssl->decoder, NULL, 0);
     }
   }
-  return (0);
+  return 0;
 }
 static int decode_HandshakeType_Finished(ssl_obj *ssl,
                                          int dir,
@@ -759,7 +761,7 @@ static int decode_HandshakeType_Finished(ssl_obj *ssl,
   }
 
   ssl_process_handshake_finished(ssl, ssl->decoder, data);
-  return (0);
+  return 0;
 }
 
 static int decode_HandshakeType_KeyUpdate(ssl_obj *ssl,
@@ -1191,7 +1193,7 @@ static int decode_AlertLevel_warning(ssl_obj *ssl,
   jobj = ssl->cur_json_st;
   json_object_object_add(jobj, "alert_level",
                          json_object_new_string("warning"));
-  return (0);
+  return 0;
 }
 static int decode_AlertLevel_fatal(ssl_obj *ssl,
                                    int dir,
@@ -1200,7 +1202,7 @@ static int decode_AlertLevel_fatal(ssl_obj *ssl,
   struct json_object *jobj;
   jobj = ssl->cur_json_st;
   json_object_object_add(jobj, "alert_level", json_object_new_string("fatal"));
-  return (0);
+  return 0;
 }
 decoder AlertLevel_decoder[] = {{1, "warning", decode_AlertLevel_warning},
                                 {2, "fatal", decode_AlertLevel_fatal},
@@ -1210,139 +1212,139 @@ static int decode_AlertDescription_close_notify(ssl_obj *ssl,
                                                 int dir,
                                                 segment *seg,
                                                 Data *data) {
-  return (0);
+  return 0;
 }
 static int decode_AlertDescription_unexpected_message(ssl_obj *ssl,
                                                       int dir,
                                                       segment *seg,
                                                       Data *data) {
-  return (0);
+  return 0;
 }
 static int decode_AlertDescription_bad_record_mac(ssl_obj *ssl,
                                                   int dir,
                                                   segment *seg,
                                                   Data *data) {
-  return (0);
+  return 0;
 }
 static int decode_AlertDescription_decryption_failed(ssl_obj *ssl,
                                                      int dir,
                                                      segment *seg,
                                                      Data *data) {
-  return (0);
+  return 0;
 }
 static int decode_AlertDescription_record_overflow(ssl_obj *ssl,
                                                    int dir,
                                                    segment *seg,
                                                    Data *data) {
-  return (0);
+  return 0;
 }
 static int decode_AlertDescription_decompression_failure(ssl_obj *ssl,
                                                          int dir,
                                                          segment *seg,
                                                          Data *data) {
-  return (0);
+  return 0;
 }
 static int decode_AlertDescription_handshake_failure(ssl_obj *ssl,
                                                      int dir,
                                                      segment *seg,
                                                      Data *data) {
-  return (0);
+  return 0;
 }
 static int decode_AlertDescription_bad_certificate(ssl_obj *ssl,
                                                    int dir,
                                                    segment *seg,
                                                    Data *data) {
-  return (0);
+  return 0;
 }
 static int decode_AlertDescription_unsupported_certificate(ssl_obj *ssl,
                                                            int dir,
                                                            segment *seg,
                                                            Data *data) {
-  return (0);
+  return 0;
 }
 static int decode_AlertDescription_certificate_revoked(ssl_obj *ssl,
                                                        int dir,
                                                        segment *seg,
                                                        Data *data) {
-  return (0);
+  return 0;
 }
 static int decode_AlertDescription_certificate_expired(ssl_obj *ssl,
                                                        int dir,
                                                        segment *seg,
                                                        Data *data) {
-  return (0);
+  return 0;
 }
 static int decode_AlertDescription_certificate_unknown(ssl_obj *ssl,
                                                        int dir,
                                                        segment *seg,
                                                        Data *data) {
-  return (0);
+  return 0;
 }
 static int decode_AlertDescription_illegal_parameter(ssl_obj *ssl,
                                                      int dir,
                                                      segment *seg,
                                                      Data *data) {
-  return (0);
+  return 0;
 }
 static int decode_AlertDescription_unknown_ca(ssl_obj *ssl,
                                               int dir,
                                               segment *seg,
                                               Data *data) {
-  return (0);
+  return 0;
 }
 static int decode_AlertDescription_access_denied(ssl_obj *ssl,
                                                  int dir,
                                                  segment *seg,
                                                  Data *data) {
-  return (0);
+  return 0;
 }
 static int decode_AlertDescription_decode_error(ssl_obj *ssl,
                                                 int dir,
                                                 segment *seg,
                                                 Data *data) {
-  return (0);
+  return 0;
 }
 static int decode_AlertDescription_decrypt_error(ssl_obj *ssl,
                                                  int dir,
                                                  segment *seg,
                                                  Data *data) {
-  return (0);
+  return 0;
 }
 static int decode_AlertDescription_export_restriction(ssl_obj *ssl,
                                                       int dir,
                                                       segment *seg,
                                                       Data *data) {
-  return (0);
+  return 0;
 }
 static int decode_AlertDescription_protocol_version(ssl_obj *ssl,
                                                     int dir,
                                                     segment *seg,
                                                     Data *data) {
-  return (0);
+  return 0;
 }
 static int decode_AlertDescription_insufficient_security(ssl_obj *ssl,
                                                          int dir,
                                                          segment *seg,
                                                          Data *data) {
-  return (0);
+  return 0;
 }
 static int decode_AlertDescription_internal_error(ssl_obj *ssl,
                                                   int dir,
                                                   segment *seg,
                                                   Data *data) {
-  return (0);
+  return 0;
 }
 static int decode_AlertDescription_user_canceled(ssl_obj *ssl,
                                                  int dir,
                                                  segment *seg,
                                                  Data *data) {
-  return (0);
+  return 0;
 }
 static int decode_AlertDescription_no_renegotiation(ssl_obj *ssl,
                                                     int dir,
                                                     segment *seg,
                                                     Data *data) {
-  return (0);
+  return 0;
 }
 decoder AlertDescription_decoder[] = {
     {0, "close_notify", decode_AlertDescription_close_notify},
@@ -1379,25 +1381,25 @@ static int decode_client_certificate_type_rsa_sign(ssl_obj *ssl,
                                                    int dir,
                                                    segment *seg,
                                                    Data *data) {
-  return (0);
+  return 0;
 }
 static int decode_client_certificate_type_dss_sign(ssl_obj *ssl,
                                                    int dir,
                                                    segment *seg,
                                                    Data *data) {
-  return (0);
+  return 0;
 }
 static int decode_client_certificate_type_rsa_fixed_dh(ssl_obj *ssl,
                                                        int dir,
                                                        segment *seg,
                                                        Data *data) {
-  return (0);
+  return 0;
 }
 static int decode_client_certificate_type_dss_fixed_dh(ssl_obj *ssl,
                                                        int dir,
                                                        segment *seg,
                                                        Data *data) {
-  return (0);
+  return 0;
 }
 decoder client_certificate_type_decoder[] = {
     {1, "rsa_sign", decode_client_certificate_type_rsa_sign},
@@ -1439,7 +1441,7 @@ static int decode_extension_server_name(ssl_obj *ssl,
     data->len -= l;
     data->data += l;
   }
-  return (0);
+  return 0;
 }
 static int decode_extension_encrypt_then_mac(ssl_obj *ssl,
                                              int dir,
@@ -1455,7 +1457,7 @@ static int decode_extension_encrypt_then_mac(ssl_obj *ssl,
   data->data += l;
 
   dir == DIR_I2R ? *etm = 1 : ++*etm;
-  return (0);
+  return 0;
 }
 static int decode_extension_extended_master_secret(ssl_obj *ssl,
                                                    int dir,
@@ -1471,7 +1473,7 @@ static int decode_extension_extended_master_secret(ssl_obj *ssl,
   data->data += l;
 
   dir == DIR_I2R ? *ems = 1 : ++*ems;
-  return (0);
+  return 0;
 }
 static int decode_extension(ssl_obj *ssl, int dir, segment *seg, Data *data) {
   int r;
@@ -1479,7 +1481,7 @@ static int decode_extension(ssl_obj *ssl, int dir, segment *seg, Data *data) {
   SSL_DECODE_UINT16(ssl, "extension length", 0, data, &l);
   data->len -= l;
   data->data += l;
-  return (0);
+  return 0;
 }
 
 decoder supported_groups_decoder[] = {
@@ -1521,7 +1523,7 @@ static int decode_extension_supported_groups(ssl_obj *ssl,
     data->data += l;
   }
   ssl->cur_ja3_ec_str = ja3_ec_str;
-  return (0);
+  return 0;
 }
 
 decoder ec_point_formats_decoder[] = {{
@@ -1572,7 +1574,7 @@ static int decode_extension_ec_point_formats(ssl_obj *ssl,
   }
 
   ssl->cur_ja3_ecp_str = ja3_ecp_str;
-  return (0);
+  return 0;
 }
 
 static int decode_extension_supported_versions(ssl_obj *ssl,
@@ -1595,6 +1597,7 @@ static int decode_extension_supported_versions(ssl_obj *ssl,
   }
   if(dir == DIR_R2I)
     ssl->version = version;  // Server sets the tls version
+  return 0;
 }
 
 decoder tls13_certificate_types[] = {{0, "x509", 0},
@@ -1623,6 +1626,7 @@ static int decode_extension_client_certificate_type(ssl_obj *ssl,
   if(dir == DIR_R2I)
     ssl->extensions->client_certificate_type =
         certificate_type;  // Server sets the client_certificate_type
+  return 0;
 }
 
 static int decode_extension_server_certificate_type(ssl_obj *ssl,
@@ -1647,6 +1651,7 @@ static int decode_extension_server_certificate_type(ssl_obj *ssl,
   if(dir == DIR_R2I)
     ssl->extensions->server_certificate_type =
         certificate_type;  // Server sets the server_certificate_type
+  return 0;
 }
 
 decoder extension_decoder[] = {
@@ -1738,7 +1743,7 @@ static int decode_server_name_type_host_name(ssl_obj *ssl,
 
   data->len -= l;
   data->data += l;
-  return (0);
+  return 0;
 }
 static int decode_server_name(ssl_obj *ssl, int dir, segment *seg, Data *data) {
   int r;
@@ -1746,7 +1751,7 @@ static int decode_server_name(ssl_obj *ssl, int dir, segment *seg, Data *data) {
   SSL_DECODE_UINT16(ssl, "server name length", 0, data, &l);
   data->len -= l;
   data->data += l;
-  return (0);
+  return 0;
 }
 
 decoder server_name_type_decoder[] = {

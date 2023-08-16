@@ -165,7 +165,8 @@ void pcap_cb(u_char *ptr, const struct pcap_pkthdr *hdr, const u_char *data) {
   n_handler *n;
   int len;
   struct ether_header *e_hdr = (struct ether_header *)data;
-  int type, cleaned_conn;
+  int type = ETHERTYPE_IP;
+  int cleaned_conn;
 
   n = (n_handler *)ptr;
   if(hdr->caplen != hdr->len)
@@ -545,7 +546,7 @@ char *collapse_args(int argc, char **argv) {
   char *ret;
 
   if(!argc)
-    return (0);
+    return 0;
 
   for(i = 0; i < argc; i++) {
     len += strlen(argv[i]) + 1;
@@ -563,5 +564,5 @@ char *collapse_args(int argc, char **argv) {
       ret[len++] = ' ';
   }
 
-  return (ret);
+  return ret;
 }

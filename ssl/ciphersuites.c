@@ -238,7 +238,7 @@ int ssl_find_cipher(int num, SSL_CipherSuite **cs) {
   for(c = CipherSuites; c->number != -1; c++) {
     if(c->number == num) {
       *cs = c;
-      return (0);
+      return 0;
     }
   }
 

@@ -102,7 +102,7 @@ abort:
   if(_status) {
     r_assoc_destroy(&assoc);
   }
-  return (_status);
+  return _status;
 }
 
 int r_assoc_destroy(r_assoc **assocp) {
@@ -110,7 +110,7 @@ int r_assoc_destroy(r_assoc **assocp) {
   int i;
 
   if(!assocp || !*assocp)
-    return (0);
+    return 0;
 
   assoc = *assocp;
   for(i = 0; i < assoc->size; i++)
@@ -119,7 +119,7 @@ int r_assoc_destroy(r_assoc **assocp) {
   free(assoc->chains);
   free(assoc);
 
-  return (0);
+  return 0;
 }
 
 static int destroy_assoc_chain(r_assoc_el *chain) {
@@ -137,7 +137,7 @@ static int destroy_assoc_chain(r_assoc_el *chain) {
     chain = nxt;
   }
 
-  return (0);
+  return 0;
 }
 
 static int copy_assoc_chain(r_assoc_el **newp, r_assoc_el *old) {
@@ -146,7 +146,7 @@ static int copy_assoc_chain(r_assoc_el **newp, r_assoc_el *old) {
 
   if(!old) {
     *newp = 0;
-    return (0);
+    return 0;
   }
   for(; old; old = old->next) {
     if(!(tmp = (r_assoc_el *)calloc(sizeof(r_assoc_el), 1)))
@@ -182,7 +182,7 @@ abort:
   if(_status) {
     destroy_assoc_chain(new);
   }
-  return (_status);
+  return _status;
 }
 
 static int r_assoc_fetch_bucket(r_assoc *assoc,
@@ -197,11 +197,11 @@ static int r_assoc_fetch_bucket(r_assoc *assoc,
   for(bucket = assoc->chains[hash_value]; bucket; bucket = bucket->next) {
     if(bucket->key_len == len && !memcmp(bucket->key, key, len)) {
       *bucketp = bucket;
-      return (0);
+      return 0;
     }
   }
 
-  return (R_NOT_FOUND);
+  return R_NOT_FOUND;
 }
 
 int r_assoc_fetch(r_assoc *assoc, char *key, int len, void **datap) {
@@ -211,11 +211,11 @@ int r_assoc_fetch(r_assoc *assoc, char *key, int len, void **datap) {
   if((r = r_assoc_fetch_bucket(assoc, key, len, &bucket))) {
     if(r != R_NOT_FOUND)
       ERETURN(r);
-    return (r);
+    return r;
   }
 
   *datap = bucket->data;
-  return (0);
+  return 0;
 }
 
 int r_assoc_insert(r_assoc *assoc,
@@ -267,7 +267,7 @@ abort:
     free(new_bucket->key);
     free(new_bucket);
   }
-  return (_status);
+  return _status;
 }
 
 int r_assoc_copy(r_assoc **newp, r_assoc *old) {
@@ -292,7 +292,7 @@ abort:
   if(_status) {
     r_assoc_destroy(&new);
   }
-  return (_status);
+  return _status;
 }
 
 int r_assoc_init_iter(r_assoc *assoc, r_assoc_iterator *iter) {
@@ -313,7 +313,7 @@ int r_assoc_init_iter(r_assoc *assoc, r_assoc_iterator *iter) {
     }
   }
 
-  return (0);
+  return 0;
 }
 
 int r_assoc_iter(r_assoc_iterator *iter, void **key, int *keyl, void **val) {
@@ -321,7 +321,7 @@ int r_assoc_iter(r_assoc_iterator *iter, void **key, int *keyl, void **val) {
   r_assoc_el *ret;
 
   if(!iter->next)
-    return (R_EOD);
+    return R_EOD;
   ret = iter->next;
 
   *key = ret->key;
@@ -348,7 +348,7 @@ int r_assoc_iter(r_assoc_iterator *iter, void **key, int *keyl, void **val) {
     }
   }
 
-  return (0);
+  return 0;
 }
 
 /* Delete the last returned value*/
@@ -368,7 +368,7 @@ int r_assoc_iter_delete(r_assoc_iterator *iter) {
   iter->prev->destroy(iter->prev->data);
   free(iter->prev->data);
   free(iter->prev);
-  return (0);
+  return 0;
 }
 
 /*This is a hack from AMS. Supposedly, it's pretty good for strings, even
@@ -381,5 +381,5 @@ hash_compute(char *key, int len, int bits) {
 
   h &= (1 << bits) - 1;
 
-  return (h);
+  return h;
 }

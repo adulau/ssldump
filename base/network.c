@@ -84,20 +84,20 @@ abort:
   if(_status) {
     network_handler_destroy(mod, &handler);
   }
-  return (_status);
+  return _status;
 }
 
 int network_handler_destroy(proto_mod *mod, n_handler **handlerp) {
   n_handler *handler = 0;
   if(!handlerp || !*handlerp)
-    return (0);
+    return 0;
 
   handler = *handlerp;
 
   mod->vtbl->destroy_ctx(mod->handle, &handler->ctx);
   free(*handlerp);
   *handlerp = 0;
-  return (0);
+  return 0;
 }
 
 int network_process_packet(n_handler *handler,
@@ -124,7 +124,7 @@ int network_process_packet(n_handler *handler,
       printf(
           "Malformed packet, packet too small to contain IP header, skipping "
           "...\n");
-    return (0);
+    return 0;
   }
 
   memset(&p.i_addr.so_st, 0x0, sizeof(struct sockaddr_storage));
@@ -145,7 +145,7 @@ int network_process_packet(n_handler *handler,
     if((off & 0x1fff) || /*Later fragment*/
        (off & 0x2000)) { /*More fragments*/
       /*      fprintf(stderr,"Fragmented packet! rejecting\n"); */
-      return (0);
+      return 0;
     }
 
     hlen = p.l3_hdr.ip->ip_hl * 4;
@@ -157,7 +157,7 @@ int network_process_packet(n_handler *handler,
         printf(
             "Malformed packet, size from IP header is larger than size "
             "reported by libpcap, skipping ...\n");
-      return (0);
+      return 0;
     }
 
     if(p.len == 0) {
@@ -190,7 +190,7 @@ int network_process_packet(n_handler *handler,
         printf(
             "Malformed packet, size from IP header is larger than size "
             "reported by libpcap, skipping ...\n");
-      return (0);
+      return 0;
     }
 
     if(p.len == 0) {
@@ -210,7 +210,7 @@ int network_process_packet(n_handler *handler,
       break;
   }
 
-  return (0);
+  return 0;
 }
 
 int packet_copy(packet *in, packet **out) {
@@ -239,16 +239,16 @@ abort:
   if(_status) {
     packet_destroy(p);
   }
-  return (_status);
+  return _status;
 }
 
 int packet_destroy(packet *p) {
   if(!p)
-    return (0);
+    return 0;
 
   FREE(p->base);
   FREE(p);
-  return (0);
+  return 0;
 }
 
 int timestamp_diff(struct timeval *t1,
@@ -263,7 +263,7 @@ int timestamp_diff(struct timeval *t1,
   if(t0->tv_usec <= t1->tv_usec) {
     diff->tv_sec = t1->tv_sec - t0->tv_sec;
     diff->tv_usec = t1->tv_usec - t0->tv_usec;
-    return (0);
+    return 0;
   }
 
   /*Hard case*/
@@ -273,7 +273,7 @@ int timestamp_diff(struct timeval *t1,
   diff->tv_sec = t1->tv_sec - (t0->tv_sec + 1);
   diff->tv_usec = 1000000 - d;
 
-  return (0);
+  return 0;
 }
 
 int lookuphostname(struct sockaddr_storage *so_st, char **namep) {
@@ -295,7 +295,7 @@ int lookuphostname(struct sockaddr_storage *so_st, char **namep) {
     inet_ntop(so_st->ss_family, addr, *namep, INET6_ADDRSTRLEN);
   }
 
-  return (0);
+  return 0;
 }
 
 int addrtotext(struct sockaddr_storage *so_st, char **namep) {
@@ -309,5 +309,5 @@ int addrtotext(struct sockaddr_storage *so_st, char **namep) {
   }
   inet_ntop(so_st->ss_family, addr, *namep, INET6_ADDRSTRLEN);
 
-  return (0);
+  return 0;
 }

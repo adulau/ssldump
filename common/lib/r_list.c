@@ -73,7 +73,7 @@ int r_list_create(r_list **listp) {
 
   _status = 0;
 abort:
-  return (_status);
+  return _status;
 }
 
 int r_list_destroy(r_list **listp) {
@@ -81,7 +81,7 @@ int r_list_destroy(r_list **listp) {
   r_list_el *el;
 
   if(!listp || !*listp)
-    return (0);
+    return 0;
   list = *listp;
 
   el = list->first;
@@ -99,7 +99,7 @@ int r_list_destroy(r_list **listp) {
   free(list);
   *listp = 0;
 
-  return (0);
+  return 0;
 }
 
 int r_list_copy(r_list **outp, r_list *in) {
@@ -138,7 +138,7 @@ int r_list_copy(r_list **outp, r_list *in) {
 abort:
   if(_status)
     r_list_destroy(&out);
-  return (_status);
+  return _status;
 }
 
 int r_list_insert(list, value, copy, destroy) r_list *list;
@@ -164,7 +164,7 @@ int(*destroy) PROTO_LIST((void **val));
 
   _status = 0;
 abort:
-  return (_status);
+  return _status;
 }
 
 int r_list_append(list, value, copy, destroy) r_list *list;
@@ -193,22 +193,22 @@ int(*destroy) PROTO_LIST((void **val));
 
   _status = 0;
 abort:
-  return (_status);
+  return _status;
 }
 
 int r_list_init_iter(r_list *list, r_list_iterator *iter) {
   iter->list = list;
   iter->ptr = list->first;
 
-  return (0);
+  return 0;
 }
 
 int r_list_iter(r_list_iterator *iter, void **val) {
   if(!iter->ptr)
-    return (R_EOD);
+    return R_EOD;
 
   *val = iter->ptr->data;
   iter->ptr = iter->ptr->next;
 
-  return (0);
+  return 0;
 }

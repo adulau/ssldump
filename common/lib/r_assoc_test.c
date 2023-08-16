@@ -124,5 +124,5 @@ int fetch_test(r_assoc *assoc) {
       exit(1);
     }
   }
-  return (0);
+  return 0;
 }
