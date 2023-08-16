@@ -394,6 +394,7 @@ int ssl_process_handshake_finished(ssl_obj *ssl, ssl_decoder *dec, Data *data) {
       dec->s_to_c_n = 0;
     }
   }
+  return 0;
 }
 
 int ssl_process_change_cipher_spec(ssl_obj *ssl,

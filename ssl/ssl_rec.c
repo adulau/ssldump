@@ -180,6 +180,7 @@ int tls13_update_rec_key(ssl_rec_decoder *d, UCHAR *newkey, UCHAR *newiv) {
   d->write_key->data = newkey;
   d->implicit_iv->data = newiv;
   d->seq = 0;
+  return 0;
 }
 
 int tls13_decode_rec_data(ssl_obj *ssl,

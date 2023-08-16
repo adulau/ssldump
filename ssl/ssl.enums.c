@@ -565,6 +565,7 @@ static int decode_HandshakeType_SessionTicket(ssl_obj *ssl,
       }
     }
   }
+  return 0;
 }
 
 static int decode_HandshakeType_EncryptedExtensions(ssl_obj *ssl,
@@ -592,6 +593,7 @@ static int decode_HandshakeType_EncryptedExtensions(ssl_obj *ssl,
       LF;
     }
   }
+  return 0;
 }
 
 static int decode_HandshakeType_ServerKeyExchange(ssl_obj *ssl,
@@ -1595,6 +1597,7 @@ static int decode_extension_supported_versions(ssl_obj *ssl,
   }
   if(dir == DIR_R2I)
     ssl->version = version;  // Server sets the tls version
+  return 0;
 }
 
 decoder tls13_certificate_types[] = {{0, "x509", 0},
@@ -1623,6 +1626,7 @@ static int decode_extension_client_certificate_type(ssl_obj *ssl,
   if(dir == DIR_R2I)
     ssl->extensions->client_certificate_type =
         certificate_type;  // Server sets the client_certificate_type
+  return 0;
 }
 
 static int decode_extension_server_certificate_type(ssl_obj *ssl,
@@ -1647,6 +1651,7 @@ static int decode_extension_server_certificate_type(ssl_obj *ssl,
   if(dir == DIR_R2I)
     ssl->extensions->server_certificate_type =
         certificate_type;  // Server sets the server_certificate_type
+  return 0;
 }
 
 decoder extension_decoder[] = {
