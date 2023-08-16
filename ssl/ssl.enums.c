@@ -125,7 +125,7 @@ static int decode_ContentType_application_data(ssl_obj *ssl,
 
   if(NET_print_flags & NET_PRINT_JSON) {
     json_object_object_add(jobj, "msg_data",
-                           json_object_new_string_len(d.data, d.len));
+                           json_object_new_string_len((char *) d.data, d.len));
   } else
     P_(P_AD) { print_data(ssl, &d); }
   else {

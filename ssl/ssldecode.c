@@ -1081,7 +1081,7 @@ static int hkdf_expand_label(ssl_obj *ssl,
                              Data *context,
                              uint16_t length,
                              UCHAR **out) {
-  int r;
+  int r = -1;
   size_t outlen = length;
   EVP_PKEY_CTX *pctx;
 
@@ -1299,7 +1299,8 @@ static int read_hex_string(char *str, UCHAR *buf, int n) {
   return 0;
 }
 static int ssl_read_key_log_file(ssl_obj *ssl, ssl_decoder *d) {
-  int r, _status, n, i;
+  int r = -1;
+  int _status, n, i;
   size_t l = 0;
   char *line, *d_client_random, *label, *client_random, *secret;
   if(ssl->version == TLSV13_VERSION &&
