@@ -191,8 +191,8 @@ int tls13_decode_rec_data(ssl_obj *ssl,
                           int inl,
                           UCHAR *out,
                           int *outl) {
-  int pad, i;
-  int r, encpadl, x, _status = 0;
+  int i;
+  int x, _status = 0;
   UCHAR aad[5], aead_nonce[12], *tag;
   int taglen = d->cs->enc == ENC_AES128_CCM_8 ? 8 : 16;
   CRDUMP("CipherText", in, inl);

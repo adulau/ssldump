@@ -216,7 +216,6 @@ int ssl_decode_ctx_destroy(ssl_decode_ctx **dp) {
     fclose(d->ssl_key_log_file);
   }
 
-  r_assoc *x = d->session_cache;
   r_assoc_destroy(&d->session_cache);
 
   SSL_CTX_free(d->ssl_ctx);
@@ -1174,7 +1173,6 @@ int ssl_tls13_update_keying_material(ssl_obj *ssl,
 
 int ssl_tls13_generate_keying_material(ssl_obj *ssl, ssl_decoder *d) {
   int r, _status;
-  Data out;
   UCHAR *s_wk_h, *s_iv_h, *c_wk_h, *c_iv_h, *s_wk, *s_iv, *c_wk, *c_iv;
   if(!(d->ctx->ssl_key_log_file && ssl_read_key_log_file(ssl, d) == 0 &&
        d->SHTS && d->CHTS && d->STS && d->CTS)) {
@@ -1302,7 +1300,6 @@ static int read_hex_string(char *str, UCHAR *buf, int n) {
 }
 static int ssl_read_key_log_file(ssl_obj *ssl, ssl_decoder *d) {
   int r, _status, n, i;
-  unsigned int t;
   size_t l = 0;
   char *line, *d_client_random, *label, *client_random, *secret;
   if(ssl->version == TLSV13_VERSION &&

@@ -65,7 +65,7 @@ static int create_pcap_logger(proto_obj **objp,
                               struct sockaddr_storage *r_addr,
                               u_short r_port,
                               struct timeval *base_time) {
-  int r, _status;
+  int _status;
   logpkt_ctx_t *pcap_obj = 0;
   struct sockaddr_in src_addr, dst_addr;
 
