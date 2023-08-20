@@ -47,15 +47,13 @@
 #include "network.h"
 #include "tcpconn.h"
 
-typedef struct conn_struct_ {
-  tcp_conn conn;
-  struct conn_struct_ *next;
-  struct conn_struct_ *prev;
-} conn_struct;
-
 int conn_number = 1;
 
-static conn_struct *first_conn = 0;
+conn_struct *first_conn = 0;
+char *state_map[] = {
+    "UNKNOWN",         "TCP_STATE_SYN1",        "TCP_STATE_SYN2",
+    "TCP_STATE_ACK",   "TCP_STATE_ESTABLISHED", "TCP_STATE_FIN1",
+    "TCP_STATE_CLOSED"};
 
 extern struct timeval last_packet_seen_time;
 extern int conn_ttl;
@@ -177,6 +175,30 @@ int clean_old_conn(void) {
     }
   }
   return i;
+}
+
+void list_all_conn(void) {
+  conn_struct *conn;
+  tcp_conn *tcpconn;
+  struct timeval dt;
+  long freshness;
+
+  fprintf(stderr,
+          "<connection #> <initiator:port> -> <responder:port> <state> "
+          "<freshness (in s)>\n");
+  conn = first_conn;
+  while(conn) {
+    tcpconn = &conn->conn;
+    conn = conn->next;
+    freshness =
+        (timestamp_diff(&last_packet_seen_time, &tcpconn->last_seen_time, &dt))
+            ? 0
+            : dt.tv_sec;
+    fprintf(stderr, "Connection #%d %s:%d -> %s:%d %s %ld\n",
+            tcpconn->conn_number, tcpconn->i_name, tcpconn->i_port,
+            tcpconn->r_name, tcpconn->r_port, state_map[tcpconn->state],
+            freshness);
+  }
 }
 
 int destroy_all_conn(void) {

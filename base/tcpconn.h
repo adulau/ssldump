@@ -62,6 +62,8 @@ typedef struct stream_data_ {
   segment *oo_queue;
 } stream_data;
 
+extern char *state_map[];
+
 typedef struct tcp_conn_ {
   int conn_number;
   int state;
@@ -92,6 +94,12 @@ typedef struct tcp_conn_ {
   struct conn_struct_ *backptr;
 } tcp_conn;
 
+typedef struct conn_struct_ {
+  tcp_conn conn;
+  struct conn_struct_ *next;
+  struct conn_struct_ *prev;
+} conn_struct;
+
 int tcp_find_conn PROTO_LIST((tcp_conn * *connp,
                               int *directionp,
                               struct sockaddr_storage *src_addr,
@@ -110,6 +118,9 @@ int free_tcp_segment_queue PROTO_LIST((segment * seg));
 int copy_tcp_segment_queue PROTO_LIST((segment * *out, segment *in));
 
 int clean_old_conn(void);
+void list_all_conn(void);
 int destroy_all_conn(void);
+
+extern conn_struct *first_conn;
 
 #endif
