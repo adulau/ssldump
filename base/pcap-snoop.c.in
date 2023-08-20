@@ -75,6 +75,7 @@
 #include "record_analyze.h"
 #endif
 #include "pcap_logger.h"
+#include "tcpconn.h"
 
 #ifndef ETHERTYPE_8021Q
 #define ETHERTYPE_8021Q 0x8100
@@ -85,7 +86,8 @@ static int pcap_if_type = DLT_NULL;
 int err_exit PROTO_LIST((char *str, int num));
 int usage PROTO_LIST((void));
 int print_version PROTO_LIST((void));
-void sig_handler PROTO_LIST((int sig));
+void sig_handler_quit PROTO_LIST((int sig));
+void sig_handler_usr PROTO_LIST((int sig));
 void pcap_cb PROTO_LIST((u_char * ptr,
                          const struct pcap_pkthdr *hdr,
                          const u_char *data));
@@ -102,7 +104,7 @@ logger_mod *logger = NULL;
 
 int err_exit(char *str, int num) {
   fprintf(stderr, "ERROR: %s\n", str);
-  sig_handler(SIGQUIT);
+  sig_handler_quit(SIGQUIT);
   exit(num);
 }
 
@@ -136,7 +138,7 @@ n_handler *n;
 char *interface_name = 0;
 char *file = 0;
 char *filter = 0;
-void sig_handler(int sig) {
+void sig_handler_quit(int sig) {
   int freed_conn = 0;
   fflush(stdout);
   if(logger)
@@ -144,8 +146,8 @@ void sig_handler(int sig) {
 
   freed_conn = destroy_all_conn();
   if(freed_conn && !(NET_print_flags & NET_PRINT_JSON))
-    printf("Cleaned %d remaining connection(s) from connection pool\n",
-           freed_conn);
+    fprintf(stderr, "Cleaned %d remaining connection(s) from connection pool\n",
+            freed_conn);
 
   network_handler_destroy(mod, &n);
 
@@ -159,6 +161,33 @@ void sig_handler(int sig) {
     free(file);
 
   exit(sig);
+}
+
+void sig_handler_usr(int sig) {
+  int freed_conn = 0;
+
+  if(sig == SIGUSR1) {
+    if(!first_conn) {
+      fprintf(stderr,
+              "Received SIGUSR1, connection pool empty, nothing to list.\n");
+    } else {
+      fprintf(
+          stderr,
+          "Received SIGUSR1, listing currently tracked connection(s) ...\n");
+      list_all_conn();
+    }
+  } else if(sig == SIGUSR2) {
+    if(!first_conn) {
+      fprintf(stderr,
+              "Received SIGUSR2, connection pool empty, nothing to purge.\n");
+    } else {
+      fprintf(stderr, "Received SIGUSR2, purging connection pool ...\n");
+      freed_conn = destroy_all_conn();
+      if(freed_conn && !(NET_print_flags & NET_PRINT_JSON))
+        fprintf(stderr, "Purged %d connection(s) from connection pool\n",
+                freed_conn);
+    }
+  }
 }
 
 void pcap_cb(u_char *ptr, const struct pcap_pkthdr *hdr, const u_char *data) {
@@ -186,9 +215,9 @@ void pcap_cb(u_char *ptr, const struct pcap_pkthdr *hdr, const u_char *data) {
     case DLT_EN10MB:
       if(len < sizeof(struct ether_header)) {
         if(!(NET_print_flags & NET_PRINT_JSON))
-          printf(
-              "Frame size too small to contain Ethernet header, skipping "
-              "...\n");
+          fprintf(stderr,
+                  "Frame size too small to contain Ethernet header, skipping "
+                  "...\n");
         return;
       }
 
@@ -291,8 +320,9 @@ void pcap_cb(u_char *ptr, const struct pcap_pkthdr *hdr, const u_char *data) {
     packet_cnt = 0;
     memcpy(&last_packet_seen_time, &hdr->ts, sizeof(struct timeval));
     if((cleaned_conn = clean_old_conn()) && !(NET_print_flags & NET_PRINT_JSON))
-      printf("%d inactive connection(s) cleaned from connection pool\n",
-             cleaned_conn);
+      fprintf(stderr,
+              "%d inactive connection(s) cleaned from connection pool\n",
+              cleaned_conn);
   } else {
     packet_cnt++;
   }
@@ -330,7 +360,9 @@ int main(int argc, char **argv) {
 
   char errbuf[PCAP_ERRBUF_SIZE];
 
-  signal(SIGINT, sig_handler);
+  signal(SIGINT, sig_handler_quit);
+  signal(SIGUSR1, sig_handler_usr);
+  signal(SIGUSR2, sig_handler_usr);
 
   while((c = getopt(argc, argv, "vr:F:f:S:jyTt:ai:k:l:w:p:znsAxXhHVNdqem:P")) !=
         EOF) {
@@ -442,6 +474,7 @@ int main(int argc, char **argv) {
         err_exit("Aborting", -1);
       }
     }
+    fprintf(stderr, "ssldump: listening on %s\n", interface_name);
     if(!(p = pcap_open_live(interface_name, 65535, !no_promiscuous, 1000,
                             errbuf))) {
       fprintf(stderr, "PCAP: %s\n", errbuf);
@@ -514,8 +547,8 @@ int main(int argc, char **argv) {
 
   freed_conn = destroy_all_conn();
   if(freed_conn && !(NET_print_flags & NET_PRINT_JSON))
-    printf("Cleaned %d remaining connection(s) from connection pool\n",
-           freed_conn);
+    fprintf(stderr, "Cleaned %d remaining connection(s) from connection pool\n",
+            freed_conn);
 
   network_handler_destroy(mod, &n);
   pcap_close(p);

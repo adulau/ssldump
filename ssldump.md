@@ -371,6 +371,16 @@ and
 **-p**
 flags.
 
+<a name="signals"></a>
+
+# Signals
+
+When it receives SIGUSR1, _ssldump_ prints the list of currently tracked
+connection on stderr.
+
+With SIGUSR2, _ssldump_ purges its internal connection tracking data
+structures.
+
 
 <a name="decryption"></a>
 
