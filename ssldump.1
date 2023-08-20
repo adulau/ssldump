@@ -534,6 +534,16 @@ and
 .B \-p
 flags.
 .LP
+.SH SIGNALS
+.LP
+When it receives SIGUSR1,
+.B ssldump
+prints the list of currently tracked connection on stderr.
+.LP
+With SIGUSR2,
+.B ssldump
+purges its internal connection tracking data structures.
+.LP
 .SH DECRYPTION
 .LP
 \fIssldump\fP can decrypt traffic between two hosts if the following two
