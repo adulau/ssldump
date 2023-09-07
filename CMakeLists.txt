@@ -90,6 +90,8 @@ add_definitions(-DLINUX)
 add_definitions(-DOPENSSL)
 add_definitions(-D_DEFAULT_SOURCE=1)
 
+set(CMAKE_C_FLAGS "-g")
+
 target_include_directories(ssldump
     PRIVATE 
         ${PROJECT_SOURCE_DIR}/common/include
