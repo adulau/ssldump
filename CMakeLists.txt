@@ -7,6 +7,22 @@ project(
     LANGUAGES C
 )
 
+######## User defined options
+option(DEBUG_BUILD "Build with debug facilities" OFF)
+option(DISABLE_OPTIMIZATION "Build without compiler optimizations" OFF)
+################
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
+if(DEBUG_BUILD)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb3 -DDEBUG")
+endif()
+
+if(DISABLE_OPTIMIZATION)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
+else()
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
+endif()
+
 include(CheckSymbolExists)
 include(GNUInstallDirs)
 
