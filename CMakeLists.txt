@@ -14,7 +14,8 @@ option(DISABLE_OPTIMIZATION "Build without compiler optimizations" OFF)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
 if(DEBUG_BUILD)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb3 -DDEBUG")
+    add_definitions(-DDEBUG)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb3")
 endif()
 
 if(DISABLE_OPTIMIZATION)
