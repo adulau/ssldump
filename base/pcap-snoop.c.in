@@ -205,8 +205,6 @@ void pcap_cb(u_char *ptr, const struct pcap_pkthdr *hdr, const u_char *data) {
 
   switch(pcap_if_type) {
     case DLT_RAW:
-      type = ETHERTYPE_IP;
-      break;
 #ifdef DLT_LOOP
     case DLT_LOOP:
 #endif
