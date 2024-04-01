@@ -2,6 +2,7 @@
 
 [![Build CI](https://github.com/adulau/ssldump/actions/workflows/build.yml/badge.svg)](https://github.com/adulau/ssldump/actions/workflows/build.yml)
 [![CodeQL analysis](https://github.com/adulau/ssldump/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/adulau/ssldump/actions/workflows/codeql-analysis.yml)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/{owner}/{repo}/badge)](https://securityscorecards.dev/viewer/?uri=github.com/{owner}/{repo})
 
 # Release and tagging
 
