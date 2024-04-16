@@ -54,7 +54,11 @@ static int init_pcap_logger(void *data) {
 }
 
 static int deinit_pcap_logger(void) {
-  fdatasync(pcap_fd);
+#if defined(_POSIX_SYNCHRONIZED_IO) && (_POSIX_SYNCHRONIZED_IO > 0)
+    fdatasync(pcap_fd);
+#else
+    fsync(pcap_fd);
+#endif
   close(pcap_fd);
   return 0;
 }
