@@ -108,7 +108,7 @@ struct ssl_decoder_ {
 
 #ifdef OPENSSL
 static int tls_P_hash PROTO_LIST(
-    (ssl_obj * ssl, Data *secret, Data *seed, const EVP_MD *md, Data *out));
+    (ssl_obj * ssl, Data *secret, Data *seed, char *md_name, Data *out));
 static int tls12_prf PROTO_LIST((ssl_obj * ssl,
                                  Data *secret,
                                  char *usage,
@@ -612,9 +612,9 @@ int ssl_process_client_key_exchange(ssl_obj *ssl,
                                     int len) {
 #ifdef OPENSSL
   int r, _status;
-  int i;
+  size_t i;
   EVP_PKEY *pk;
-  const BIGNUM *n;
+  BIGNUM *n;
 
   /* Remove the master secret if it was there
      to force keying material regeneration in
@@ -635,12 +635,15 @@ int ssl_process_client_key_exchange(ssl_obj *ssl,
     if(EVP_PKEY_id(pk) != EVP_PKEY_RSA)
       return -1;
 
-    RSA_get0_key(EVP_PKEY_get0_RSA(pk), &n, NULL, NULL);
+    EVP_PKEY_get_bn_param(pk, "priv", &n);
     if((r = r_data_alloc(&d->PMS, BN_num_bytes(n))))
       ABORT(r);
 
-    i = RSA_private_decrypt(len, msg, d->PMS->data, EVP_PKEY_get0_RSA(pk),
-                            RSA_PKCS1_PADDING);
+    EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new(pk, NULL);
+    EVP_PKEY_decrypt_init(ctx);
+    EVP_PKEY_decrypt(ctx, d->PMS->data, &i, msg, len);
+    EVP_PKEY_CTX_free(ctx);
+    EVP_PKEY_free(pk);
 
     if(i != 48)
       ABORT(SSL_BAD_PMS);
@@ -678,15 +681,22 @@ abort:
 static int tls_P_hash(ssl_obj *ssl,
                       Data *secret,
                       Data *seed,
-                      const EVP_MD *md,
+                      char *md_name,
                       Data *out) {
   UCHAR *ptr = out->data;
   int left = out->len;
   int tocpy;
   UCHAR *A;
   UCHAR _A[128], tmp[128];
-  unsigned int A_l, tmp_l;
-  HMAC_CTX *hm = HMAC_CTX_new();
+  size_t A_l, tmp_l;
+
+  OSSL_PARAM params[2];
+  EVP_MAC *hmac = EVP_MAC_fetch(NULL, "HMAC", NULL);
+  EVP_MAC_CTX *mac_ctx = EVP_MAC_CTX_new(hmac);
+  EVP_MAC_free(hmac);
+
+  params[0] = OSSL_PARAM_construct_utf8_string("digest", md_name, 0);
+  params[1] = OSSL_PARAM_construct_end();
 
   CRDUMPD("P_hash secret", secret);
   CRDUMPD("P_hash seed", seed);
@@ -695,15 +705,15 @@ static int tls_P_hash(ssl_obj *ssl,
   A_l = seed->len;
 
   while(left) {
-    HMAC_Init_ex(hm, secret->data, secret->len, md, NULL);
-    HMAC_Update(hm, A, A_l);
-    HMAC_Final(hm, _A, &A_l);
+    EVP_MAC_init(mac_ctx, secret->data, secret->len, params);
+    EVP_MAC_update(mac_ctx, A, A_l);
+    EVP_MAC_final(mac_ctx, (unsigned char *) &_A, &A_l, sizeof(_A));
     A = _A;
 
-    HMAC_Init_ex(hm, secret->data, secret->len, md, NULL);
-    HMAC_Update(hm, A, A_l);
-    HMAC_Update(hm, seed->data, seed->len);
-    HMAC_Final(hm, tmp, &tmp_l);
+    EVP_MAC_init(mac_ctx, secret->data, secret->len, params);
+    EVP_MAC_update(mac_ctx, A, A_l);
+    EVP_MAC_update(mac_ctx, seed->data, seed->len);
+    EVP_MAC_final(mac_ctx, (unsigned char *) &tmp, &tmp_l, sizeof(tmp));
 
     tocpy = MIN(left, tmp_l);
     memcpy(ptr, tmp, tocpy);
@@ -711,7 +721,7 @@ static int tls_P_hash(ssl_obj *ssl,
     left -= tocpy;
   }
 
-  HMAC_CTX_free(hm);
+  EVP_MAC_CTX_free(mac_ctx);
   CRDUMPD("P_hash out", out);
 
   return 0;
@@ -754,9 +764,9 @@ static int tls_prf(ssl_obj *ssl,
   memcpy(S1->data, secret->data, S_l);
   memcpy(S2->data, secret->data + (secret->len - S_l), S_l);
 
-  if((r = tls_P_hash(ssl, S1, seed, EVP_get_digestbyname("MD5"), md5_out)))
+  if((r = tls_P_hash(ssl, S1, seed, "MD5", md5_out)))
     ABORT(r);
-  if((r = tls_P_hash(ssl, S2, seed, EVP_get_digestbyname("SHA1"), sha_out)))
+  if((r = tls_P_hash(ssl, S2, seed, "SHA1", sha_out)))
     ABORT(r);
 
   for(i = 0; i < out->len; i++)
@@ -808,7 +818,7 @@ static int tls12_prf(ssl_obj *ssl,
          digests[dgi]));
     ERETURN(SSL_BAD_MAC);
   }
-  if((r = tls_P_hash(ssl, secret, seed, md, sha_out)))
+  if((r = tls_P_hash(ssl, secret, seed, digests[dgi], sha_out)))
     ABORT(r);
 
   for(i = 0; i < out->len; i++)
@@ -826,15 +836,18 @@ static int ssl3_generate_export_iv(ssl_obj *ssl,
                                    Data *r1,
                                    Data *r2,
                                    Data *out) {
-  MD5_CTX md5;
   UCHAR tmp[16];
+  unsigned int tmp_len;
 
-  MD5_Init(&md5);
-  MD5_Update(&md5, r1->data, r1->len);
-  MD5_Update(&md5, r2->data, r2->len);
-  MD5_Final(tmp, &md5);
+  EVP_MD_CTX *mdctx;
+  mdctx = EVP_MD_CTX_new();
+  EVP_DigestInit(mdctx, EVP_get_digestbyname("MD5"));
+  EVP_DigestUpdate(mdctx, r1->data, r1->len);
+  EVP_DigestUpdate(mdctx, r2->data, r2->len);
+  EVP_DigestFinal_ex(mdctx, tmp, &tmp_len);
+  EVP_MD_CTX_free(mdctx);
 
-  memcpy(out->data, tmp, out->len);
+  memcpy(out->data, tmp, tmp_len);
 
   return 0;
 }
@@ -845,12 +858,13 @@ static int ssl3_prf(ssl_obj *ssl,
                     Data *r1,
                     Data *r2,
                     Data *out) {
-  MD5_CTX md5;
-  SHA_CTX sha;
+  EVP_MD_CTX *md5_ctx;
+  EVP_MD_CTX *sha1_ctx;
   Data *rnd1, *rnd2;
   int off;
   int i = 0, j;
   UCHAR buf[20];
+  unsigned int buf_len;
 
   rnd1 = r1;
   rnd2 = r2;
@@ -859,12 +873,14 @@ static int ssl3_prf(ssl_obj *ssl,
   CRDUMPD("RND1", rnd1);
   CRDUMPD("RND2", rnd2);
 
-  MD5_Init(&md5);
-  memset(&sha, 0, sizeof(sha));
-  SHA1_Init(&sha);
+  md5_ctx = EVP_MD_CTX_new();
+  EVP_DigestInit(md5_ctx, EVP_get_digestbyname("MD5"));
+  sha1_ctx = EVP_MD_CTX_new();
+  EVP_DigestInit(sha1_ctx, EVP_get_digestbyname("SHA1"));
 
   for(off = 0; off < out->len; off += 16) {
     char outbuf[16];
+    unsigned int outbuf_len;
     int tocpy;
     i++;
 
@@ -873,38 +889,43 @@ static int ssl3_prf(ssl_obj *ssl,
       buf[j] = 64 + i;
     }
 
-    SHA1_Update(&sha, buf, i);
+    EVP_DigestUpdate(sha1_ctx, buf, i);
     CRDUMP("BUF", buf, i);
     if(secret)
-      SHA1_Update(&sha, secret->data, secret->len);
+      EVP_DigestUpdate(sha1_ctx, secret->data, secret->len);
     CRDUMPD("secret", secret);
 
     if(!strcmp(usage, "client write key") ||
        !strcmp(usage, "server write key")) {
-      SHA1_Update(&sha, rnd2->data, rnd2->len);
+      EVP_DigestUpdate(sha1_ctx, rnd2->data, rnd2->len);
       CRDUMPD("rnd2", rnd2);
-      SHA1_Update(&sha, rnd1->data, rnd1->len);
+      EVP_DigestUpdate(sha1_ctx, rnd1->data, rnd1->len);
       CRDUMPD("rnd1", rnd1);
     } else {
-      SHA1_Update(&sha, rnd1->data, rnd1->len);
+      EVP_DigestUpdate(sha1_ctx, rnd1->data, rnd1->len);
       CRDUMPD("rnd1", rnd1);
-      SHA1_Update(&sha, rnd2->data, rnd2->len);
+      EVP_DigestUpdate(sha1_ctx, rnd2->data, rnd2->len);
       CRDUMPD("rnd2", rnd2);
     }
 
-    SHA1_Final(buf, &sha);
+    EVP_DigestFinal_ex(sha1_ctx, buf, &buf_len);
+
+    EVP_MD_CTX_free(sha1_ctx);
     CRDUMP("SHA out", buf, 20);
 
-    SHA1_Init(&sha);
+    sha1_ctx = EVP_MD_CTX_new();
+    EVP_DigestInit(sha1_ctx, EVP_get_digestbyname("SHA1"));
 
-    MD5_Update(&md5, secret->data, secret->len);
-    MD5_Update(&md5, buf, 20);
-    MD5_Final((unsigned char *)outbuf, &md5);
+    EVP_DigestUpdate(md5_ctx, secret->data, secret->len);
+    EVP_DigestUpdate(md5_ctx, buf, 20);
+    EVP_DigestFinal_ex(md5_ctx, outbuf, &outbuf_len);
+    EVP_MD_CTX_free(md5_ctx);
     tocpy = MIN(out->len - off, 16);
     memcpy(out->data + off, outbuf, tocpy);
     CRDUMP("MD5 out", (UCHAR *)outbuf, 16);
 
-    MD5_Init(&md5);
+    md5_ctx = EVP_MD_CTX_new();
+    EVP_DigestInit(md5_ctx, EVP_get_digestbyname("MD5"));
   }
 
   return 0;
@@ -914,6 +935,7 @@ static int ssl_generate_keying_material(ssl_obj *ssl, ssl_decoder *d) {
   Data *key_block = 0, temp;
   UCHAR _iv_c[8], _iv_s[8];
   UCHAR _key_c[16], _key_s[16];
+  unsigned int _key_c_len, _key_s_len;
   int needed;
   int r, _status;
   UCHAR *ptr, *c_wk, *s_wk, *c_mk = NULL, *s_mk = NULL, *c_iv = NULL,
@@ -1017,20 +1039,24 @@ static int ssl_generate_keying_material(ssl_obj *ssl, ssl_decoder *d) {
     }
 
     if(ssl->version == SSLV3_VERSION) {
-      MD5_CTX md5;
 
-      MD5_Init(&md5);
-      MD5_Update(&md5, c_wk, ssl->cs->eff_bits / 8);
-      MD5_Update(&md5, d->client_random->data, d->client_random->len);
-      MD5_Update(&md5, d->server_random->data, d->server_random->len);
-      MD5_Final(_key_c, &md5);
+      EVP_MD_CTX *mdctx;
+      mdctx = EVP_MD_CTX_new();
+      EVP_DigestInit(mdctx, EVP_get_digestbyname("MD5"));
+      EVP_DigestUpdate(mdctx, c_wk, ssl->cs->eff_bits / 8);
+      EVP_DigestUpdate(mdctx, d->client_random->data, d->client_random->len);
+      EVP_DigestUpdate(mdctx, d->server_random->data, d->server_random->len);
+      EVP_DigestFinal_ex(mdctx, _key_c, &_key_c_len);
+      EVP_MD_CTX_free(mdctx);
       c_wk = _key_c;
 
-      MD5_Init(&md5);
-      MD5_Update(&md5, s_wk, ssl->cs->eff_bits / 8);
-      MD5_Update(&md5, d->server_random->data, d->server_random->len);
-      MD5_Update(&md5, d->client_random->data, d->client_random->len);
-      MD5_Final(_key_s, &md5);
+      mdctx = EVP_MD_CTX_new();
+      EVP_DigestInit(mdctx, EVP_get_digestbyname("MD5"));
+      EVP_DigestUpdate(mdctx, s_wk, ssl->cs->eff_bits / 8);
+      EVP_DigestUpdate(mdctx, d->server_random->data, d->server_random->len);
+      EVP_DigestUpdate(mdctx, d->client_random->data, d->client_random->len);
+      EVP_DigestFinal_ex(mdctx, _key_s, &_key_s_len);
+      EVP_MD_CTX_free(mdctx);
       s_wk = _key_s;
     } else {
       ATTACH_DATA(key_c, _key_c);
