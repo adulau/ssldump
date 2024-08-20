@@ -496,9 +496,6 @@ static int logpkt_write_packet(logpkt_ctx_t *ctx,
                              CSA(&ctx->dst_addr), CSA(&ctx->src_addr), flags,
                              ctx->dst_seq, ctx->src_seq, payload, payloadlen);
     }
-    
-  fprintf(stderr,
-       "DEBUG --- timestamp in logpkt_write_packet: %d.%d\n", ctx->timestamp_sec, ctx->timestamp_usec);
 
     rv = logpkt_pcap_write(buf, sz, fd, ctx->timestamp_sec, ctx->timestamp_usec);
     if(rv == -1) {
