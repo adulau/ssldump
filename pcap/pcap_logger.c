@@ -72,6 +72,10 @@ static int create_pcap_logger(proto_obj **objp,
   int _status;
   logpkt_ctx_t *pcap_obj = 0;
   struct sockaddr_in src_addr, dst_addr;
+  uint32_t timestamp_sec, timestamp_usec;
+
+  timestamp_sec = base_time->tv_sec;
+  timestamp_usec = base_time->tv_usec;
 
   if(!(pcap_obj = (logpkt_ctx_t *)calloc(1, sizeof(logpkt_ctx_t))))
     ABORT(R_NO_MEMORY);
@@ -89,7 +93,9 @@ static int create_pcap_logger(proto_obj **objp,
   logpkt_ctx_init(pcap_obj, NULL, 0, content_pcap_src_ether,
                   content_pcap_dst_ether, (const struct sockaddr *)&src_addr,
                   sizeof(src_addr), (const struct sockaddr *)&dst_addr,
-                  sizeof(dst_addr));
+                  sizeof(dst_addr),
+                  &timestamp_sec,
+                  &timestamp_usec);
   *objp = (proto_obj *)pcap_obj;
   _status = 0;
 abort:

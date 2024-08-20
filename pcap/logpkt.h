@@ -51,6 +51,8 @@ typedef struct {
   uint32_t src_seq;
   uint32_t dst_seq;
   size_t mss;
+  uint32_t timestamp_sec;
+  uint32_t timestamp_usec;
 } logpkt_ctx_t;
 
 #define LOGPKT_REQUEST 0
@@ -65,7 +67,9 @@ void logpkt_ctx_init(logpkt_ctx_t *,
                      const struct sockaddr *,
                      socklen_t,
                      const struct sockaddr *,
-                     socklen_t);
+                     socklen_t,
+                     const uint32_t *,
+                     const uint32_t *);
 int logpkt_write_payload(logpkt_ctx_t *,
                          int,
                          int,
