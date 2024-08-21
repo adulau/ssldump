@@ -555,6 +555,7 @@ int ssl_restore_session(ssl_obj *ssl, ssl_decoder *d) {
     case TLSV1_VERSION:
     case TLSV11_VERSION:
     case TLSV12_VERSION:
+    case TLSV13_VERSION:
       if((r = ssl_generate_keying_material(ssl, d)))
         ABORT(r);
       break;
@@ -655,6 +656,7 @@ int ssl_process_client_key_exchange(ssl_obj *ssl,
     case TLSV1_VERSION:
     case TLSV11_VERSION:
     case TLSV12_VERSION:
+    case TLSV13_VERSION:
       if((r = ssl_generate_keying_material(ssl, d)))
         ABORT(r);
       break;

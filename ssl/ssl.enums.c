@@ -244,7 +244,7 @@ static int decode_HandshakeType_ClientHello(ssl_obj *ssl,
   SSL_DECODE_UINT16(ssl, "extensions len", 0, data, &exlen);
   if(exlen) {
     explain(ssl, "extensions\n");
-    while(data->len) {
+    while(data->len > 0) {
       SSL_DECODE_UINT16(ssl, "extension type", 0, data, &ex);
       if(!ja3_ex_str)
         ja3_ex_str = calloc(7, 1);
@@ -1714,6 +1714,7 @@ decoder extension_decoder[] = {
     {55, "external_id_hash", decode_extension},
     {56, "external_session_id", decode_extension},
     {13172, "next_protocol_negotiation", decode_extension},
+    {0xfe0d, "encrypted_client_hello", decode_extension},
     {0xff01, "renegotiation_info", decode_extension},
     {-1}};
 
