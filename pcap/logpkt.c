@@ -254,12 +254,16 @@ void logpkt_ctx_init(logpkt_ctx_t *ctx,
                      const struct sockaddr *src_addr,
                      socklen_t src_addr_len,
                      const struct sockaddr *dst_addr,
-                     socklen_t dst_addr_len) {
+                     socklen_t dst_addr_len,
+                     const uint32_t *timestamp_sec,
+                     const uint32_t *timestamp_usec) {
   ctx->libnet = libnet;
   memcpy(ctx->src_ether, src_ether, ETHER_ADDR_LEN);
   memcpy(ctx->dst_ether, dst_ether, ETHER_ADDR_LEN);
   memcpy(&ctx->src_addr, src_addr, src_addr_len);
   memcpy(&ctx->dst_addr, dst_addr, dst_addr_len);
+  memcpy(&ctx->timestamp_sec, timestamp_sec, sizeof(timestamp_sec));
+  memcpy(&ctx->timestamp_usec, timestamp_usec, sizeof(timestamp_usec));
   ctx->src_seq = 0;
   ctx->dst_seq = 0;
   if(mtu) {
@@ -275,13 +279,17 @@ void logpkt_ctx_init(logpkt_ctx_t *ctx,
  * Write the layer 2 frame contained in *pkt* to file descriptor *fd* already
  * open for writing.  First writes a PCAP record header, then the actual frame.
  */
-static int logpkt_pcap_write(const uint8_t *pkt, size_t pktsz, int fd) {
+static int logpkt_pcap_write(const uint8_t *pkt, size_t pktsz, int fd, uint32_t timestamp_sec, uint32_t timestamp_usec) {
   pcap_rec_hdr_t rec_hdr;
   struct timeval tv;
-
-  gettimeofday(&tv, NULL);
-  rec_hdr.ts_sec = tv.tv_sec;
-  rec_hdr.ts_usec = tv.tv_usec;
+  if (timestamp_sec != 0 || timestamp_usec != 0) {
+    rec_hdr.ts_sec = timestamp_sec;
+    rec_hdr.ts_usec = timestamp_usec;
+  } else {
+    gettimeofday(&tv, NULL);
+    rec_hdr.ts_sec = tv.tv_sec;
+    rec_hdr.ts_usec = tv.tv_usec;
+  }
   rec_hdr.orig_len = rec_hdr.incl_len = pktsz;
 
   if(write(fd, &rec_hdr, sizeof(rec_hdr)) != sizeof(rec_hdr)) {
@@ -488,7 +496,8 @@ static int logpkt_write_packet(logpkt_ctx_t *ctx,
                              CSA(&ctx->dst_addr), CSA(&ctx->src_addr), flags,
                              ctx->dst_seq, ctx->src_seq, payload, payloadlen);
     }
-    rv = logpkt_pcap_write(buf, sz, fd);
+
+    rv = logpkt_pcap_write(buf, sz, fd, ctx->timestamp_sec, ctx->timestamp_usec);
     if(rv == -1) {
       printf("Error writing packet to PCAP file\n");
       return -1;
