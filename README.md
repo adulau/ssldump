@@ -48,6 +48,7 @@ other too (but this is just a collateral damage).
 - Alpine Linux [ssldump](https://pkgs.alpinelinux.org/packages?name=ssldump&branch=edge&repo=&arch=&maintainer=)
 - Arch Linux [ssldump](https://aur.archlinux.org/packages/ssldump)
 - CentOS, RHEL, Rocky (via [EPEL](https://docs.fedoraproject.org/en-US/epel/)) [ssldump](https://packages.fedoraproject.org/pkgs/ssldump/ssldump/)
+- Debian [ssldump](https://tracker.debian.org/pkg/ssldump)
 - Fedora [ssldump](https://packages.fedoraproject.org/pkgs/ssldump/ssldump/)
 - Kali Linux [ssldump](https://www.kali.org/tools/ssldump/)
 - Ubuntu Linux [ssldump](http://changelogs.ubuntu.com/changelogs/pool/universe/s/ssldump/)
