@@ -296,9 +296,11 @@ int ssl_expand_record(ssl_obj *ssl,
         }
       }
     }
-    if(ct == 23) {
-      if(logger) {
-        logger->vtbl->data(ssl->logger_obj, d.data, d.len, direction);
+    else {
+      if(ct == 23) {
+        if(logger) {
+          logger->vtbl->data(ssl->logger_obj, d.data, d.len, direction);
+        }
       }
     }
     if((r = ssl_decode_switch(ssl, ContentType_decoder, ct, direction, q,
