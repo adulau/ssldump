@@ -288,13 +288,19 @@ int ssl_expand_record(ssl_obj *ssl,
     // try to save unencrypted data to logger
     // we must save record with type "application_data" (this is unencrypted
     // data)
-    if(ct == 23) {
-      if(logger) {
-        logger->vtbl->data(ssl->logger_obj, d.data, d.len, direction);
+    if(ssl->version == TLSV13_VERSION) {
+      ct = d.data[--d.len];  // In TLS 1.3 ct is stored in the end for encrypted records
+      if(ct == 23) {
+        if(logger) {
+          logger->vtbl->data(ssl->logger_obj, d.data, d.len, direction);
+        }
       }
-      if(ssl->version == TLSV13_VERSION) {
-        ct = d.data[--d.len];  // In TLS 1.3 ct is stored in the end for
-                               // encrypted records
+    }
+    else {
+      if(ct == 23) {
+        if(logger) {
+          logger->vtbl->data(ssl->logger_obj, d.data, d.len, direction);
+        }
       }
     }
     if((r = ssl_decode_switch(ssl, ContentType_decoder, ct, direction, q,

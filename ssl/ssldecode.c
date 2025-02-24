@@ -1301,71 +1301,90 @@ static int read_hex_string(char *str, UCHAR *buf, int n) {
   return 0;
 }
 static int ssl_read_key_log_file(ssl_obj *ssl, ssl_decoder *d) {
-  int r = -1;
-  int _status, n, i;
-  size_t l = 0;
-  char *line, *d_client_random, *label, *client_random, *secret;
-  if(ssl->version == TLSV13_VERSION &&
-     !ssl->cs)  // ssl->cs is not set when called from
-                // ssl_process_client_session_id
-    ABORT(r);
-  if(!(d_client_random = malloc((d->client_random->len * 2) + 1)))
-    ABORT(r);
-  for(i = 0; i < d->client_random->len; i++)
-    if(snprintf(d_client_random + (i * 2), 3, "%02x",
-                d->client_random->data[i]) != 2)
-      ABORT(r);
-  while((n = getline(&line, &l, d->ctx->ssl_key_log_file)) != -1) {
-    if(line[n - 1] == '\n')
-      line[n - 1] = '\0';
-    if(!(label = strtok(line, " ")))
-      continue;
-    if(!(client_random = strtok(NULL, " ")) || strlen(client_random) != 64 ||
-       STRNICMP(client_random, d_client_random, 64))
-      continue;
-    secret = strtok(NULL, " ");
-    if(!(secret) ||
-       strlen(secret) !=
-           (ssl->version == TLSV13_VERSION ? ssl->cs->dig_len * 2 : 96))
-      continue;
-    if(!strncmp(label, "CLIENT_RANDOM", 13)) {
-      if((r = r_data_alloc(&d->MS, 48)))
-        ABORT(r);
-      if(read_hex_string(secret, d->MS->data, 48))
-        ABORT(r);
+    int r = -1;
+    int _status = -1, n, i;
+    size_t l = 0;
+    char *line = NULL, *d_client_random = NULL, *label = NULL, *client_random = NULL, *secret = NULL;
+
+    if (!ssl || !d || !d->client_random || !d->client_random->data || !d->ctx || !d->ctx->ssl_key_log_file) {
+        return -1;
     }
-    if(ssl->version != TLSV13_VERSION)
-      continue;
-    if(!strncmp(label, "SERVER_HANDSHAKE_TRAFFIC_SECRET", 31)) {
-      if((r = r_data_alloc(&d->SHTS, ssl->cs->dig_len)))
-        ABORT(r);
-      if(read_hex_string(secret, d->SHTS->data, ssl->cs->dig_len))
-        ABORT(r);
-    } else if(!strncmp(label, "CLIENT_HANDSHAKE_TRAFFIC_SECRET", 31)) {
-      if((r = r_data_alloc(&d->CHTS, ssl->cs->dig_len)))
-        ABORT(r);
-      if(read_hex_string(secret, d->CHTS->data, ssl->cs->dig_len))
-        ABORT(r);
-    } else if(!strncmp(label, "SERVER_TRAFFIC_SECRET_0", 23)) {
-      if((r = r_data_alloc(&d->STS, ssl->cs->dig_len)))
-        ABORT(r);
-      if(read_hex_string(secret, d->STS->data, ssl->cs->dig_len))
-        ABORT(r);
-    } else if(!strncmp(label, "CLIENT_TRAFFIC_SECRET_0", 23)) {
-      if((r = r_data_alloc(&d->CTS, ssl->cs->dig_len)))
-        ABORT(r);
-      if(read_hex_string(secret, d->CTS->data, ssl->cs->dig_len))
-        ABORT(r);
+
+    if (ssl->version == TLSV13_VERSION && !ssl->cs) {
+        return -1;
     }
-    /*
+
+    d_client_random = malloc((d->client_random->len * 2) + 1);
+    if (!d_client_random) {
+        return -1;
+    }
+
+    for (i = 0; i < d->client_random->len; i++) {
+        if (snprintf(d_client_random + (i * 2), 3, "%02x", d->client_random->data[i]) != 2) {
+            ABORT(r);
+        }
+    }
+
+    while ((n = getline(&line, &l, d->ctx->ssl_key_log_file)) != -1) {
+        if (line[n - 1] == '\n') {
+            line[n - 1] = '\0';
+        }
+
+        label = strtok(line, " ");
+        client_random = strtok(NULL, " ");
+        secret = strtok(NULL, " ");
+
+        if (!label || !client_random || strlen(client_random) != 64 || 
+            !secret || (ssl->version == TLSV13_VERSION ? strlen(secret) != ssl->cs->dig_len * 2 : strlen(secret) != 96) ||
+            strncmp(client_random, d_client_random, 64) != 0) {
+            continue;
+        }
+
+        if (!strncmp(label, "CLIENT_RANDOM", 13)) {
+            if ((r = r_data_alloc(&d->MS, 48)) || read_hex_string(secret, d->MS->data, 48)) {
+                ABORT(r);
+            }
+        } else if (ssl->version == TLSV13_VERSION) {
+            if (!strncmp(label, "SERVER_HANDSHAKE_TRAFFIC_SECRET", 31)) {
+                if ((r = r_data_alloc(&d->SHTS, ssl->cs->dig_len)) || 
+                    read_hex_string(secret, d->SHTS->data, ssl->cs->dig_len)) {
+                    ABORT(r);
+                }
+            } else if (!strncmp(label, "CLIENT_HANDSHAKE_TRAFFIC_SECRET", 31)) {
+                if ((r = r_data_alloc(&d->CHTS, ssl->cs->dig_len)) || 
+                    read_hex_string(secret, d->CHTS->data, ssl->cs->dig_len)) {
+                    ABORT(r);
+                }
+            } else if (!strncmp(label, "SERVER_TRAFFIC_SECRET_0", 23)) {
+                if ((r = r_data_alloc(&d->STS, ssl->cs->dig_len)) || 
+                    read_hex_string(secret, d->STS->data, ssl->cs->dig_len)) {
+                    ABORT(r);
+                }
+            } else if (!strncmp(label, "CLIENT_TRAFFIC_SECRET_0", 23)) {
+                if ((r = r_data_alloc(&d->CTS, ssl->cs->dig_len)) || 
+                    read_hex_string(secret, d->CTS->data, ssl->cs->dig_len)) {
+                    ABORT(r);
+                }
+            }
+        }
+      /*
        Eventually add support for other labels defined here:
        https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS/Key_Log_Format
-    */
-  }
-  _status = 0;
+      */
+    }
+
+    _status = 0;
+
 abort:
-  if(d->ctx->ssl_key_log_file != NULL)
-    fseek(d->ctx->ssl_key_log_file, 0, SEEK_SET);
-  return _status;
+    if (d_client_random) {
+        free(d_client_random);
+    }
+    if (line) {
+        free(line);
+    }
+    if (d->ctx->ssl_key_log_file) {
+        fseek(d->ctx->ssl_key_log_file, 0, SEEK_SET);
+    }
+    return _status;
 }
 #endif
