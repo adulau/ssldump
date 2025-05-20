@@ -255,18 +255,17 @@ void logpkt_ctx_init(logpkt_ctx_t *ctx,
                      socklen_t src_addr_len,
                      const struct sockaddr *dst_addr,
                      socklen_t dst_addr_len,
-                     const uint32_t *timestamp_sec,
-                     const uint32_t *timestamp_usec) {
+                     const struct timeval *timestamp) {
   ctx->libnet = libnet;
   memcpy(ctx->src_ether, src_ether, ETHER_ADDR_LEN);
   memcpy(ctx->dst_ether, dst_ether, ETHER_ADDR_LEN);
   memcpy(&ctx->src_addr, src_addr, src_addr_len);
   memcpy(&ctx->dst_addr, dst_addr, dst_addr_len);
-  memcpy(&ctx->timestamp_sec, timestamp_sec, sizeof(timestamp_sec));
-  memcpy(&ctx->timestamp_usec, timestamp_usec, sizeof(timestamp_usec));
+  ctx->timestamp_sec  = timestamp->tv_sec;
+  ctx->timestamp_usec = timestamp->tv_usec;
   ctx->src_seq = 0;
   ctx->dst_seq = 0;
-  if(mtu) {
+  if (mtu) {
     ctx->mss = mtu - sizeof(tcp_hdr_t) -
                (dst_addr->sa_family == AF_INET ? sizeof(ip4_hdr_t)
                                                : sizeof(ip6_hdr_t));

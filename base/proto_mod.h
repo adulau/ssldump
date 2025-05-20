@@ -102,9 +102,11 @@ struct logger_mod_vtbl_ {
                            struct timeval *time_base));
   int(*destroy) PROTO_LIST((proto_obj * *objp));
   int(*data) PROTO_LIST(
-      (proto_obj * obj, unsigned char *data, unsigned int len, int direction));
+      (proto_obj * obj, unsigned char *data, unsigned int len, int direction,
+       const struct timeval *timestamp));
   int(*close) PROTO_LIST(
-      (proto_obj * obj, unsigned char *data, unsigned int len, int direction));
+      (proto_obj * obj, unsigned char *data, unsigned int len, int direction,
+       const struct timeval *timestamp));
 };
 
 struct logger_mod_ {

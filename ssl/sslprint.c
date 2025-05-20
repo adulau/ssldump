@@ -72,7 +72,8 @@ int process_beginning_plaintext(ssl_obj *ssl, segment *seg, int direction) {
     return SSL_BAD_CONTENT_TYPE;
 
   if(logger)
-    logger->vtbl->data(ssl->logger_obj, d.data, d.len, direction);
+    logger->vtbl->data(ssl->logger_obj, d.data, d.len, direction,
+                       &seg->p->ts);
 
   P_(P_AD) {
     ssl_print_timestamp(ssl, &seg->p->ts);
@@ -290,7 +291,8 @@ int ssl_expand_record(ssl_obj *ssl,
     // data)
     if(ct == 23) {
       if(logger) {
-        logger->vtbl->data(ssl->logger_obj, d.data, d.len, direction);
+        logger->vtbl->data(ssl->logger_obj, d.data, d.len, direction,
+                           &q->p->ts);
       }
       if(ssl->version == TLSV13_VERSION) {
         ct = d.data[--d.len];  // In TLS 1.3 ct is stored in the end for

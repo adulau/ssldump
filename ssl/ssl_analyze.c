@@ -570,7 +570,8 @@ int close_ssl_analyzer(proto_obj *_obj, packet *p, int dir) {
 
   // check logger...
   if(logger)
-    logger->vtbl->close(ssl->logger_obj, NULL, 0, dir);
+    logger->vtbl->close(ssl->logger_obj, NULL, 0, dir,
+                       &p->ts);
 
   explain(ssl, "%d    ", ssl->conn->conn_number);
   ssl_print_timestamp(ssl, &p->ts);

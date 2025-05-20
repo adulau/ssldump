@@ -68,8 +68,7 @@ void logpkt_ctx_init(logpkt_ctx_t *,
                      socklen_t,
                      const struct sockaddr *,
                      socklen_t,
-                     const uint32_t *,
-                     const uint32_t *);
+                     const struct timeval *);
 int logpkt_write_payload(logpkt_ctx_t *,
                          int,
                          int,
