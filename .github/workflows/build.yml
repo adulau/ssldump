@@ -24,7 +24,7 @@ jobs:
             compiler: gcc-12
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Compiler version
         run: $CC -v
         env:
