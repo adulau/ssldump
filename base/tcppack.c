@@ -226,7 +226,7 @@ static int process_data_segment(tcp_conn *conn,
   int r, _status;
   tcp_seq seq, right_edge;
   segment _seg;
-  segment *seg, *nseg = 0;
+  segment *seg, *nseg = 0, *prev = 0;
   long l;
 
   l = p->len - p->tcp->th_off * 4;
@@ -284,9 +284,10 @@ static int process_data_segment(tcp_conn *conn,
     /* Out of order segment */
     tcp_seq left_edge;
 
-    for(seg = 0; seg; seg = seg ? seg->next : stream->oo_queue) {
-      if(seg->next->s_seq > seq)
+    for(seg = stream->oo_queue; seg; seg = seg->next) {
+      if(!SEQ_LT(seg->s_seq, seq))
         break;
+      prev = seg;
     }
 
     if(!(nseg = (segment *)calloc(1, sizeof(segment))))
@@ -296,20 +297,20 @@ static int process_data_segment(tcp_conn *conn,
     nseg->s_seq = seq;
 
     /*Insert this segment into the reassembly queue*/
-    if(seg) {
-      nseg->next = seg->next;
-      seg->next = nseg;
+    if(prev) {
+      nseg->next = prev->next;
+      prev->next = nseg;
     } else {
       nseg->next = stream->oo_queue;
       stream->oo_queue = nseg;
     }
 
-    left_edge = seg ? seg->s_seq : stream->seq;
+    left_edge = prev ? prev->s_seq : stream->seq;
     STRIM(left_edge, nseg);
   } else {
     /*First segment -- just thread the unallocated data on the
      list so we can pass to the analyzer*/
-    _seg.next = 0;
+    _seg.next = stream->oo_queue;
     _seg.p = p;
     _seg.s_seq = seq;
 
@@ -331,7 +332,7 @@ static int process_data_segment(tcp_conn *conn,
       } else {
         for(seg = &_seg; seg->next; seg = seg->next) {
           if(seg->p->tcp->th_flags & (TH_FIN)) {
-            stream->close = _seg.p->tcp->th_flags & (TH_FIN);
+            stream->close = seg->p->tcp->th_flags & (TH_FIN);
             break;
           }
           if(seg->len + seg->s_seq != seg->next->s_seq)
@@ -350,7 +351,6 @@ static int process_data_segment(tcp_conn *conn,
           conn->state = TCP_STATE_CLOSED;
       }
 
-      free_tcp_segment_queue(stream->oo_queue);
       stream->oo_queue = seg->next;
       seg->next = 0;
       stream->seq = seg->s_seq + seg->len;
