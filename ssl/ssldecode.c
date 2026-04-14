@@ -143,11 +143,17 @@ int ssl_restore_session PROTO_LIST((ssl_obj * ssl, ssl_decoder *d));
 
 /*The password code is not thread safe*/
 static int password_cb(char *buf, int num, int rwflag, void *userdata) {
-  if(num < strlen(ssl_password) + 1)
+  size_t password_len;
+
+  if(!ssl_password || num <= 0)
     return 0;
 
-  strcpy(buf, ssl_password);
-  return strlen(ssl_password);
+  password_len = strlen(ssl_password);
+  if(password_len >= (size_t)num)
+    return 0;
+
+  memcpy(buf, ssl_password, password_len + 1);
+  return (int)password_len;
 }
 
 int ssl_decode_ctx_create(ssl_decode_ctx **dp,

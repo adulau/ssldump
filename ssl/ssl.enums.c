@@ -1438,6 +1438,12 @@ static int decode_extension_server_name(ssl_obj *ssl,
       l -= (p - data->len);
     }
   } else {
+    if(l > data->len) {
+      fprintf(stderr,
+              "Error: short server_name extension: expected %u got %u\n", l,
+              data->len);
+      ERETURN(R_EOD);
+    }
     data->len -= l;
     data->data += l;
   }
@@ -1453,6 +1459,12 @@ static int decode_extension_encrypt_then_mac(ssl_obj *ssl,
   etm = &ssl->extensions->encrypt_then_mac;
 
   SSL_DECODE_UINT16(ssl, "extension length", 0, data, &l);
+  if(l > data->len) {
+    fprintf(stderr,
+            "Error: short encrypt_then_mac extension: expected %u got %u\n", l,
+            data->len);
+    ERETURN(R_EOD);
+  }
   data->len -= l;
   data->data += l;
 
@@ -1469,6 +1481,13 @@ static int decode_extension_extended_master_secret(ssl_obj *ssl,
   ems = &ssl->extensions->extended_master_secret;
 
   SSL_DECODE_UINT16(ssl, "extension length", 0, data, &l);
+  if(l > data->len) {
+    fprintf(
+        stderr,
+        "Error: short extended_master_secret extension: expected %u got %u\n",
+        l, data->len);
+    ERETURN(R_EOD);
+  }
   data->len -= l;
   data->data += l;
 
@@ -1479,6 +1498,11 @@ static int decode_extension(ssl_obj *ssl, int dir, segment *seg, Data *data) {
   int r;
   UINT4 l;
   SSL_DECODE_UINT16(ssl, "extension length", 0, data, &l);
+  if(l > data->len) {
+    fprintf(stderr, "Error: short extension data: expected %u got %u\n", l,
+            data->len);
+    ERETURN(R_EOD);
+  }
   data->len -= l;
   data->data += l;
   return 0;
@@ -1519,6 +1543,12 @@ static int decode_extension_supported_groups(ssl_obj *ssl,
     if(ja3_ec_str && ja3_ec_str[strlen(ja3_ec_str) - 1] == '-')
       ja3_ec_str[strlen(ja3_ec_str) - 1] = '\0';
   } else {
+    if(l > data->len) {
+      fprintf(stderr,
+              "Error: short supported_groups extension: expected %u got %u\n",
+              l, data->len);
+      ERETURN(R_EOD);
+    }
     data->len -= l;
     data->data += l;
   }
@@ -1569,6 +1599,12 @@ static int decode_extension_ec_point_formats(ssl_obj *ssl,
     if(ja3_ecp_str && ja3_ecp_str[strlen(ja3_ecp_str) - 1] == '-')
       ja3_ecp_str[strlen(ja3_ecp_str) - 1] = '\0';
   } else {
+    if(l > data->len) {
+      fprintf(stderr,
+              "Error: short ec_point_formats extension: expected %u got %u\n",
+              l, data->len);
+      ERETURN(R_EOD);
+    }
     data->len -= l;
     data->data += l;
   }
@@ -1725,6 +1761,11 @@ static int decode_server_name_type_host_name(ssl_obj *ssl,
   int r;
   UINT4 l;
   SSL_DECODE_UINT16(ssl, "server name length", 0, data, &l);
+  if(l > data->len) {
+    fprintf(stderr, "Error: short server name: expected %u got %u\n", l,
+            data->len);
+    ERETURN(R_EOD);
+  }
   if(!(NET_print_flags & NET_PRINT_JSON))
     printf(": %.*s", l, data->data);
 
@@ -1735,8 +1776,6 @@ static int decode_server_name_type_host_name(ssl_obj *ssl,
     if(server_name != NULL) {
       if(ssl->server_name)
         free(ssl->server_name);
-      if(l > data->len)
-        l = data->len;
       memcpy(server_name, data->data, l);
       ssl->server_name = server_name;
     }
@@ -1750,6 +1789,11 @@ static int decode_server_name(ssl_obj *ssl, int dir, segment *seg, Data *data) {
   int r;
   UINT4 l;
   SSL_DECODE_UINT16(ssl, "server name length", 0, data, &l);
+  if(l > data->len) {
+    fprintf(stderr, "Error: short server name: expected %u got %u\n", l,
+            data->len);
+    ERETURN(R_EOD);
+  }
   data->len -= l;
   data->data += l;
   return 0;
