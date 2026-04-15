@@ -1490,6 +1490,7 @@ decoder supported_groups_decoder[] = {
     {0x001e, "x448", 0},      {0x0100, "ffdhe2048", 0},
     {0x0101, "ffdhe3072", 0}, {0x0102, "ffdhe4096", 0},
     {0x0103, "ffdhe6144", 0}, {0x0104, "ffdhe8192", 0},
+    {-1}
 };
 // Extension #10 supported_groups (renamed from "elliptic_curves")
 static int decode_extension_supported_groups(ssl_obj *ssl,
