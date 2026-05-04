@@ -114,7 +114,7 @@ static int decode_ContentType_application_data(ssl_obj *ssl,
                                                int dir,
                                                segment *seg,
                                                Data *data) {
-  int r;
+  int r,i;
   Data d;
   struct json_object *jobj;
   jobj = ssl->cur_json_st;
@@ -124,6 +124,11 @@ static int decode_ContentType_application_data(ssl_obj *ssl,
   SSL_DECODE_OPAQUE_ARRAY(ssl, "data", data->len, 0, data, &d);
 
   if(NET_print_flags & NET_PRINT_JSON) {
+	for(i=0; i<d.len; i++) {
+		if((unsigned char) d.data[i] & 0x80 || (unsigned char) d.data[i] < 0x20) {
+			d.data[i] = '.';
+		}
+	}
     json_object_object_add(jobj, "msg_data",
                            json_object_new_string_len((char *)d.data, d.len));
   } else
