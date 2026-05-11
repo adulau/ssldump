@@ -10,6 +10,37 @@
 #include "ssl.enums.h"
 static int decode_extension(ssl_obj *ssl, int dir, segment *seg, Data *data);
 static int decode_server_name(ssl_obj *ssl, int dir, segment *seg, Data *data);
+
+static int is_grease_value(UINT4 v) {
+  return ((v & 0x0f0f) == 0x0a0a) && (((v >> 8) & 0xff) == (v & 0xff));
+}
+
+static void append_u16_dash(char **dst, UINT4 v) {
+  if(!*dst)
+    *dst = calloc(7, 1);
+  else
+    *dst = realloc(*dst, strlen(*dst) + 7);
+  snprintf(*dst + strlen(*dst), 7, "%u-", v);
+}
+
+static void sha256_12hex(const char *in, char out[13]) {
+  EVP_MD_CTX *mdctx;
+  const EVP_MD *md;
+  unsigned char md_value[EVP_MAX_MD_SIZE];
+  unsigned int md_len, i;
+
+  md = EVP_get_digestbyname("SHA256");
+  mdctx = EVP_MD_CTX_new();
+  EVP_DigestInit_ex(mdctx, md, NULL);
+  EVP_DigestUpdate(mdctx, in, strlen(in));
+  EVP_DigestFinal_ex(mdctx, md_value, &md_len);
+  EVP_MD_CTX_free(mdctx);
+
+  out[0] = '\0';
+  for(i = 0; i < 6; i++)
+    snprintf(out + strlen(out), 3, "%02x", md_value[i]);
+}
+
 static int decode_ContentType_ChangeCipherSpec(ssl_obj *ssl,
                                                int dir,
                                                segment *seg,
@@ -171,6 +202,11 @@ static int decode_HandshakeType_ClientHello(ssl_obj *ssl,
   char *ja3_ex_str = NULL;
   char *ja3_ec_str = NULL;
   char *ja3_ecp_str = NULL;
+  char *ja4_cs_str = NULL;
+  char *ja4_ex_str = NULL;
+  char *ja4_str = NULL;
+  int ja4_cipher_cnt = 0;
+  int ja4_ext_cnt = 0;
 
   ssl->cur_ja3_ec_str = NULL;
   ssl->cur_ja3_ecp_str = NULL;
@@ -220,12 +256,11 @@ static int decode_HandshakeType_ClientHello(ssl_obj *ssl,
       if(ssl_decode_enum(ssl, 0, 2, cipher_suite_decoder, 0, data, &cs))
         return 1;
       ssl_print_cipher_suite(ssl, (vj << 8) | vn, P_HL, cs);
-      if(!ja3_cs_str)
-        ja3_cs_str = calloc(7, 1);
-      else
-        ja3_cs_str = realloc(ja3_cs_str, strlen(ja3_cs_str) + 7);
-
-      snprintf(ja3_cs_str + strlen(ja3_cs_str), 7, "%u-", cs);
+      append_u16_dash(&ja3_cs_str, cs);
+      if(!is_grease_value(cs)) {
+        append_u16_dash(&ja4_cs_str, cs);
+        ja4_cipher_cnt++;
+      }
       LF;
     }
     if(ja3_cs_str && ja3_cs_str[strlen(ja3_cs_str) - 1] == '-')
@@ -246,12 +281,11 @@ static int decode_HandshakeType_ClientHello(ssl_obj *ssl,
     explain(ssl, "extensions\n");
     while(data->len > 0) {
       SSL_DECODE_UINT16(ssl, "extension type", 0, data, &ex);
-      if(!ja3_ex_str)
-        ja3_ex_str = calloc(7, 1);
-      else
-        ja3_ex_str = realloc(ja3_ex_str, strlen(ja3_ex_str) + 7);
-
-      snprintf(ja3_ex_str + strlen(ja3_ex_str), 7, "%u-", ex);
+      append_u16_dash(&ja3_ex_str, ex);
+      if(!is_grease_value(ex)) {
+        append_u16_dash(&ja4_ex_str, ex);
+        ja4_ext_cnt++;
+      }
 
       if(ssl_decode_switch(ssl, extension_decoder, ex, dir, seg, data) ==
          R_NOT_FOUND) {
@@ -267,6 +301,11 @@ static int decode_HandshakeType_ClientHello(ssl_obj *ssl,
     if(ja3_ex_str && ja3_ex_str[strlen(ja3_ex_str) - 1] == '-')
       ja3_ex_str[strlen(ja3_ex_str) - 1] = '\0';
   }
+
+  if(ja4_cs_str && ja4_cs_str[strlen(ja4_cs_str) - 1] == '-')
+    ja4_cs_str[strlen(ja4_cs_str) - 1] = '\0';
+  if(ja4_ex_str && ja4_ex_str[strlen(ja4_ex_str) - 1] == '-')
+    ja4_ex_str[strlen(ja4_ex_str) - 1] = '\0';
 
   ja3_ec_str = ssl->cur_ja3_ec_str;
   ja3_ecp_str = ssl->cur_ja3_ecp_str;
@@ -327,6 +366,29 @@ static int decode_HandshakeType_ClientHello(ssl_obj *ssl,
   explain(ssl, "ja3 string: %s\n", ja3_str);
   explain(ssl, "ja3 fingerprint: %s\n", ja3_fp);
 
+  {
+    char ja4_proto = 't';
+    char ja4_sni = (ssl->server_name && ssl->server_name[0]) ? 'd' : 'i';
+    unsigned int ja4_ver = ((vj & 0xff) << 8) | (vn & 0xff);
+    char ja4_cs_hash[13], ja4_ex_hash[13];
+    char *ja4_cs_src = ja4_cs_str ? ja4_cs_str : "";
+    char *ja4_ex_src = ja4_ex_str ? ja4_ex_str : "";
+    int ja4_len;
+
+    sha256_12hex(ja4_cs_src, ja4_cs_hash);
+    sha256_12hex(ja4_ex_src, ja4_ex_hash);
+
+    ja4_len = snprintf(NULL, 0, "%c%04x%c%02u%02u00_%s_%s", ja4_proto, ja4_ver,
+                       ja4_sni, ja4_cipher_cnt, ja4_ext_cnt, ja4_cs_hash,
+                       ja4_ex_hash) + 1;
+    ja4_str = calloc(ja4_len, 1);
+    snprintf(ja4_str, ja4_len, "%c%04x%c%02u%02u00_%s_%s", ja4_proto, ja4_ver,
+             ja4_sni, ja4_cipher_cnt, ja4_ext_cnt, ja4_cs_hash, ja4_ex_hash);
+
+    json_object_object_add(jobj, "ja4", json_object_new_string(ja4_str));
+    explain(ssl, "ja4 fingerprint: %s\n", ja4_str);
+  }
+
   free(ja3_fp);
   free(ja3_str);
   free(ja3_ver_str);
@@ -334,6 +396,9 @@ static int decode_HandshakeType_ClientHello(ssl_obj *ssl,
   free(ja3_ex_str);
   free(ja3_ec_str);
   free(ja3_ecp_str);
+  free(ja4_cs_str);
+  free(ja4_ex_str);
+  free(ja4_str);
 
   return 0;
 }
