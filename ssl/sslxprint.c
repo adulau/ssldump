@@ -53,9 +53,121 @@
 #include <openssl/asn1.h>
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
+#include <openssl/sha.h>
 #endif
 
 #define BUFSIZE 1024
+
+
+#ifdef OPENSSL
+static char *fanx_base64url(const char *in) {
+  int in_len = strlen(in);
+  int out_len = 4 * ((in_len + 2) / 3);
+  char *out = calloc(out_len + 1, 1);
+  int i;
+  if(!out)
+    return NULL;
+  EVP_EncodeBlock((unsigned char *)out, (const unsigned char *)in, in_len);
+  for(i = 0; out[i]; i++) {
+    if(out[i] == '+')
+      out[i] = '-';
+    else if(out[i] == '/')
+      out[i] = '_';
+  }
+  while(out_len > 0 && out[out_len - 1] == '=')
+    out[--out_len] = 0;
+  return out;
+}
+static char *fanx_sha256_hex(const char *in) {
+  EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
+  unsigned char md_value[EVP_MAX_MD_SIZE];
+  unsigned int md_len, i;
+  char *hex = calloc(SHA256_DIGEST_LENGTH * 2 + 1, 1);
+  if(!hex || !mdctx)
+    return hex;
+  EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL);
+  EVP_DigestUpdate(mdctx, in, strlen(in));
+  EVP_DigestFinal_ex(mdctx, md_value, &md_len);
+  EVP_MD_CTX_free(mdctx);
+  for(i = 0; i < SHA256_DIGEST_LENGTH; i++)
+    snprintf(hex + strlen(hex), 3, "%02x", md_value[i]);
+  return hex;
+}
+static char *fanx_fingerprint(const char *features) {
+  char *b64 = fanx_base64url(features), *hex = fanx_sha256_hex(features), *fp;
+  if(!b64 || !hex) {
+    free(b64);
+    free(hex);
+    return NULL;
+  }
+  fp = calloc(strlen(b64) + strlen(hex) + 31, 1);
+  if(fp) sprintf(fp, "fan1:x509:server:passive:%s:sha256:%s", b64, hex);
+  free(b64);
+  free(hex);
+  return fp;
+}
+static char *fanx_oid(const ASN1_OBJECT *obj, char *buf, size_t len) {
+  if(!obj || OBJ_obj2txt(buf, len, obj, 1) <= 0) buf[0] = 0;
+  return buf;
+}
+static void fanx_add_certificate_json(ssl_obj *ssl,
+                                       struct json_object *cert_obj,
+                                       X509 *x) {
+  char subj[BUFSIZE], iss[BUFSIZE], sig[128], tbssig[128], spki[128];
+  char extbuf[2048];
+  const ASN1_OBJECT *sigobj = NULL, *tbssigobj = NULL;
+  const X509_ALGOR *sigalg = NULL;
+  EVP_PKEY *pkey;
+  int ext_count = X509_get_ext_count(x), i, pk_bits = 0, days = 0;
+  int pday = 0, psec = 0;
+  char *features, *fp;
+  extbuf[0] = 0;
+  X509_NAME_oneline(X509_get_subject_name(x), subj, sizeof(subj));
+  X509_NAME_oneline(X509_get_issuer_name(x), iss, sizeof(iss));
+  X509_get0_signature(NULL, &sigalg, x);
+  X509_ALGOR_get0(&sigobj, NULL, NULL, sigalg);
+  X509_ALGOR_get0(&tbssigobj, NULL, NULL, X509_get0_tbs_sigalg(x));
+  pkey = X509_get_pubkey(x);
+  if(pkey) pk_bits = EVP_PKEY_bits(pkey);
+  fanx_oid(sigobj, sig, sizeof(sig));
+  fanx_oid(tbssigobj, tbssig, sizeof(tbssig));
+  fanx_oid(pkey ? OBJ_nid2obj(EVP_PKEY_base_id(pkey)) : NULL, spki,
+           sizeof(spki));
+  if(ASN1_TIME_diff(&pday, &psec, X509_getm_notBefore(x),
+                    X509_getm_notAfter(x)))
+    days = pday + (psec ? 1 : 0);
+  for(i = 0; i < ext_count; i++) {
+    X509_EXTENSION *ex = X509_get_ext(x, i);
+    char oid[128];
+    fanx_oid(X509_EXTENSION_get_object(ex), oid, sizeof(oid));
+    snprintf(extbuf + strlen(extbuf), sizeof(extbuf) - strlen(extbuf),
+             "%s%s:%s", i ? "," : "",
+             X509_EXTENSION_get_critical(ex) ? "c" : "n", oid);
+  }
+  features = calloc(strlen(subj) + strlen(iss) + strlen(sig) +
+                        strlen(tbssig) + strlen(spki) + strlen(extbuf) + 256,
+                    1);
+  if(features) {
+    snprintf(features,
+             strlen(subj) + strlen(iss) + strlen(sig) + strlen(tbssig) +
+                 strlen(spki) + strlen(extbuf) + 256,
+             "x509|server|idx=|ver=%ld|serial_len=%d|sig=%s|tbs_sig=%s|issuer=%s|subject=%s|valid_days=%d|spki_alg=%s|spki_param=|pk_bits=%d|san=|ku=|eku=|bc=|ski=|aki=|pol=|aia=|crldp=|nc=|ext=%s",
+             X509_get_version(x), X509_get_serialNumber(x)->length, sig, tbssig, iss, subj, days, spki, pk_bits, extbuf);
+    fp = fanx_fingerprint(features);
+    if(fp) {
+      json_object_object_add(cert_obj, "fan1_x509_features",
+                             json_object_new_string(features));
+      json_object_object_add(cert_obj, "fan1_x509_fp", json_object_new_string(fp));
+      explain(ssl, "fan1 x509 features: %s\n", features);
+      explain(ssl, "fan1 x509 fingerprint: %s\n", fp);
+      free(fp);
+    }
+    free(features);
+  }
+  if(pkey)
+    EVP_PKEY_free(pkey);
+}
+#endif
 
 static int sslx__print_dn PROTO_LIST((ssl_obj * ssl, char *x));
 #ifdef OPENSSL
@@ -124,6 +236,7 @@ int sslx_print_certificate(ssl_obj *ssl, Data *data, int pf) {
                            json_object_new_string(serial_str));
     free(serial_str);
     sslx__print_serial(ssl, a);
+    fanx_add_certificate_json(ssl, cert_obj, x);
 
     ext = X509_get_ext_count(x);
     if(ext > 0) {
