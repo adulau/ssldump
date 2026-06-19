@@ -19,6 +19,7 @@ decodes the records and displays them in a textual form to stdout. If
 provided with the appropriate keying material, it will also decrypt
 the connections and display the application data traffic. It also
 includes a JSON output option, supports [JA3](https://github.com/salesforce/ja3) and IPv6.
+It also emits passive [FAN/1](https://github.com/fanything-project/fanything) fingerprints for TLS ClientHello/ServerHello messages and X.509 certificates in JSON output.
 
 # How to do I run ssldump?
 

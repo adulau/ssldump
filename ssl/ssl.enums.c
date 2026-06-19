@@ -1,5 +1,6 @@
 #include <json.h>
 #include <openssl/md5.h>
+#include <openssl/sha.h>
 #include "network.h"
 #include "ssl_h.h"
 #include "sslprint.h"
@@ -8,6 +9,97 @@
 #include <openssl/ssl.h>
 #endif
 #include "ssl.enums.h"
+
+
+static int fan_is_grease(UINT4 v) {
+  return ((v & 0x0f0f) == 0x0a0a) && (((v >> 8) & 0xff) == (v & 0xff));
+}
+
+static char *fan_append_uint(char *s, UINT4 v) {
+  char tmp[16];
+  size_t old = s ? strlen(s) : 0;
+  snprintf(tmp, sizeof(tmp), "%u", v);
+  s = realloc(s, old + strlen(tmp) + (old ? 2 : 1));
+  if(!s)
+    return NULL;
+  if(old) {
+    s[old++] = '-';
+    s[old] = 0;
+  } else {
+    s[0] = 0;
+  }
+  strcat(s, tmp);
+  return s;
+}
+
+static char *fan_base64url(const char *in) {
+  int in_len = strlen(in);
+  int out_len = 4 * ((in_len + 2) / 3);
+  char *out = calloc(out_len + 1, 1);
+  int i;
+  if(!out)
+    return NULL;
+  EVP_EncodeBlock((unsigned char *)out, (const unsigned char *)in, in_len);
+  for(i = 0; out[i]; i++) {
+    if(out[i] == '+')
+      out[i] = '-';
+    else if(out[i] == '/')
+      out[i] = '_';
+  }
+  while(out_len > 0 && out[out_len - 1] == '=')
+    out[--out_len] = 0;
+  return out;
+}
+
+static char *fan_sha256_hex(const char *in) {
+  EVP_MD_CTX *mdctx;
+  unsigned char md_value[EVP_MAX_MD_SIZE];
+  unsigned int md_len, i;
+  char *hex = calloc(SHA256_DIGEST_LENGTH * 2 + 1, 1);
+  if(!hex)
+    return NULL;
+  mdctx = EVP_MD_CTX_new();
+  EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL);
+  EVP_DigestUpdate(mdctx, in, strlen(in));
+  EVP_DigestFinal_ex(mdctx, md_value, &md_len);
+  EVP_MD_CTX_free(mdctx);
+  for(i = 0; i < SHA256_DIGEST_LENGTH; i++)
+    snprintf(hex + strlen(hex), 3, "%02x", md_value[i]);
+  return hex;
+}
+
+static char *fan_fingerprint(const char *protocol, const char *role,
+                             const char *features) {
+  char *b64 = fan_base64url(features);
+  char *hex = fan_sha256_hex(features);
+  char *fp;
+  if(!b64 || !hex) {
+    free(b64);
+    free(hex);
+    return NULL;
+  }
+  fp = calloc(strlen(protocol) + strlen(role) + strlen(b64) + strlen(hex) + 28,
+              1);
+  if(fp)
+    sprintf(fp, "fan1:%s:%s:passive:%s:sha256:%s", protocol, role, b64, hex);
+  free(b64);
+  free(hex);
+  return fp;
+}
+
+static void fan_add_tls_json(ssl_obj *ssl, const char *role,
+                             const char *features) {
+  char *fp = fan_fingerprint("tls", role, features);
+  if(!fp)
+    return;
+  json_object_object_add(ssl->cur_json_st, "fan1_tls_features",
+                         json_object_new_string(features));
+  json_object_object_add(ssl->cur_json_st, "fan1_tls_fp",
+                         json_object_new_string(fp));
+  explain(ssl, "fan1 tls features: %s\n", features);
+  explain(ssl, "fan1 tls fingerprint: %s\n", fp);
+  free(fp);
+}
 static int decode_extension(ssl_obj *ssl, int dir, segment *seg, Data *data);
 static int decode_server_name(ssl_obj *ssl, int dir, segment *seg, Data *data);
 static int decode_ContentType_ChangeCipherSpec(ssl_obj *ssl,
@@ -171,6 +263,8 @@ static int decode_HandshakeType_ClientHello(ssl_obj *ssl,
   char *ja3_ex_str = NULL;
   char *ja3_ec_str = NULL;
   char *ja3_ecp_str = NULL;
+  char *fan_cs_str = NULL;
+  char *fan_ex_str = NULL;
 
   ssl->cur_ja3_ec_str = NULL;
   ssl->cur_ja3_ecp_str = NULL;
@@ -226,6 +320,8 @@ static int decode_HandshakeType_ClientHello(ssl_obj *ssl,
         ja3_cs_str = realloc(ja3_cs_str, strlen(ja3_cs_str) + 7);
 
       snprintf(ja3_cs_str + strlen(ja3_cs_str), 7, "%u-", cs);
+      if(!fan_is_grease(cs))
+        fan_cs_str = fan_append_uint(fan_cs_str, cs);
       LF;
     }
     if(ja3_cs_str && ja3_cs_str[strlen(ja3_cs_str) - 1] == '-')
@@ -252,6 +348,8 @@ static int decode_HandshakeType_ClientHello(ssl_obj *ssl,
         ja3_ex_str = realloc(ja3_ex_str, strlen(ja3_ex_str) + 7);
 
       snprintf(ja3_ex_str + strlen(ja3_ex_str), 7, "%u-", ex);
+      if(!fan_is_grease(ex))
+        fan_ex_str = fan_append_uint(fan_ex_str, ex);
 
       if(ssl_decode_switch(ssl, extension_decoder, ex, dir, seg, data) ==
          R_NOT_FOUND) {
@@ -324,6 +422,19 @@ static int decode_HandshakeType_ClientHello(ssl_obj *ssl,
   json_object_object_add(jobj, "ja3_str", json_object_new_string(ja3_str));
   json_object_object_add(jobj, "ja3_fp", json_object_new_string(ja3_fp));
 
+  {
+    int fan_len = strlen(ja3_ver_str) + strlen(fan_cs_str ? fan_cs_str : "") +
+                  strlen(fan_ex_str ? fan_ex_str : "") + strlen(ja3_ec_str) +
+                  strlen(ja3_ecp_str) + 64;
+    char *fan_features = calloc(fan_len, 1);
+    snprintf(fan_features, fan_len,
+             "tls|client|v=%s|c=%s|e=%s|g=%s|p=%s|sv=|alpn=|sig=",
+             ja3_ver_str, fan_cs_str ? fan_cs_str : "",
+             fan_ex_str ? fan_ex_str : "", ja3_ec_str, ja3_ecp_str);
+    fan_add_tls_json(ssl, "client", fan_features);
+    free(fan_features);
+  }
+
   explain(ssl, "ja3 string: %s\n", ja3_str);
   explain(ssl, "ja3 fingerprint: %s\n", ja3_fp);
 
@@ -334,6 +445,8 @@ static int decode_HandshakeType_ClientHello(ssl_obj *ssl,
   free(ja3_ex_str);
   free(ja3_ec_str);
   free(ja3_ecp_str);
+  free(fan_cs_str);
+  free(fan_ex_str);
 
   return 0;
 }
@@ -349,6 +462,7 @@ static int decode_HandshakeType_ServerHello(ssl_obj *ssl,
   char *ja3s_ver_str = NULL;
   char *ja3s_c_str = NULL;
   char *ja3s_ex_str = NULL;
+  char *fan_ex_str = NULL;
 
   extern decoder extension_decoder[];
 
@@ -401,6 +515,8 @@ static int decode_HandshakeType_ServerHello(ssl_obj *ssl,
         ja3s_ex_str = realloc(ja3s_ex_str, strlen(ja3s_ex_str) + 7);
 
       snprintf(ja3s_ex_str + strlen(ja3s_ex_str), 7, "%u-", ex);
+      if(!fan_is_grease(ex))
+        fan_ex_str = fan_append_uint(fan_ex_str, ex);
 
       if(ssl_decode_switch(ssl, extension_decoder, ex, dir, seg, data) ==
          R_NOT_FOUND) {
@@ -468,6 +584,16 @@ static int decode_HandshakeType_ServerHello(ssl_obj *ssl,
   json_object_object_add(jobj, "ja3s_str", json_object_new_string(ja3s_str));
   json_object_object_add(jobj, "ja3s_fp", json_object_new_string(ja3s_fp));
 
+  {
+    int fan_len = strlen(ja3s_ver_str) + strlen(ja3s_c_str) +
+                  strlen(fan_ex_str ? fan_ex_str : "") + 48;
+    char *fan_features = calloc(fan_len, 1);
+    snprintf(fan_features, fan_len, "tls|server|v=%s|c=%s|e=%s|sv=",
+             ja3s_ver_str, ja3s_c_str, fan_ex_str ? fan_ex_str : "");
+    fan_add_tls_json(ssl, "server", fan_features);
+    free(fan_features);
+  }
+
   explain(ssl, "ja3s string: %s\n", ja3s_str);
   explain(ssl, "ja3s fingerprint: %s\n", ja3s_fp);
 
@@ -476,6 +602,7 @@ static int decode_HandshakeType_ServerHello(ssl_obj *ssl,
   free(ja3s_ver_str);
   free(ja3s_c_str);
   free(ja3s_ex_str);
+  free(fan_ex_str);
 
   return 0;
 }
