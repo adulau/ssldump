@@ -23,9 +23,31 @@ It also emits passive [FAN/1](https://github.com/fanything-project/fanything) fi
 
 # How to do I run ssldump?
 
-`./ssldump -j -ANH -n -i any | jq` will run ssldump on all interfaces and output the result in JSON format including ja3 hashes.
+`./ssldump -j -ANH -n -i any | jq` will run ssldump on all interfaces and output the result in JSON format including JA3 and FAN/1 fingerprints.
 
 For more details, check the man page.
+
+## FAN/1 passive fingerprints
+
+ssldump can emit [FAN/1](https://github.com/fanything-project/fanything/) fingerprints, a passive fingerprint format from the fanything project. The fingerprints are produced automatically in JSON output (`-j`) when the corresponding handshake data is present; no extra command-line option is required.
+
+For TLS handshakes, ClientHello and ServerHello JSON objects include:
+
+- `fan1_tls_features`: the canonical feature string used as the FAN/1 input.
+- `fan1_tls_fp`: the final FAN/1 fingerprint string.
+
+For certificate messages, each certificate object in `cert_chain` can include:
+
+- `fan1_x509_features`: the canonical X.509 feature string used as the FAN/1 input.
+- `fan1_x509_fp`: the final FAN/1 X.509 fingerprint string.
+
+A quick way to inspect these values from a capture is:
+
+```sh
+./ssldump -r yourcapture.pcap -j | jq 'select(.fan1_tls_fp != null or .cert_chain != null) | {handshake_type, fan1_tls_features, fan1_tls_fp, cert_chain}'
+```
+
+The TLS FAN/1 feature string is derived from the same decoded ClientHello/ServerHello data used for JA3/JA3S, while filtering GREASE values. Certificate FAN/1 feature strings are derived from X.509 metadata such as version, serial length, signature algorithms, issuer, subject, validity duration, public-key algorithm and size, and extension OIDs.
 
 ## How can I lookup ja3 hashes?
 
