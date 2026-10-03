@@ -412,42 +412,53 @@ static int tls_check_mac(ssl_rec_decoder *d,
                          UCHAR *iv,
                          UINT4 ivlen,
                          UCHAR *mac) {
-  HMAC_CTX *hm = HMAC_CTX_new();
-  if(!hm)
-    ERETURN(R_NO_MEMORY);
   const EVP_MD *md;
-  UINT4 l;
+  size_t l;
   UCHAR buf[128];
 
+  OSSL_PARAM params[2];
+  EVP_MAC *hmac = EVP_MAC_fetch(NULL, "HMAC", NULL);
+  EVP_MAC_CTX *mac_ctx = EVP_MAC_CTX_new(hmac);
+  EVP_MAC_free(hmac);
+
+  if(!mac_ctx)
+    ERETURN(R_NO_MEMORY);
+
   md = EVP_get_digestbyname(digests[d->cs->dig - 0x40]);
-  HMAC_Init_ex(hm, d->mac_key->data, d->mac_key->len, md, NULL);
+  if(!md)
+    ERETURN(R_NOT_FOUND);
+
+  params[0] = OSSL_PARAM_construct_utf8_string("digest", digests[d->cs->dig - 0x40], 0);
+  params[1] = OSSL_PARAM_construct_end();
+
+  EVP_MAC_init(mac_ctx, d->mac_key->data, d->mac_key->len, params);
 
   fmt_seq(d->seq, buf);
   d->seq++;
-  HMAC_Update(hm, buf, 8);
+  EVP_MAC_update(mac_ctx, buf, 8);
   buf[0] = ct;
-  HMAC_Update(hm, buf, 1);
+  EVP_MAC_update(mac_ctx, buf, 1);
 
   buf[0] = MSB(ver);
   buf[1] = LSB(ver);
-  HMAC_Update(hm, buf, 2);
+  EVP_MAC_update(mac_ctx, buf, 2);
 
   buf[0] = MSB(datalen);
   buf[1] = LSB(datalen);
-  HMAC_Update(hm, buf, 2);
+  EVP_MAC_update(mac_ctx, buf, 2);
 
   /* for encrypt-then-mac with an explicit IV */
   if(ivlen && iv) {
-    HMAC_Update(hm, iv, ivlen);
-    HMAC_Update(hm, data, datalen - ivlen);
+    EVP_MAC_update(mac_ctx, iv, ivlen);
+    EVP_MAC_update(mac_ctx, data, datalen - ivlen);
   } else
-    HMAC_Update(hm, data, datalen);
+    EVP_MAC_update(mac_ctx, data, datalen);
 
-  HMAC_Final(hm, buf, &l);
+  EVP_MAC_final(mac_ctx, buf, &l, sizeof(buf));
   if(memcmp(mac, buf, l))
     ERETURN(SSL_BAD_MAC);
 
-  HMAC_CTX_free(hm);
+  EVP_MAC_CTX_free(mac_ctx);
   return 0;
 }
 
