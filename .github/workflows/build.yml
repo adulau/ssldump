@@ -35,8 +35,9 @@ jobs:
       - name: Install macOS dependencies
         run: |
           brew install cmake ninja openssl@3 libpcap libnet json-c
-          echo "LDFLAGS=-L$(brew --prefix openssl@3)/lib" >> $GITHUB_ENV
-          echo "CPPFLAGS=-I$(brew --prefix openssl@3)/include" >> $GITHUB_ENV
+          # Select the installed OpenSSL 3 keg for CMake and pkg-config.
+          echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)" >> "$GITHUB_ENV"
+          echo "PKG_CONFIG_PATH=$(brew --prefix openssl@3)/lib/pkgconfig" >> "$GITHUB_ENV"
         if: ${{ runner.os == 'macOS' }}
       - name: cmake -B ${{github.workspace}}/build -G Ninja
         run: cmake -B ${{github.workspace}}/build -G Ninja
