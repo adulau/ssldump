@@ -44,3 +44,16 @@ jobs:
           CC: ${{ matrix.compiler }}
       - name: ninja -C ${{github.workspace}}/build
         run: ninja -C ${{github.workspace}}/build
+      - name: Run regression tests
+        run: ctest --test-dir build --output-on-failure
+      - name: Check certificate fingerprints with AddressSanitizer
+        if: runner.os == 'Linux' && matrix.compiler == 'cc'
+        env:
+          # Keep this regression focused on invalid buffer accesses.
+          ASAN_OPTIONS: detect_leaks=0
+        run: |
+          cmake -B build-asan -G Ninja -DDISABLE_OPTIMIZATION=ON \
+            -DCMAKE_C_FLAGS="-fsanitize=address -fno-omit-frame-pointer" \
+            -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address"
+          cmake --build build-asan
+          ctest --test-dir build-asan --output-on-failure

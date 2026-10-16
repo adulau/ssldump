@@ -129,5 +129,18 @@ target_link_libraries(ssldump
         ${JSONC_LIBRARIES}
 )
 
+include(CTest)
+if(BUILD_TESTING)
+    find_package(Python3 COMPONENTS Interpreter)
+    if(Python3_Interpreter_FOUND)
+        add_test(NAME fan1_x509
+            COMMAND ${Python3_EXECUTABLE}
+                ${PROJECT_SOURCE_DIR}/tests/test_fan1_x509.py
+                $<TARGET_FILE:ssldump>
+                ${PROJECT_SOURCE_DIR}/samples/tls1.2_aes256.pcap
+        )
+    endif()
+endif()
+
 install(TARGETS ssldump DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES ssldump.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
