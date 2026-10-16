@@ -113,6 +113,16 @@ ninja -C build
 (optional, as root) ninja -C build install
 ```
 
+## Regression tests
+
+When Python 3 is available, CMake registers regression tests with CTest. After
+building, run `ctest --test-dir build --output-on-failure`. These tests can be
+disabled at configure time with `-DBUILD_TESTING=OFF`.
+
+The FAN/1 X.509 regression processes the existing TLS 1.2 sample with `-j -N`
+and verifies each certificate fingerprint against its feature string. CI also
+runs this test with AddressSanitizer to detect buffer overflows.
+
 # Notes
 
 The "save to pcap" (-w) option by @ryabkov, is heavily based on the work of

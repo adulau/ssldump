@@ -35,8 +35,9 @@ jobs:
       - name: Install macOS dependencies
         run: |
           brew install cmake ninja openssl@3 libpcap libnet json-c
-          echo "LDFLAGS=-L$(brew --prefix openssl@3)/lib" >> $GITHUB_ENV
-          echo "CPPFLAGS=-I$(brew --prefix openssl@3)/include" >> $GITHUB_ENV
+          # Select the installed OpenSSL 3 keg for CMake and pkg-config.
+          echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)" >> "$GITHUB_ENV"
+          echo "PKG_CONFIG_PATH=$(brew --prefix openssl@3)/lib/pkgconfig" >> "$GITHUB_ENV"
         if: ${{ runner.os == 'macOS' }}
       - name: cmake -B ${{github.workspace}}/build -G Ninja
         run: cmake -B ${{github.workspace}}/build -G Ninja
@@ -44,3 +45,16 @@ jobs:
           CC: ${{ matrix.compiler }}
       - name: ninja -C ${{github.workspace}}/build
         run: ninja -C ${{github.workspace}}/build
+      - name: Run regression tests
+        run: ctest --test-dir build --output-on-failure
+      - name: Check certificate fingerprints with AddressSanitizer
+        if: runner.os == 'Linux' && matrix.compiler == 'cc'
+        env:
+          # Keep this regression focused on invalid buffer accesses.
+          ASAN_OPTIONS: detect_leaks=0
+        run: |
+          cmake -B build-asan -G Ninja -DDISABLE_OPTIMIZATION=ON \
+            -DCMAKE_C_FLAGS="-fsanitize=address -fno-omit-frame-pointer" \
+            -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address"
+          cmake --build build-asan
+          ctest --test-dir build-asan --output-on-failure

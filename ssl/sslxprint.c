@@ -94,14 +94,17 @@ static char *fanx_sha256_hex(const char *in) {
   return hex;
 }
 static char *fanx_fingerprint(const char *features) {
+  static const char format[] = "fan1:x509:server:passive:%s:sha256:%s";
   char *b64 = fanx_base64url(features), *hex = fanx_sha256_hex(features), *fp;
+  int fp_len;
   if(!b64 || !hex) {
     free(b64);
     free(hex);
     return NULL;
   }
-  fp = calloc(strlen(b64) + strlen(hex) + 31, 1);
-  if(fp) sprintf(fp, "fan1:x509:server:passive:%s:sha256:%s", b64, hex);
+  fp_len = snprintf(NULL, 0, format, b64, hex);
+  fp = fp_len < 0 ? NULL : calloc((size_t)fp_len + 1, 1);
+  if(fp) snprintf(fp, (size_t)fp_len + 1, format, b64, hex);
   free(b64);
   free(hex);
   return fp;
